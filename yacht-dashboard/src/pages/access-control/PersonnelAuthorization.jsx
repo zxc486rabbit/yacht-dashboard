@@ -77,7 +77,7 @@ export default function PersonnelAuthorization() {
       <table className="table table-bordered text-center shadow-sm">
         <thead className="table-info">
           <tr>
-            <th>#</th>
+            <th>序號</th>
             <th>人員姓名</th>
             <th>卡號</th>
             <th>角色</th>

@@ -1,244 +1,280 @@
-import { useState } from "react";
+// pages/power-water/BerthMaster.jsx
+import { useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
-export default function StorageManage() {
+/* ===== Mock 設備清單（之後可換成 API）===== */
+const SHORE = [
+  { id: "SP-01", name: "岸電樁 A-01" },
+  { id: "SP-02", name: "岸電樁 A-02" },
+  { id: "SP-03", name: "岸電樁 B-01" },
+];
+
+const PM = [
+  { id: "PM-11", name: "電錶 #11" },
+  { id: "PM-12", name: "電錶 #12" },
+  { id: "PM-13", name: "電錶 #13" },
+];
+
+const WM = [
+  { id: "WM-21", name: "水錶 #21" },
+  { id: "WM-22", name: "水錶 #22" },
+  { id: "WM-23", name: "水錶 #23" },
+];
+
+const findName = (list, id) => list.find((x) => x.id === id)?.name || "-";
+
+export default function BerthMaster() {
+  // 兩筆假資料
   const [data, setData] = useState([
-    { id: 1, name: "儲存設備 A", capacity: "2TB", status: "正常" },
-    { id: 2, name: "儲存設備 B", capacity: "4TB", status: "異常" },
-    { id: 3, name: "儲存設備 C", capacity: "1TB", status: "正常" },
+    { id: 1, name: "船席 1", shoreId: "SP-01", powerMeterId: "PM-11", waterMeterId: "WM-21" },
+    { id: 2, name: "船席 2", shoreId: "SP-02", powerMeterId: "PM-12", waterMeterId: "WM-22" },
   ]);
 
-  const [search, setSearch] = useState("");
+  // ===== 查詢條件（單行、保留 label）=====
+  const [qName, setQName] = useState("");         // 船席名稱
+  const [qShore, setQShore] = useState("all");    // 岸電設備
+  const [qPM, setQPM] = useState("all");          // 電錶設備
+  const [qWM, setQWM] = useState("all");          // 水錶設備
+
+  // ===== 分頁（保留結構；目前資料少）=====
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const filteredData = data.filter(
-    (item) => item.name.includes(search.trim()) || item.capacity.includes(search.trim())
-  );
-
-  const totalPages = Math.ceil(filteredData.length / pageSize);
-  const pageData = filteredData.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
-
-  const toggleStatus = (item) => {
-    Swal.fire({
-      title: "確定切換狀態？",
-      text: `目前狀態為「${item.status}」`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "切換",
-      cancelButtonText: "取消",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setData((prev) =>
-          prev.map((s) =>
-            s.id === item.id
-              ? { ...s, status: s.status === "正常" ? "異常" : "正常" }
-              : s
-          )
-        );
-        Swal.fire("狀態已更新", "", "success");
-      }
+  // 篩選
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      if (qName.trim() && !item.name.includes(qName.trim())) return false;
+      if (qShore !== "all" && item.shoreId !== qShore) return false;
+      if (qPM !== "all" && item.powerMeterId !== qPM) return false;
+      if (qWM !== "all" && item.waterMeterId !== qWM) return false;
+      return true;
     });
+  }, [data, qName, qShore, qPM, qWM]);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+  const safePage = Math.min(page, totalPages);
+  const pageData = filteredData.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const onFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+    setPage(1);
   };
 
-  const deleteStorage = (id) => {
-    Swal.fire({
-      title: "確定刪除？",
-      text: "刪除後無法復原！",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "刪除",
-      cancelButtonText: "取消",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setData((prev) => prev.filter((s) => s.id !== id));
-        Swal.fire("刪除成功", "", "success");
-      }
-    });
+  const clearFilters = () => {
+    setQName("");
+    setQShore("all");
+    setQPM("all");
+    setQWM("all");
+    setPage(1);
   };
 
-  const editStorage = (item) => {
+  /* ========== 新增（彈出框）========== */
+  const addBerth = () => {
     Swal.fire({
-      title: "編輯儲存設備",
+      title: "新增船席",
       html: `
-        <input id="name" class="swal2-input" placeholder="名稱" value="${item.name}">
-        <input id="capacity" class="swal2-input" placeholder="容量" value="${item.capacity}">
-      `,
-      showCancelButton: true,
-      confirmButtonText: "儲存",
-      cancelButtonText: "取消",
-      preConfirm: () => {
-        const name = document.getElementById("name").value.trim();
-        const capacity = document.getElementById("capacity").value.trim();
-        if (!name || !capacity) {
-          Swal.showValidationMessage("請輸入完整資料");
-          return false;
-        }
-        return { name, capacity };
-      },
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setData((prev) =>
-          prev.map((s) =>
-            s.id === item.id
-              ? { ...s, name: res.value.name, capacity: res.value.capacity }
-              : s
-          )
-        );
-        Swal.fire("更新成功", "", "success");
-      }
-    });
-  };
+        <div class="text-start">
+          <label class="form-label">船席名稱 <span class="text-danger">*</span></label>
+          <input id="bm-name" class="swal2-input" placeholder="例：船席 3" style="width:100%;">
 
-  const addStorage = () => {
-    Swal.fire({
-      title: "新增儲存設備",
-      html: `
-        <input id="name" class="swal2-input" placeholder="名稱">
-        <input id="capacity" class="swal2-input" placeholder="容量">
+          <label class="form-label mt-2">指定的岸電設備 <span class="text-danger">*</span></label>
+          <select id="bm-shore" class="swal2-select" style="width:100%;">
+            <option value="">— 請選擇 —</option>
+            ${SHORE.map((s) => `<option value="${s.id}">${s.name}</option>`).join("")}
+          </select>
+
+          <label class="form-label mt-2">指定的電錶設備 <span class="text-danger">*</span></label>
+          <select id="bm-pm" class="swal2-select" style="width:100%;">
+            <option value="">— 請選擇 —</option>
+            ${PM.map((s) => `<option value="${s.id}">${s.name}</option>`).join("")}
+          </select>
+
+          <label class="form-label mt-2">指定的水錶設備 <span class="text-danger">*</span></label>
+          <select id="bm-wm" class="swal2-select" style="width:100%;">
+            <option value="">— 請選擇 —</option>
+            ${WM.map((s) => `<option value="${s.id}">${s.name}</option>`).join("")}
+          </select>
+        </div>
       `,
+      focusConfirm: false,
       showCancelButton: true,
       confirmButtonText: "新增",
       cancelButtonText: "取消",
       preConfirm: () => {
-        const name = document.getElementById("name").value.trim();
-        const capacity = document.getElementById("capacity").value.trim();
-        if (!name || !capacity) {
-          Swal.showValidationMessage("請輸入完整資料");
+        const name = document.getElementById("bm-name").value.trim();
+        const shoreId = document.getElementById("bm-shore").value;
+        const powerMeterId = document.getElementById("bm-pm").value;
+        const waterMeterId = document.getElementById("bm-wm").value;
+
+        if (!name || !shoreId || !powerMeterId || !waterMeterId) {
+          Swal.showValidationMessage("請填寫完整資料（名稱 / 岸電 / 電錶 / 水錶）。");
           return false;
         }
-        return { name, capacity };
+        return { name, shoreId, powerMeterId, waterMeterId };
       },
     }).then((res) => {
-      if (res.isConfirmed) {
-        const newItem = {
-          id: Date.now(),
-          name: res.value.name,
-          capacity: res.value.capacity,
-          status: "正常",
-        };
-        setData((prev) => [newItem, ...prev]);
-        Swal.fire("新增成功", "", "success");
+      if (!res.isConfirmed) return;
+
+      // 名稱不可重複
+      if (data.some((b) => b.name === res.value.name)) {
+        Swal.fire("重複名稱", "已有相同的船席名稱。", "warning");
+        return;
       }
+
+      const newItem = {
+        id: Date.now(),
+        ...res.value,
+      };
+      setData((prev) => [newItem, ...prev]);
+      Swal.fire("新增成功", `${newItem.name} 已建立。`, "success");
+    });
+  };
+
+  /* ========== 單筆刪除（可選）========== */
+  const removeBerth = (row) => {
+    Swal.fire({
+      title: "刪除確認",
+      text: `確定刪除「${row.name}」？`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "刪除",
+      cancelButtonText: "取消",
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      setData((prev) => prev.filter((x) => x.id !== row.id));
+      Swal.fire("已刪除", "", "success");
     });
   };
 
   return (
     <div className="container mt-4">
-      <h3 className="mb-4 text-primary">影像監控系統 - 影像儲存管理</h3>
+      <h3 className="mb-3 text-primary">船席基本檔</h3>
 
-      <div className="row mb-3">
-        <div className="col-md-4">
+      {/* 單行查詢列（保留 label；可水平捲動） */}
+      <div
+        className="d-flex align-items-end gap-3 flex-nowrap overflow-auto pb-2"
+        style={{ whiteSpace: "nowrap" }}
+      >
+        <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 220 }}>
+          <label className="form-label mb-1">船席名稱</label>
           <input
             type="text"
-            placeholder="搜尋名稱或容量"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
             className="form-control"
+            placeholder="例：船席 1"
+            value={qName}
+            onChange={onFilterChange(setQName)}
           />
         </div>
-        <div className="col-md-2">
-          <button onClick={addStorage} className="btn btn-success w-100">
+
+        <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 240 }}>
+          <label className="form-label mb-1">指定的岸電設備</label>
+          <select
+            className="form-select"
+            value={qShore}
+            onChange={onFilterChange(setQShore)}
+          >
+            <option value="all">全部</option>
+            {SHORE.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 240 }}>
+          <label className="form-label mb-1">指定的電錶設備</label>
+          <select
+            className="form-select"
+            value={qPM}
+            onChange={onFilterChange(setQPM)}
+          >
+            <option value="all">全部</option>
+            {PM.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 240 }}>
+          <label className="form-label mb-1">指定的水錶設備</label>
+          <select
+            className="form-select"
+            value={qWM}
+            onChange={onFilterChange(setQWM)}
+          >
+            <option value="all">全部</option>
+            {WM.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex-shrink-0" style={{ paddingBottom: 2 }}>
+          <button className="btn btn-outline-secondary me-2" onClick={clearFilters}>
+            清除條件
+          </button>
+          <button className="btn btn-success" onClick={addBerth}>
             新增
           </button>
         </div>
       </div>
 
-      <table className="table table-bordered text-center shadow-sm">
-        <thead className="table-info">
-          <tr>
-            <th>#</th>
-            <th>名稱</th>
-            <th>容量</th>
-            <th>狀態</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pageData.length === 0 ? (
+      {/* 表格 */}
+      <div className="table-responsive">
+        <table className="table table-bordered text-center shadow-sm align-middle">
+          <thead className="table-light">
             <tr>
-              <td colSpan="5">查無資料</td>
+              <th style={{ width: 70 }}>序號</th>
+              <th>船席名稱</th>
+              <th>指定的岸電設備</th>
+              <th>指定的電錶設備</th>
+              <th>指定的水錶設備</th>
+              <th style={{ width: 140 }}>操作</th>
             </tr>
-          ) : (
-            pageData.map((item, idx) => (
-              <tr key={item.id}>
-                <td>{(page - 1) * pageSize + idx + 1}</td>
-                <td>{item.name}</td>
-                <td>{item.capacity}</td>
-                <td>
-                  {item.status === "正常" ? (
-                    <span className="badge bg-success">
-                      <i className="fas fa-check-circle me-1"></i> 正常
-                    </span>
-                  ) : (
-                    <span className="badge bg-danger">
-                      <i className="fas fa-exclamation-triangle me-1"></i> 異常
-                    </span>
-                  )}
-                </td>
-                <td>
-                  <button
-                    onClick={() => toggleStatus(item)}
-                    className="btn btn-sm btn-primary me-2"
-                  >
-                    切換狀態
-                  </button>
-                  <button
-                    onClick={() => editStorage(item)}
-                    className="btn btn-sm btn-warning me-2"
-                  >
-                    編輯
-                  </button>
-                  <button
-                    onClick={() => deleteStorage(item.id)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    刪除
-                  </button>
-                </td>
+          </thead>
+          <tbody>
+            {pageData.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="py-4 text-muted">查無資料</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              pageData.map((row, idx) => (
+                <tr key={row.id}>
+                  <td>{(safePage - 1) * pageSize + idx + 1}</td>
+                  <td className="text-start">{row.name}</td>
+                  <td className="text-start">{findName(SHORE, row.shoreId)}</td>
+                  <td className="text-start">{findName(PM, row.powerMeterId)}</td>
+                  <td className="text-start">{findName(WM, row.waterMeterId)}</td>
+                  <td>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => removeBerth(row)}>
+                      刪除
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
+      {/* 分頁（保留與範例一致） */}
       <div className="d-flex justify-content-center">
         <nav>
           <ul className="pagination">
-            <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-              <button
-                className="page-link"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
+            <li className={`page-item ${safePage === 1 ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => setPage((p) => Math.max(1, p - 1))}>
                 上一頁
               </button>
             </li>
             {Array.from({ length: totalPages }, (_, i) => (
-              <li
-                key={i}
-                className={`page-item ${page === i + 1 ? "active" : ""}`}
-              >
+              <li key={i} className={`page-item ${safePage === i + 1 ? "active" : ""}`}>
                 <button className="page-link" onClick={() => setPage(i + 1)}>
                   {i + 1}
                 </button>
               </li>
             ))}
-            <li
-              className={`page-item ${
-                page === totalPages || totalPages === 0 ? "disabled" : ""
-              }`}
-            >
-              <button
-                className="page-link"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
+            <li className={`page-item ${safePage === totalPages ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
                 下一頁
               </button>
             </li>

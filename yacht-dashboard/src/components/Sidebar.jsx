@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaWater,
@@ -27,6 +27,16 @@ export default function Sidebar() {
     });
   };
 
+  useEffect(() => {
+    // 只有 pinned 時主內容才讓出 200px；未 pinned 僅覆蓋，不推版
+    if (pinned) {
+      document.body.classList.add("sidebar-pinned");
+    } else {
+      document.body.classList.remove("sidebar-pinned");
+    }
+    return () => document.body.classList.remove("sidebar-pinned");
+  }, [pinned]);
+
   const handleToggleSubmenu = (index) => {
     if (!isExpanded) return;
     setActiveSubmenu((prev) => (prev === index ? null : index));
@@ -41,13 +51,14 @@ export default function Sidebar() {
   const menus = [
     {
       icon: <FaWater />,
-      label: "水電管理系統",
+      label: "岸電控制系統",
       children: [
         { label: "即時監控模組", path: "realtime" },
-        { label: "歷史紀錄查詢", path: "history" },
-        // { label: "計費收費模組", path: "billing" },
-        { label: "用戶資訊綁定", path: "user-binding" },
+        { label: "船舶基本檔", path: "BerthMaster" },
         { label: "遠端控管功能", path: "remote-control" },
+        // { label: "計費收費模組", path: "billing" },
+        { label: "用戶資訊綁定 ?", path: "user-binding" },
+        { label: "歷史紀錄查詢", path: "history" },
       ],
     },
     {
@@ -63,22 +74,22 @@ export default function Sidebar() {
       icon: <FaDoorClosed />,
       label: "門禁管制系統",
       children: [
+        { label: "門匣設備管理", path: "equipment" },
+        { label: "門禁排程設定 ?", path: "schedule" },
         { label: "進出識別紀錄", path: "access-log" },
-        { label: "人員授權管理", path: "personnel" },
-        { label: "設備門禁管理", path: "equipment" },
+        { label: "人員授權管理 ?", path: "personnel" },
         { label: "異常警示事件", path: "alerts" },
-        { label: "門禁排程設定", path: "schedule" },
       ],
     },
     {
       icon: <FaVideo />,
       label: "影像監控系統",
       children: [
+        { label: "監控畫面管理", path: "monitoring" },
         { label: "攝影機管理", path: "camera" },
         { label: "影像儲存管理", path: "storage" },
-        { label: "AI分析模組", path: "ai-analysis" },
-        { label: "監控畫面管理", path: "monitoring" },
-        { label: "警示通報系統", path: "notifications" },
+        { label: "AI分析模組 ?", path: "ai-analysis" },
+        { label: "警示通報系統 ?", path: "notifications" },
       ],
     },
     {
@@ -114,6 +125,8 @@ export default function Sidebar() {
       <button
         className={`pin-btn ${pinned ? "pinned" : ""}`}
         onClick={togglePin}
+        aria-label="固定/解除固定側欄"
+        title={pinned ? "解除固定" : "固定側欄"}
       >
         <FaThumbtack />
       </button>
@@ -155,7 +168,7 @@ export default function Sidebar() {
         ))}
       </div>
 
-      {/* 👉 登入樣式 */}
+      {/*  登入樣式 */}
       <div className="sidebar-login text-center py-3 border-top">
         <Link
           to="/login"

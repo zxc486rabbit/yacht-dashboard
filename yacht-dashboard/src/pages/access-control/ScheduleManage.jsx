@@ -107,7 +107,7 @@ export default function ScheduleManage() {
       <table className="table table-bordered text-center shadow-sm">
         <thead className="table-info">
           <tr>
-            <th>#</th>
+            <th>序號</th>
             <th>排程名稱</th>
             <th>時段</th>
             <th>設備</th>

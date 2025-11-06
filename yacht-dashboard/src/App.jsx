@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Login from "./pages/Login";
 
 import RealtimeMonitor from "./pages/power-water/RealtimeMonitor"; //即時監控模組
+import BerthMaster from "./pages/power-water/BerthMaster"; //船舶基本檔
 import History from "./pages/power-water/History"; //歷史紀錄查詢
 import BillingModule from "./pages/power-water/BillingModule"; //計費收費模組
 import UserBinding from "./pages/power-water/UserBinding"; //用戶資訊綁定
@@ -40,43 +41,34 @@ import "./index.css";
 export default function App() {
   return (
     <HashRouter>
-      <div
-        className="container-fluid d-flex flex-nowrap p-0"
-        style={{ height: "100vh", overflow: "hidden" }}
-      >
+      <div className="container-fluid d-flex flex-nowrap p-0" style={{ height: "100vh" }}>
         <Sidebar />
-        <div className="main-content flex-grow-1" style={{ minWidth: 0 }}>
+        {/* 重點：加上 main-content class，讓它自己捲動 */}
+        <div className="main-content flex-grow-1 overflow-auto" style={{ minWidth: 0, height: "100vh" }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/realtime" element={<RealtimeMonitor />} />
+            <Route path="/BerthMaster" element={<BerthMaster />} />
             <Route path="/history" element={<History />} />
             <Route path="/billing" element={<BillingModule />} />
             <Route path="/user-binding" element={<UserBinding />} />
             <Route path="/remote-control" element={<RemoteControl />} />
-
             <Route path="/ais" element={<AisIntegration />} />
-            <Route
-              path="/image-recognition"
-              element={<ShipImageRecognition />}
-            />
+            <Route path="/image-recognition" element={<ShipImageRecognition />} />
             <Route path="/owner-ship" element={<OwnerShipManage />} />
-
             <Route path="/access-log" element={<AccessRecords />} />
             <Route path="/personnel" element={<PersonnelAuthorization />} />
             <Route path="/equipment" element={<DeviceAccessManage />} />
             <Route path="/alerts" element={<AlarmEvents />} />
             <Route path="/schedule" element={<ScheduleManage />} />
-
             <Route path="/camera" element={<CameraManage />} />
             <Route path="/storage" element={<StorageManage />} />
             <Route path="/ai-analysis" element={<AiAnalysis />} />
             <Route path="/monitoring" element={<MonitorViewManage />} />
             <Route path="/notifications" element={<AlertNotification />} />
-
             <Route path="/network" element={<NetworkManage />} />
             <Route path="/wired" element={<WiredDeviceManage />} />
             <Route path="/wireless" element={<WirelessDeviceManage />} />
-
             <Route path="/items" element={<ChargeItemManage />} />
             <Route path="/rates" element={<RateLogicManage />} />
             <Route path="/payment-methods" element={<PaymentSupport />} />
