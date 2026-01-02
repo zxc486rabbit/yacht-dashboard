@@ -1,8 +1,10 @@
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/dashboard/Dashboard";
 
 import Login from "./pages/Login";
+
+import ShorePowerDashboard from "./pages/shorePower/ShorePowerDashboard"; //岸電儀表板
 
 import RealtimeMonitor from "./pages/power-water/RealtimeMonitor"; //即時監控模組
 import BerthMaster from "./pages/power-water/BerthMaster"; //船舶基本檔
@@ -40,12 +42,15 @@ import "./index.css";
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <div className="container-fluid d-flex flex-nowrap p-0" style={{ height: "100vh" }}>
         <Sidebar />
         {/* 重點：加上 main-content class，讓它自己捲動 */}
         <div className="main-content flex-grow-1 overflow-auto" style={{ minWidth: 0, height: "100vh" }}>
           <Routes>
+            {/* ----------新版--------- */}
+            <Route path="/shore-power" element={<ShorePowerDashboard />} />
+            {/* ----------舊版--------- */}
             <Route path="/" element={<Dashboard />} />
             <Route path="/realtime" element={<RealtimeMonitor />} />
             <Route path="/BerthMaster" element={<BerthMaster />} />
@@ -78,6 +83,6 @@ export default function App() {
           </Routes>
         </div>
       </div>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

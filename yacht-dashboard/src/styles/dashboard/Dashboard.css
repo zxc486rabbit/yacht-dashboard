@@ -1,0 +1,203 @@
+/* src/styles/dashboard/Dashboard.css */
+
+/* 你原本的主色系 + 可調背景參數 */
+:root{
+  --brand: #0599BB;
+  --brand-2: #0487a6;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e5e7eb;
+  --bg: #f6f7f9;
+
+  --card-bg: rgba(255,255,255,.92);
+  --shadow: 0 10px 28px rgba(15, 23, 42, .10);
+  --shadow-sm: 0 6px 16px rgba(15, 23, 42, .08);
+  --radius: 16px;
+
+  /* ✅ 背景霧度（越大越淡、越小越清楚） */
+  --bgTop: .15;
+  --bgBottom: .25;
+}
+
+.appdash{
+  min-height: 100%;
+  padding: 18px 18px 28px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景圖：用漸層霧化控制「透明度」 var(--bgBottom)*/
+.appdash__bg{
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(246,247,249,0),
+      rgba(246,247,249,0)
+    ),
+    url("../../../public/images/bg2.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* 內容容器 */
+.appdash__wrap{
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* 上方膠囊 Header：更接近你截圖的樣子 */
+.appdash__header{
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  backdrop-filter: blur(6px);
+}
+
+.appdash__title{
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--brand);
+  letter-spacing: .2px;
+}
+
+.appdash__subtitle{
+  font-size: .95rem;
+  color: #5b6b7a;
+  font-weight: 800;
+}
+
+/* 中間白色大卡片（你截圖那種主容器感） */
+.appdash__grid{
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  backdrop-filter: blur(8px);
+}
+
+/* tile：加入左側色條 + 更柔的 hover */
+.appdash__tile{
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  border: 1px solid rgba(0,0,0,.06);
+  background: rgba(255,255,255,.96);
+  border-radius: 14px;
+  padding: 16px 16px;
+  cursor: pointer;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  box-shadow: 0 3px 12px rgba(15,23,42,.06);
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background-color .14s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 左側品牌色條（像你截圖那種精緻感） */
+.appdash__tile::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width: 4px;
+  background: linear-gradient(180deg, rgba(5,153,187,.95), rgba(5,153,187,.55));
+  opacity: .65;
+}
+
+.appdash__tile:hover{
+  transform: translateY(-2px);
+  border-color: rgba(5,153,187,.35);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, .14);
+  background: #fff;
+}
+
+.appdash__tile:active{
+  transform: translateY(-1px);
+}
+
+.appdash__tile:focus{ outline: none; }
+.appdash__tile:focus-visible{
+  outline: 3px solid rgba(5,153,187,.22);
+  outline-offset: 2px;
+}
+
+/* icon：更像你截圖的「淡藍底小方塊」 */
+.appdash__icon{
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(5,153,187,.10);
+  border: 1px solid rgba(5,153,187,.18);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  font-size: 1.25rem;
+}
+
+/* 文字 */
+.appdash__text{
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 1.02rem;
+  line-height: 1.2;
+  letter-spacing: .1px;
+}
+
+/* footer 提示：小膠囊 */
+.appdash__footer{
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.appdash__hint{
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: 999px;
+  padding: 9px 14px;
+  color: #5b6b7a;
+  font-weight: 800;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, .07);
+  backdrop-filter: blur(6px);
+}
+
+/* RWD */
+@media (max-width: 992px){
+  .appdash__grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 576px){
+  .appdash{ padding: 14px 14px 22px; }
+  .appdash__header{
+    border-radius: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .appdash__grid{
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+}

@@ -9,8 +9,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   // 交通部航港局 MTNet 會員申請表 PDF 頁面
-  const mtNetApplyUrl = "https://web02.mtnet.gov.tw/0/Info/DownloadFile";
-  const bgUrl = `${import.meta.env.BASE_URL}images/loginBG.png`; // 來自 public 資料夾
+  const mtNetApplyUrl = "https://web02.mtnet.gov.tw/";
+  const bgUrl = `${import.meta.env.BASE_URL}images/bg2.png`; // 來自 public 資料夾
 
   const handleLogin = (e) => {
     e.preventDefault();

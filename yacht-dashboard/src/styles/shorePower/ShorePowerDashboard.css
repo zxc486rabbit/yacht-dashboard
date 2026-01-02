@@ -1,0 +1,665 @@
+/* ===========================
+   岸電儀表板樣式（Clean）
+   =========================== */
+:root{
+  --sp-bg:#f6f7f9;
+  --sp-card:#ffffff;
+  --sp-line:#e5e7eb;
+  --sp-ink:#0f172a;
+  --sp-muted:#64748b;
+  --sp-brand:#2b6777;
+  --sp-soft:#eff6ff;
+  --sp-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+html, body { overflow-x: hidden; }
+.sp-noX { overflow-x: hidden; }
+
+.sp-page{
+  background: var(--sp-bg);
+  color: var(--sp-ink);
+  padding: 18px;
+}
+
+/* Header */
+.sp-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom: 14px;
+}
+.sp-h1{ font-size: 20px; font-weight: 800; letter-spacing: .2px; }
+.sp-sub{ color: var(--sp-muted); font-size: 13px; margin-top: 4px; }
+
+/* Input / Tabs */
+.sp-filter input{
+  width:100%;
+  height: 38px;
+  border:1px solid var(--sp-line);
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  background: #fff;
+}
+.sp-filter input:focus{
+  border-color: rgba(43,103,119,.5);
+  box-shadow: 0 0 0 4px rgba(43,103,119,.12);
+}
+
+.sp-tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.sp-tab{
+  border:1px solid var(--sp-line);
+  background:#fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor:pointer;
+}
+.sp-tab.is-active{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.08);
+  color: var(--sp-brand);
+  font-weight: 700;
+}
+
+.sp-muted{ color: var(--sp-muted); font-size: 12px; }
+
+/* Cards */
+.sp-card{
+  background: var(--sp-card);
+  border:1px solid var(--sp-line);
+  border-radius: 14px;
+  box-shadow: var(--sp-shadow);
+  overflow: hidden;
+}
+.sp-card__hd{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 12px 14px;
+  border-bottom:1px solid var(--sp-line);
+  background: linear-gradient(180deg, rgba(239,246,255,.6), rgba(255,255,255,1));
+}
+.sp-card__title{ font-weight: 800; color: var(--sp-brand); }
+.sp-card__right{ color: var(--sp-muted); font-size: 12px; }
+.sp-card__bd{ padding: 12px 14px; }
+
+/* 讓 grid item 裡面內容撐滿高度 + body 可捲 */
+.sp-widget{ min-height: 0; position: relative; }
+.sp-widget .sp-card{
+  height: 100%;
+  display:flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sp-widget .sp-card__bd{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Stats grid */
+.sp-stats{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 1200px){
+  .sp-stats{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ✅ 船舶狀態概覽：桌機固定 3 欄，佔滿容器寬 */
+.sp-stats.sp-stats--shipStatus{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+/* ✅ 今日用量：桌機固定 2 欄，佔滿容器寬 */
+.sp-stats.sp-stats--todayUsage{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 900px){
+  .sp-stats.sp-stats--shipStatus{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sp-stats.sp-stats--todayUsage{ grid-template-columns: 1fr; }
+}
+
+.sp-stat{
+  border:1px solid var(--sp-line);
+  background:#fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.sp-stat__row{ display:flex; gap: 10px; align-items:center; }
+.sp-stat__icon{
+  width: 34px; height: 34px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: 10px;
+  background: rgba(43,103,119,.10);
+  color: var(--sp-brand);
+  font-size: 18px;
+}
+.sp-stat__title{ font-size: 12px; color: var(--sp-muted); font-weight: 700; }
+.sp-stat__value{ font-size: 18px; font-weight: 900; margin-top: 2px; }
+.sp-stat__sub{ font-size: 11px; color: var(--sp-muted); margin-top: 2px; }
+
+.sp-stat--ok .sp-stat__icon{ background: rgba(34,197,94,.12); color: #16a34a; }
+.sp-stat--info .sp-stat__icon{ background: rgba(59,130,246,.12); color: #2563eb; }
+.sp-stat--alarm .sp-stat__icon{ background: rgba(239,68,68,.12); color: #dc2626; }
+
+/* Berth list */
+.sp-berthList{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow: auto;
+  padding-right: 2px;
+}
+@media (max-width: 1200px){
+  .sp-berthList{ grid-template-columns: 1fr; }
+}
+.sp-berthList--inGrid{ max-height: none; }
+
+.sp-berth{
+  width:100%;
+  border:1px solid var(--sp-line);
+  background:#fff;
+  border-radius: 14px;
+  padding: 12px;
+  text-align:left;
+  cursor:pointer;
+}
+.sp-berth__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.sp-berth__name{ font-weight: 900; }
+.sp-berth__status{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--sp-muted);
+  font-weight: 800;
+}
+.sp-berth__statusIcon{ display:flex; align-items:center; justify-content:center; }
+
+.sp-berth__grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.sp-kpi{
+  border:1px dashed rgba(100,116,139,.35);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(246,247,249,.55);
+}
+.sp-kpi__k{ font-size: 11px; color: var(--sp-muted); font-weight: 800; }
+.sp-kpi__v{ font-size: 14px; font-weight: 900; margin-top: 2px; }
+.sp-kpi__v--small{ font-size: 12px; font-weight: 800; }
+
+.sp-berth__foot{
+  display:flex;
+  justify-content:space-between;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--sp-muted);
+}
+
+.sp-berth--powering{ border-color: rgba(34,197,94,.35); box-shadow: 0 0 0 4px rgba(34,197,94,.06); }
+.sp-berth--ready{ border-color: rgba(59,130,246,.25); }
+.sp-berth--alarm{ border-color: rgba(239,68,68,.35); box-shadow: 0 0 0 4px rgba(239,68,68,.06); }
+.sp-berth--offline{ opacity: .75; }
+
+/* Trend */
+.sp-trendGrid{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+.sp-trendTitle{ font-weight: 900; margin-bottom: 8px; }
+.sp-miniTrend{
+  height: 70px;
+  display:flex;
+  align-items:flex-end;
+  gap: 6px;
+  border:1px solid var(--sp-line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+.sp-miniTrend__barWrap{ flex:1; height:100%; display:flex; align-items:flex-end; }
+.sp-miniTrend__bar{ width: 100%; border-radius: 10px; background: rgba(43,103,119,.35); }
+
+/* Shortcuts */
+.sp-shortcuts{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sp-btn{
+  border:1px solid var(--sp-line);
+  background:#fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor:pointer;
+  font-weight: 900;
+}
+.sp-btn:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+.sp-btn--ghost{
+  background: transparent;
+}
+
+/* Icon buttons / Drag handle */
+.sp-iconBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--sp-muted);
+}
+.sp-iconBtn:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+.sp-iconBtn--sm{ width: 30px; height: 30px; border-radius: 10px; }
+
+.sp-cardRight{ display:flex; gap: 8px; align-items:center; }
+
+.sp-dragHandle{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: #fff;
+  cursor: grab;
+  color: var(--sp-muted);
+  user-select: none;
+  touch-action: none;
+}
+.sp-dragHandle:active{ cursor: grabbing; }
+
+/* Resize hint */
+.sp-resizeHint{
+  position:absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 10;
+  background: rgba(15,23,42,.78);
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+
+/* RGL drag styles */
+.react-grid-item.react-draggable-dragging{
+  z-index: 999 !important;
+  opacity: .96;
+  box-shadow: 0 18px 50px rgba(15,23,42,.22);
+  border-radius: 14px;
+  cursor: grabbing;
+  will-change: transform;
+}
+.react-grid-item.react-grid-placeholder{
+  background: rgba(43,103,119,.18);
+  border: 2px dashed rgba(43,103,119,.35);
+  border-radius: 14px;
+}
+.sp-widget.is-dragging{
+  opacity: .55;
+  filter: saturate(.85);
+}
+.sp-widget.is-target::before{
+  content:"";
+  position:absolute;
+  inset: 6px;
+  border-radius: 14px;
+  border: 2px solid rgba(43,103,119,.55);
+  box-shadow: 0 0 0 6px rgba(43,103,119,.12);
+  pointer-events:none;
+  z-index: 5;
+}
+.sp-widget.is-target::after{
+  content:"";
+  position:absolute;
+  left: 12px;
+  right: 12px;
+  top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(43,103,119,.75);
+  pointer-events:none;
+  z-index: 6;
+}
+
+/* Popover */
+.sp-sizePopover{
+  position: absolute;
+  width: 260px;
+  background: #fff;
+  border: 1px solid var(--sp-line);
+  border-radius: 14px;
+  box-shadow: var(--sp-shadow);
+  z-index: 90;
+  overflow: hidden;
+}
+.sp-sizePopover__hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--sp-line);
+  background: linear-gradient(180deg, rgba(239,246,255,.6), rgba(255,255,255,1));
+}
+.sp-sizePopover__title{ font-weight: 900; color: var(--sp-brand); }
+.sp-sizePopover__row{ padding: 10px 12px; }
+.sp-sizePopover__label{
+  font-weight: 900;
+  color: var(--sp-brand);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.sp-sizePopover__btns{ display:flex; gap: 8px; flex-wrap:wrap; }
+.sp-chip{
+  border: 1px solid var(--sp-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+.sp-chip:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+.sp-sizePopover__steppers{ display:flex; gap: 10px; }
+.sp-stepper{
+  flex: 1;
+  border: 1px solid var(--sp-line);
+  border-radius: 12px;
+  padding: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 8px;
+}
+.sp-stepper__k{ font-weight: 900; color: var(--sp-muted); font-size: 12px; }
+.sp-stepper__v{ font-weight: 900; min-width: 20px; text-align:center; }
+.sp-stepper button{
+  width: 30px; height: 30px;
+  border-radius: 10px;
+  border: 1px solid var(--sp-line);
+  background: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+.sp-stepper button:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+.sp-sizePopover, .sp-sizePopover *{ pointer-events: auto; }
+
+/* 船位排序（dnd-kit） */
+.sp-berthFilters{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.sp-filter--mini input{ width: 220px; height: 34px; border-radius: 10px; }
+.sp-tabs--mini{ justify-content:flex-end; gap: 6px; }
+.sp-tabs--mini .sp-tab{ padding: 7px 10px; font-size: 12px; }
+
+.sp-berthSortItem{
+  position: relative;
+  transition: transform .18s ease;
+}
+.sp-berthSortItem.is-dragging{ z-index: 3; transform: scale(0.99); }
+.sp-berthSortItem__dragging{ opacity: .35; filter: saturate(.75); }
+
+.sp-berthSortItem.is-over::before{
+  content:"";
+  position:absolute;
+  left: 6px;
+  right: 6px;
+  top: -7px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(43,103,119,.85);
+}
+.sp-berthSortItem.is-over::after{
+  content:"";
+  position:absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: rgba(43,103,119,.06);
+  pointer-events:none;
+}
+
+.sp-berthSortHandle{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: var(--sp-muted);
+  opacity: .95;
+  cursor: grab;
+  pointer-events: auto !important;
+  user-select: none;
+  touch-action: none;
+}
+.sp-berthSortHandle:active{ cursor: grabbing; }
+
+/* DragOverlay（船位卡片跟滑鼠） */
+.sp-berthOverlay{
+  transform: translateZ(0);
+  filter: drop-shadow(0 18px 40px rgba(15,23,42,.25));
+}
+.sp-berthOverlay .sp-berth{ cursor: grabbing; }
+
+/* RGL Overlay（拖曳可視） */
+.sp-rglOverlay{
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  transform: translateZ(0);
+  filter: drop-shadow(0 18px 40px rgba(15,23,42,.28));
+}
+.sp-rglOverlay__inner{
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.sp-rglOverlay .sp-card{ height: 100%; }
+.sp-rglOverlay .sp-card__bd{ overflow: hidden; }
+
+/* resize handle */
+.react-resizable-handle{ opacity: .75; }
+
+/* ===========================
+   ✅ 抽屜式側欄（遮罩更乾淨）
+   =========================== */
+
+/* 背景遮罩：更淡、無 blur、比較不「濛」 */
+.sp-sideBackdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.18);
+  z-index: 60;
+}
+
+/* 抽屜側欄：右側滑入 */
+.sp-sidePanel{
+  background:#fff;
+  border: 1px solid var(--sp-line);
+  border-radius: 16px;
+  box-shadow: var(--sp-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-sidePanel--drawer{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 360px;
+  max-height: calc(100vh - 28px);
+  z-index: 70;
+
+  transform: translateX(calc(100% + 18px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .22s ease, opacity .22s ease;
+}
+
+.sp-sidePanel--drawer.is-open{
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sp-sidePanel__hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--sp-line);
+  background: linear-gradient(180deg, rgba(239,246,255,.7), rgba(255,255,255,1));
+}
+.sp-sidePanel__title{
+  font-weight: 900;
+  color: var(--sp-brand);
+  white-space: nowrap;
+}
+.sp-sidePanel__bd{
+  padding: 12px;
+  overflow: auto;
+}
+.sp-sidePanel__sectionTitle{
+  font-weight: 900;
+  color: var(--sp-brand);
+  margin-bottom: 10px;
+}
+.sp-sidePanel__checks{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.sp-sidePanel__checks label{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+.sp-sidePanel__tips{
+  margin-top: 10px;
+  line-height: 1.45;
+}
+.sp-sidePanel__reset{ width:100%; margin-top: 10px; }
+
+/* ✅ 快速套用按鈕 */
+.sp-presetRow{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sp-presetBtn{
+  flex: 1;
+  min-width: 100px;
+  border: 1px solid var(--sp-line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 13px;
+}
+.sp-presetBtn:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+
+/* 右下角浮動按鈕 */
+.sp-sideFab{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 80;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid var(--sp-line);
+  background: #fff;
+  box-shadow: var(--sp-shadow);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  color: var(--sp-muted);
+}
+.sp-sideFab:hover{
+  border-color: rgba(43,103,119,.35);
+  background: rgba(43,103,119,.06);
+}
+
+/* 手機：側欄改全寬抽屜 */
+@media (max-width: 520px){
+  .sp-sidePanel--drawer{
+    left: 12px;
+    right: 12px;
+    width: auto;
+    top: 12px;
+  }
+}
+/* ===========================
+   ✅ dnd-kit DragOverlay（Portal 到 body）
+   - 修正被 transform 祖先影響造成的滑鼠偏移
+   =========================== */
+
+/* DragOverlay 本體層級拉高，避免被 RGL / SidePanel 壓住 */
+.sp-dndOverlay{
+  z-index: 20000 !important;
+}
+
+/* Overlay 內卡片拖曳時游標 */
+.sp-berthOverlay .sp-berth{
+  cursor: grabbing;
+}
+
+/* ===========================
+   ✅ 船位卡片：狀態文字避開拖曳按鈕
+   =========================== */
+
+/* 狀態區整體往左縮，預留右側給拖曳把手 */
+.sp-berth__status{
+  padding-right: 40px; /* 關鍵：讓出拖曳按鈕空間 */
+}

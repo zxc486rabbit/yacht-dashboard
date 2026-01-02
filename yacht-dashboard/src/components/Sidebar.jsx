@@ -53,6 +53,7 @@ export default function Sidebar() {
       icon: <FaWater />,
       label: "岸電控制系統",
       children: [
+        { label: "岸電儀錶板", path: "shore-power" },
         { label: "即時監控模組", path: "realtime" },
         { label: "船舶基本檔", path: "BerthMaster" },
         { label: "遠端控管功能", path: "remote-control" },

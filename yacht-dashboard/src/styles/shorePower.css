@@ -1,0 +1,237 @@
+:root{
+  --sp-bg:#f6f7f9;
+  --sp-card:#ffffff;
+  --sp-ink:#0f172a;
+  --sp-muted:#64748b;
+  --sp-line:#e5e7eb;
+  --sp-brand:#2b6777;
+  --sp-brand-2:#245b69;
+  --sp-good:#16a34a;
+  --sp-warn:#f59e0b;
+  --sp-bad:#ef4444;
+  --sp-off:#94a3b8;
+}
+
+.sp-page{
+  background: var(--sp-bg);
+  color: var(--sp-ink);
+  min-height: 100vh;
+  padding: 18px;
+  font-family: "Microsoft JhengHei", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.sp-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.sp-title h1{
+  margin:0;
+  font-size:20px;
+  letter-spacing:.2px;
+}
+.sp-title p{
+  margin:4px 0 0 0;
+  color:var(--sp-muted);
+  font-size:13px;
+}
+
+.sp-toolbar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+.sp-btn{
+  border:1px solid var(--sp-line);
+  background:#fff;
+  padding:9px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition: .15s ease;
+}
+.sp-btn:hover{ transform: translateY(-1px); }
+.sp-btn.primary{
+  background: var(--sp-brand);
+  border-color: var(--sp-brand);
+  color:#fff;
+}
+.sp-btn.danger{
+  background: #fff;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.sp-grid{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:12px;
+}
+
+@media (max-width: 1100px){
+  .sp-grid{ grid-template-columns: 1fr; }
+}
+
+.sp-card{
+  background: var(--sp-card);
+  border: 1px solid var(--sp-line);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(15,23,42,.05);
+}
+
+.sp-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.sp-section-title h2{
+  margin:0;
+  font-size:15px;
+}
+.sp-section-title .hint{
+  color:var(--sp-muted);
+  font-size:12px;
+}
+
+.sp-kpis{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
+  margin-bottom:12px;
+}
+@media (max-width: 900px){
+  .sp-kpis{ grid-template-columns: repeat(2, 1fr); }
+}
+
+.kpi{
+  border: 1px solid var(--sp-line);
+  border-radius: 14px;
+  padding: 12px;
+  background:#fff;
+}
+.kpi .label{
+  color: var(--sp-muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+.kpi .value{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.kpi .sub{
+  margin-top:6px;
+  font-size:12px;
+  color: var(--sp-muted);
+}
+
+.sp-berths{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+@media (max-width: 1200px){
+  .sp-berths{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 650px){
+  .sp-berths{ grid-template-columns: 1fr; }
+}
+
+.berth{
+  border: 1px solid var(--sp-line);
+  border-radius: 14px;
+  padding: 12px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.berth-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.berth-name{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.berth-name b{ font-size:14px; }
+.berth-name span{ font-size:12px; color:var(--sp-muted); }
+
+.pill{
+  font-size:12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border:1px solid var(--sp-line);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.pill.good{ border-color:#bbf7d0; color:#166534; background:#f0fdf4; }
+.pill.warn{ border-color:#fde68a; color:#92400e; background:#fffbeb; }
+.pill.bad{ border-color:#fecaca; color:#991b1b; background:#fef2f2; }
+.pill.off{ border-color:#e2e8f0; color:#475569; background:#f8fafc; }
+
+.berth-metrics{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:8px;
+}
+.metric{
+  border:1px solid var(--sp-line);
+  border-radius:12px;
+  padding:8px;
+  background:#fff;
+}
+.metric .k{ font-size:11px; color:var(--sp-muted); }
+.metric .v{ margin-top:4px; font-weight:800; font-size:13px; }
+
+.berth-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.berth-actions .sp-btn{
+  padding:8px 9px;
+  border-radius:12px;
+}
+
+.sp-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.row{
+  border:1px solid var(--sp-line);
+  border-radius:12px;
+  padding:10px;
+  background:#fff;
+}
+.row .top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:4px;
+}
+.row .top b{ font-size:13px; }
+.row .meta{
+  font-size:12px;
+  color:var(--sp-muted);
+  line-height:1.45;
+}
