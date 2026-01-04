@@ -1,4 +1,4 @@
-// 迷你趨勢圖（先用簡單 bar 假裝，之後可換 Recharts）
+// 迷你趨勢圖（先用簡單 bar 假裝，之後換 Recharts）
 export default function MiniTrend({ data = [] }) {
   const max = Math.max(1, ...data);
   return (

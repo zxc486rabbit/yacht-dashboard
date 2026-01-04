@@ -1,6 +1,4 @@
-/* ===========================
-   岸電儀表板樣式（Clean）
-   =========================== */
+/* ShorePowerDashboard.jsx（全域/頁面基礎：變數、版面、header、RGL 容器） */
 :root{
   --sp-bg:#f6f7f9;
   --sp-card:#ffffff;
@@ -21,7 +19,7 @@ html, body { overflow-x: hidden; }
   padding: 18px;
 }
 
-/* Header */
+/* ShorePowerDashboard.jsx（頁首標題區） */
 .sp-header{
   display:flex;
   align-items:flex-start;
@@ -32,7 +30,7 @@ html, body { overflow-x: hidden; }
 .sp-h1{ font-size: 20px; font-weight: 800; letter-spacing: .2px; }
 .sp-sub{ color: var(--sp-muted); font-size: 13px; margin-top: 4px; }
 
-/* Input / Tabs */
+/* ShorePowerDashboard.jsx（搜尋輸入與狀態 tabs：用在 BerthFilters / 上方工具列） */
 .sp-filter input{
   width:100%;
   height: 38px;
@@ -70,7 +68,7 @@ html, body { overflow-x: hidden; }
 
 .sp-muted{ color: var(--sp-muted); font-size: 12px; }
 
-/* Cards */
+/* SectionCard.jsx（容器卡片：標題列/右側工具/內容區） */
 .sp-card{
   background: var(--sp-card);
   border:1px solid var(--sp-line);
@@ -90,7 +88,7 @@ html, body { overflow-x: hidden; }
 .sp-card__right{ color: var(--sp-muted); font-size: 12px; }
 .sp-card__bd{ padding: 12px 14px; }
 
-/* 讓 grid item 裡面內容撐滿高度 + body 可捲 */
+/* ShorePowerDashboard.jsx（RGL widget 讓內容撐滿高度、內容可捲動） */
 .sp-widget{ min-height: 0; position: relative; }
 .sp-widget .sp-card{
   height: 100%;
@@ -104,7 +102,7 @@ html, body { overflow-x: hidden; }
   overflow: auto;
 }
 
-/* Stats grid */
+/* StatsCard.jsx / ShorePowerDashboard.jsx（統計卡片排版：grid 容器 + 響應式） */
 .sp-stats{
   display:grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -114,11 +112,10 @@ html, body { overflow-x: hidden; }
   .sp-stats{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ✅ 船舶狀態概覽：桌機固定 3 欄，佔滿容器寬 */
+/* ShorePowerDashboard.jsx（特定區塊：shipStatus / todayUsage 欄數固定） */
 .sp-stats.sp-stats--shipStatus{
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-/* ✅ 今日用量：桌機固定 2 欄，佔滿容器寬 */
 .sp-stats.sp-stats--todayUsage{
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -127,6 +124,7 @@ html, body { overflow-x: hidden; }
   .sp-stats.sp-stats--todayUsage{ grid-template-columns: 1fr; }
 }
 
+/* StatsCard.jsx（卡片外觀、icon 區、文字層級、tone 顏色） */
 .sp-stat{
   border:1px solid var(--sp-line);
   background:#fff;
@@ -150,7 +148,7 @@ html, body { overflow-x: hidden; }
 .sp-stat--info .sp-stat__icon{ background: rgba(59,130,246,.12); color: #2563eb; }
 .sp-stat--alarm .sp-stat__icon{ background: rgba(239,68,68,.12); color: #dc2626; }
 
-/* Berth list */
+/* ShorePowerDashboard.jsx（船位列表容器：grid + 捲動） */
 .sp-berthList{
   display:grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -163,6 +161,7 @@ html, body { overflow-x: hidden; }
 }
 .sp-berthList--inGrid{ max-height: none; }
 
+/* BerthCard.jsx（船位卡片本體：外觀、上排資訊、kpi 區、footer） */
 .sp-berth{
   width:100%;
   border:1px solid var(--sp-line);
@@ -213,12 +212,13 @@ html, body { overflow-x: hidden; }
   color: var(--sp-muted);
 }
 
+/* BerthCard.jsx（船位狀態樣式：powering/ready/alarm/offline） */
 .sp-berth--powering{ border-color: rgba(34,197,94,.35); box-shadow: 0 0 0 4px rgba(34,197,94,.06); }
 .sp-berth--ready{ border-color: rgba(59,130,246,.25); }
 .sp-berth--alarm{ border-color: rgba(239,68,68,.35); box-shadow: 0 0 0 4px rgba(239,68,68,.06); }
 .sp-berth--offline{ opacity: .75; }
 
-/* Trend */
+/* MiniTrend.jsx（趨勢卡：標題 + 小 bar 圖） */
 .sp-trendGrid{ display:grid; grid-template-columns: 1fr; gap: 12px; }
 .sp-trendTitle{ font-weight: 900; margin-bottom: 8px; }
 .sp-miniTrend{
@@ -234,7 +234,7 @@ html, body { overflow-x: hidden; }
 .sp-miniTrend__barWrap{ flex:1; height:100%; display:flex; align-items:flex-end; }
 .sp-miniTrend__bar{ width: 100%; border-radius: 10px; background: rgba(43,103,119,.35); }
 
-/* Shortcuts */
+/* ShorePowerDashboard.jsx（快捷入口：按鈕網格 + 基本按鈕樣式） */
 .sp-shortcuts{
   display:grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -256,7 +256,7 @@ html, body { overflow-x: hidden; }
   background: transparent;
 }
 
-/* Icon buttons / Drag handle */
+/* ShorePowerDashboard.jsx（通用 icon 按鈕、右上工具列、拖曳把手） */
 .sp-iconBtn{
   display:inline-flex;
   align-items:center;
@@ -293,7 +293,7 @@ html, body { overflow-x: hidden; }
 }
 .sp-dragHandle:active{ cursor: grabbing; }
 
-/* Resize hint */
+/* ShorePowerDashboard.jsx（縮放提示泡泡：顯示目前 w×h） */
 .sp-resizeHint{
   position:absolute;
   right: 10px;
@@ -308,7 +308,7 @@ html, body { overflow-x: hidden; }
   backdrop-filter: blur(6px);
 }
 
-/* RGL drag styles */
+/* ShorePowerDashboard.jsx（react-grid-layout 拖曳/placeholder/目標高亮） */
 .react-grid-item.react-draggable-dragging{
   z-index: 999 !important;
   opacity: .96;
@@ -349,10 +349,9 @@ html, body { overflow-x: hidden; }
   z-index: 6;
 }
 
-/* Popover */
+/* ShorePowerDashboard.jsx（卡片大小 popover：調整 w/h 的小視窗） */
 .sp-sizePopover{
   position: absolute;
-  width: 260px;
   background: #fff;
   border: 1px solid var(--sp-line);
   border-radius: 14px;
@@ -417,7 +416,7 @@ html, body { overflow-x: hidden; }
 }
 .sp-sizePopover, .sp-sizePopover *{ pointer-events: auto; }
 
-/* 船位排序（dnd-kit） */
+/* ShorePowerDashboard.jsx（BerthFilters：搜尋縮小版 + tabs 縮小版 + 排版） */
 .sp-berthFilters{
   display:flex;
   align-items:center;
@@ -429,6 +428,7 @@ html, body { overflow-x: hidden; }
 .sp-tabs--mini{ justify-content:flex-end; gap: 6px; }
 .sp-tabs--mini .sp-tab{ padding: 7px 10px; font-size: 12px; }
 
+/* ShorePowerDashboard.jsx（dnd-kit 船位排序：容器狀態、拖曳中、插入提示） */
 .sp-berthSortItem{
   position: relative;
   transition: transform .18s ease;
@@ -477,14 +477,14 @@ html, body { overflow-x: hidden; }
 }
 .sp-berthSortHandle:active{ cursor: grabbing; }
 
-/* DragOverlay（船位卡片跟滑鼠） */
+/* ShorePowerDashboard.jsx（dnd-kit DragOverlay：拖起來的船位卡片陰影/游標） */
 .sp-berthOverlay{
   transform: translateZ(0);
   filter: drop-shadow(0 18px 40px rgba(15,23,42,.25));
 }
 .sp-berthOverlay .sp-berth{ cursor: grabbing; }
 
-/* RGL Overlay（拖曳可視） */
+/* ShorePowerDashboard.jsx（RGL Overlay：拖曳 widget 的跟隨預覽層） */
 .sp-rglOverlay{
   position: fixed;
   z-index: 10000;
@@ -501,14 +501,10 @@ html, body { overflow-x: hidden; }
 .sp-rglOverlay .sp-card{ height: 100%; }
 .sp-rglOverlay .sp-card__bd{ overflow: hidden; }
 
-/* resize handle */
+/* ShorePowerDashboard.jsx（react-resizable 右下角 resize handle 顯示） */
 .react-resizable-handle{ opacity: .75; }
 
-/* ===========================
-   ✅ 抽屜式側欄（遮罩更乾淨）
-   =========================== */
-
-/* 背景遮罩：更淡、無 blur、比較不「濛」 */
+/* ShorePowerDashboard.jsx（版面設定抽屜：遮罩、側欄、按鈕、手機版調整） */
 .sp-sideBackdrop{
   position: fixed;
   inset: 0;
@@ -516,7 +512,6 @@ html, body { overflow-x: hidden; }
   z-index: 60;
 }
 
-/* 抽屜側欄：右側滑入 */
 .sp-sidePanel{
   background:#fff;
   border: 1px solid var(--sp-line);
@@ -586,7 +581,6 @@ html, body { overflow-x: hidden; }
 }
 .sp-sidePanel__reset{ width:100%; margin-top: 10px; }
 
-/* ✅ 快速套用按鈕 */
 .sp-presetRow{
   display:flex;
   gap: 8px;
@@ -608,7 +602,6 @@ html, body { overflow-x: hidden; }
   background: rgba(43,103,119,.06);
 }
 
-/* 右下角浮動按鈕 */
 .sp-sideFab{
   position: fixed;
   right: 18px;
@@ -631,7 +624,6 @@ html, body { overflow-x: hidden; }
   background: rgba(43,103,119,.06);
 }
 
-/* 手機：側欄改全寬抽屜 */
 @media (max-width: 520px){
   .sp-sidePanel--drawer{
     left: 12px;
@@ -640,26 +632,16 @@ html, body { overflow-x: hidden; }
     top: 12px;
   }
 }
-/* ===========================
-   ✅ dnd-kit DragOverlay（Portal 到 body）
-   - 修正被 transform 祖先影響造成的滑鼠偏移
-   =========================== */
 
-/* DragOverlay 本體層級拉高，避免被 RGL / SidePanel 壓住 */
+/* ShorePowerDashboard.jsx（dnd-kit DragOverlay：Portal 到 body 的層級控制） */
 .sp-dndOverlay{
   z-index: 20000 !important;
 }
-
-/* Overlay 內卡片拖曳時游標 */
 .sp-berthOverlay .sp-berth{
   cursor: grabbing;
 }
 
-/* ===========================
-   ✅ 船位卡片：狀態文字避開拖曳按鈕
-   =========================== */
-
-/* 狀態區整體往左縮，預留右側給拖曳把手 */
+/* BerthCard.jsx（狀態文字避開右上拖曳把手：預留右側空間） */
 .sp-berth__status{
-  padding-right: 40px; /* 關鍵：讓出拖曳按鈕空間 */
+  padding-right: 40px;
 }

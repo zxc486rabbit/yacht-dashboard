@@ -1,26 +1,31 @@
-// src/pages/shorePower/ShorePowerDashboard.jsx
+// 岸電儀錶板
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "../../styles/shorePower/ShorePowerDashboard.css";
 
+// 資料來源 mock，之後接 API 時改成 state + fetch
 import { BERTHS, EVENTS } from "../../data/shorePower/shorePowerMock";
 
+// 這些都是「純 UI 元件」：只負責顯示，不負責抓資料
 import SectionCard from "../../components/shorePower/SectionCard";
 import StatsCard from "../../components/shorePower/StatsCard";
 import BerthCard from "../../components/shorePower/BerthCard";
 import EventList from "../../components/shorePower/EventList";
 import MiniTrend from "../../components/shorePower/MiniTrend";
 
+// icon
 import { FaBolt, FaWater, FaRegClock } from "react-icons/fa";
 import { MdOutlineErrorOutline } from "react-icons/md";
 import { LuPower } from "react-icons/lu";
 import { TbCircuitAmmeter } from "react-icons/tb";
 import { FiMove, FiSettings, FiX } from "react-icons/fi";
 
+// 儀表板版面：可拖曳/可縮放（widget 層級）
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+// 船位卡片排序：只用在「船位總覽」內部（BerthCard 列表）
 import {
   DndContext,
   PointerSensor,
@@ -40,14 +45,22 @@ import { CSS as DndCSS } from "@dnd-kit/utilities";
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const sum = (arr) => arr.reduce((a, b) => a + (Number(b) || 0), 0);
+
+// 版面設定會存到 localStorage，讓使用者下次開啟能沿用
 const LS_KEY = "shorePower.dashboard.v3";
 
-// ✅ 固定 12 欄
+//  layout 用 12 欄為基準（lg / md）
 const GRID_COLS = 12;
 const ROW_HEIGHT = 48;
 
-// ✅ 預設版面（12 欄）— 不限縮最小寬度（minW: 1）
-// ✅ 今日用量高度預設 3
+/**
+ * DEFAULT_CFG 是整頁「儀表板拼裝」的核心：
+ * - visible：哪些區塊要顯示（勾選/取消）
+ * - layout：每個區塊的位置(x,y) 與大小(w,h)
+ * - berthOrder：船位卡片的排序（dnd-kit 拖曳後會更新）
+ *
+ * i 是 widget key（必須對應到 renderWidgetByKey 裡的 key）
+ */
 const DEFAULT_CFG = {
   visible: {
     stats: true,
@@ -74,7 +87,8 @@ const DEFAULT_CFG = {
   berthOrder: BERTHS.map((b) => b.berthId),
 };
 
-// ✅ 快速套用：標準 / 監控大屏 / 值班模式
+// 快速套用三種版面：標準 / 大屏 / 值班
+// 這裡只提供「版面與顯示」，船位排序會在 applyQuickPreset 裡保留使用者順序
 const PRESET_CFGS = {
   standard: () => ({
     visible: { ...DEFAULT_CFG.visible },
@@ -143,6 +157,10 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+/**
+ * 早期版本可能用 4 欄 layout，後來改成 12 欄
+ * 這個 migrate 會把舊資料放大到新系統（避免使用者 localStorage 壞掉）
+ */
 function migrateLayoutTo12(layout) {
   const arr = Array.isArray(layout) ? layout : [];
   if (!arr.length) return arr;
@@ -172,6 +190,7 @@ function migrateLayoutTo12(layout) {
   });
 }
 
+// 調整指定 widget 的寬高（w/h），並確保不超出 min/max 與 cols
 function updateLayoutItemWH(layout, key, nextW, nextH, cols) {
   const cloned = Array.isArray(layout) ? layout.map((x) => ({ ...x })) : [];
   const idx = cloned.findIndex((x) => x.i === key);
@@ -194,6 +213,7 @@ function updateLayoutItemWH(layout, key, nextW, nextH, cols) {
   return cloned;
 }
 
+// 依 cfg.berthOrder 對 BERTHS 做排序；沒有出現在 order 的會追加在最後
 function applyBerthOrder(list, order) {
   const map = new Map(list.map((x) => [x.berthId, x]));
   const ordered = [];
@@ -210,6 +230,11 @@ function getItem(layout, key) {
   return (layout || []).find((x) => x.i === key);
 }
 
+/**
+ * react-grid-layout 的 onLayoutChange 只會回傳「可見」的那些 item
+ * 但需要保留「不可見 item 的 layout」以便之後勾回來還有位置
+ * 所以這裡用 merge 的方式保留全部
+ */
 function mergeLayoutsKeepAll(prevLayout, nextPartialLayout) {
   const prev = Array.isArray(prevLayout) ? prevLayout : [];
   const next = Array.isArray(nextPartialLayout) ? nextPartialLayout : [];
@@ -225,6 +250,7 @@ function mergeLayoutsKeepAll(prevLayout, nextPartialLayout) {
   return merged;
 }
 
+// 保證 layout 一定存在某個 key（如果 localStorage 少了一塊，就補回 default）
 function ensureLayoutItem(layout, key) {
   const arr = Array.isArray(layout) ? [...layout] : [];
   if (arr.some((x) => x.i === key)) return arr;
@@ -234,6 +260,11 @@ function ensureLayoutItem(layout, key) {
   return arr;
 }
 
+/*
+  SortableBerthItem 是船位卡片排序的外殼：
+  - 真正的卡片是 children（BerthCard）
+  - 右上角的 FiMove 是「拖曳把手」
+ */
 function SortableBerthItem({ id, children }) {
   const {
     attributes,
@@ -273,15 +304,23 @@ function SortableBerthItem({ id, children }) {
         <FiMove />
       </button>
 
-      <div className={isDragging ? "sp-berthSortItem__dragging" : ""}>{children}</div>
+      {/* 拖曳中可以套不同樣式（例如陰影/透明），避免跟原卡片混在一起 */}
+      <div className={isDragging ? "sp-berthSortItem__dragging" : ""}>
+        {children}
+      </div>
     </div>
   );
 }
 
 export default function ShorePowerDashboard() {
+  // 船位搜尋與狀態篩選（只作用在「船位總覽」那塊）
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState("ALL");
 
+  /*
+    cfg = 儀表板的「使用者版面設定」
+    會從 localStorage 讀回來，並做 migrate / 補齊缺塊
+   */
   const [cfg, setCfg] = useState(() => {
     const saved = safeParse(localStorage.getItem(LS_KEY), null);
     if (!saved) return DEFAULT_CFG;
@@ -289,6 +328,7 @@ export default function ShorePowerDashboard() {
     const merged = { ...DEFAULT_CFG, ...saved };
     if (saved?.layout) merged.layout = migrateLayoutTo12(saved.layout);
 
+    // 避免舊設定少了某個 widget，造成 visible 勾回來卻沒有 layout 可用
     ["shipStatus", "todayUsage", "stats", "trend", "events", "shortcuts", "berth"].forEach((k) => {
       merged.layout = ensureLayoutItem(merged.layout, k);
     });
@@ -297,11 +337,14 @@ export default function ShorePowerDashboard() {
     return merged;
   });
 
+  // 版面設定抽屜是否打開
   const [openPanel, setOpenPanel] = useState(false);
 
+  // 卡片大小 popover 的定位狀態（點右上齒輪出現）
   const [sizePopover, setSizePopover] = useState({ open: false, key: null, top: 0, left: 0 });
   const popoverRef = useRef(null);
 
+  // 拖曳縮放時顯示的尺寸提示（例如 6×4 格）
   const [resizeHint, setResizeHint] = useState({
     show: false,
     key: null,
@@ -311,8 +354,13 @@ export default function ShorePowerDashboard() {
     pxH: 0,
   });
 
+  // 拖曳 widget 時，用來高亮「正在拖的」與「被碰到的目標」
   const [dragState, setDragState] = useState({ draggingKey: null, targetKey: null });
 
+  /**
+   * rglOverlay：拖曳 widget 時的跟隨預覽層
+   * 目的：拖起來更像「把卡片抓起來移動」，而不是只看到 placeholder
+   */
   const [rglOverlay, setRglOverlay] = useState({
     on: false,
     key: null,
@@ -324,17 +372,23 @@ export default function ShorePowerDashboard() {
     dy: 0,
   });
 
+  // 船位卡片排序拖曳時：目前被拖的 berthId
   const [activeBerthId, setActiveBerthId] = useState(null);
+
+  // 用於 DragOverlay：讓拖起來的卡片尺寸跟原卡片一致，避免看起來縮放怪怪的
   const [berthOverlaySize, setBerthOverlaySize] = useState({ w: 0, h: 0 });
 
+  // dnd-kit：避免輕微滑動就觸發拖曳，distance=6 比較像「真的拖」
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
 
+  // cfg 變動就保存（版面/顯示/船位排序都在 cfg 裡）
   useEffect(() => {
     localStorage.setItem(LS_KEY, JSON.stringify(cfg));
   }, [cfg]);
 
+  // 點 popover 外面就關閉（這種 UX 用 document 監聽最穩）
   useEffect(() => {
     function onDocDown(e) {
       if (!sizePopover.open) return;
@@ -346,6 +400,7 @@ export default function ShorePowerDashboard() {
     return () => document.removeEventListener("mousedown", onDocDown);
   }, [sizePopover.open]);
 
+  // widget 預覽 overlay 跟著滑鼠跑
   useEffect(() => {
     if (!rglOverlay.on) return;
     const onMove = (e) => {
@@ -355,11 +410,14 @@ export default function ShorePowerDashboard() {
     return () => window.removeEventListener("mousemove", onMove);
   }, [rglOverlay.on]);
 
+  // 目前要渲染哪些 widget（由 cfg.visible 決定）
   const visibleKeys = useMemo(() => {
     const v = cfg.visible || {};
     return Object.keys(v).filter((k) => v[k]);
   }, [cfg.visible]);
 
+  // 勾選顯示/隱藏某個 widget
+  // 勾回來時順便確保 layout 有該 key（避免舊設定缺 layout）
   const setVisible = (key, val) => {
     setCfg((p) => {
       const next = { ...p, visible: { ...(p.visible || {}), [key]: val } };
@@ -368,6 +426,7 @@ export default function ShorePowerDashboard() {
     });
   };
 
+  // 還原整頁預設（也包含船位排序）
   const resetLayout = () => {
     setCfg({
       visible: DEFAULT_CFG.visible,
@@ -376,6 +435,7 @@ export default function ShorePowerDashboard() {
     });
   };
 
+  // react-grid-layout 的 layout 變更回傳的是 partial，這裡 merge 回 cfg.layout（保留不可見卡片）
   const onLayoutChange = (nextPartialLayout) => {
     setCfg((p) => ({
       ...p,
@@ -383,6 +443,11 @@ export default function ShorePowerDashboard() {
     }));
   };
 
+  /*
+    指標統計（上方 StatsCard 會用）
+    目前 BERTHS 是常數 mock，所以 dependency 用 []
+    之後改成 API 取得（berths state），這裡改成 [berths]
+   */
   const metrics = useMemo(() => {
     const powering = BERTHS.filter((x) => x.status === "POWERING").length;
     const ready = BERTHS.filter((x) => x.status === "READY").length;
@@ -399,6 +464,7 @@ export default function ShorePowerDashboard() {
     return { powering, ready, alarm, totalKW, totalKwhToday, totalWaterToday, phase: { r, s, t } };
   }, []);
 
+  // 船位列表：先套使用者排序，再做搜尋/狀態篩選
   const orderedBerths = useMemo(() => {
     const ordered = applyBerthOrder(BERTHS, cfg.berthOrder);
     const kw = keyword.trim();
@@ -409,19 +475,22 @@ export default function ShorePowerDashboard() {
     });
   }, [cfg.berthOrder, keyword, status]);
 
+  // 點船位卡片的行為：目前先 alert，之後可導到席位詳情或開 modal
   const onOpenBerth = (item) => {
     alert(`開啟：${item.berthName}（之後導到席位詳細頁）`);
   };
 
+  // 船位卡片拖曳開始（dnd-kit）
   const onBerthDragStart = (event) => {
     setActiveBerthId(event.active?.id ?? null);
 
-    // ✅ 取 active item 實際尺寸，讓 DragOverlay 更貼近原卡片
+    // 取 active item 的實際尺寸，DragOverlay 用這個尺寸渲染會更像原卡片
     const r = event?.active?.rect?.current?.initial;
     if (r?.width && r?.height) setBerthOverlaySize({ w: r.width, h: r.height });
     else setBerthOverlaySize({ w: 0, h: 0 });
   };
 
+  // 船位卡片拖曳結束：把 berthOrder 更新回 cfg（存 localStorage）
   const onBerthDragEnd = (event) => {
     const { active, over } = event;
     setActiveBerthId(null);
@@ -444,17 +513,20 @@ export default function ShorePowerDashboard() {
     setBerthOverlaySize({ w: 0, h: 0 });
   };
 
+  // 目前被拖的那張船位卡片（DragOverlay 會用它）
   const activeBerthItem = useMemo(() => {
     if (!activeBerthId) return null;
     return BERTHS.find((b) => b.berthId === activeBerthId) || null;
   }, [activeBerthId]);
 
+  // react-grid-layout widget 拖曳把手（只有抓這個才會拖整個 widget）
   const DragHandle = (
     <span className="sp-dragHandle" title="拖曳更換位置">
       <FiMove />
     </span>
   );
 
+  // 開啟「卡片大小」popover（靠按鈕座標定位）
   const openSizePopover = (key, e) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -466,6 +538,7 @@ export default function ShorePowerDashboard() {
     });
   };
 
+  // 套用大小到 cfg.layout（w/h），並決定要不要關閉 popover
   const applySize = (key, w, h, opts = { close: true }) => {
     setCfg((p) => ({
       ...p,
@@ -474,6 +547,7 @@ export default function ShorePowerDashboard() {
     if (opts?.close) setSizePopover({ open: false, key: null, top: 0, left: 0 });
   };
 
+  // 快速尺寸預設（格數）
   const PRESETS = {
     S: { w: 4, h: 3 },
     M: { w: 6, h: 4 },
@@ -492,6 +566,8 @@ export default function ShorePowerDashboard() {
     };
   };
 
+  // 尺寸 popover（點卡片右上齒輪出現）
+  // 這段寫成 IIFE 是因為要依 key 抓當下尺寸並渲染內容
   const SizePopover = sizePopover.open ? (() => {
     const key = sizePopover.key;
     const cur = getCurrentWH(key);
@@ -561,6 +637,7 @@ export default function ShorePowerDashboard() {
     );
   })() : null;
 
+  // 船位總覽的上方工具列：搜尋 + 狀態 tabs + 數量 + 調整大小 + 拖曳把手
   const BerthFilters = (
     <div className="sp-berthFilters">
       <div className="sp-filter sp-filter--mini">
@@ -592,6 +669,7 @@ export default function ShorePowerDashboard() {
 
       <div className="sp-muted">共 {orderedBerths.length} 席</div>
 
+      {/* 這個齒輪是調整「整塊船位總覽 widget」的大小（不是單一卡片） */}
       <button type="button" className="sp-iconBtn" title="調整卡片大小" onClick={(e) => openSizePopover("berth", e)}>
         <FiSettings />
       </button>
@@ -600,6 +678,7 @@ export default function ShorePowerDashboard() {
     </div>
   );
 
+  // 套用快速版面，保留使用者的 berthOrder（避免船位順序突然重置）
   const applyQuickPreset = (mode) => {
     const maker = PRESET_CFGS[mode];
     if (!maker) return;
@@ -624,6 +703,7 @@ export default function ShorePowerDashboard() {
     setOpenPanel(false);
   };
 
+  // 右側抽屜：版面設定（顯示/隱藏 + 快速套用 + 還原）
   const SidePanel = (
     <>
       {openPanel ? <div className="sp-sideBackdrop" onClick={() => setOpenPanel(false)} /> : null}
@@ -686,6 +766,7 @@ export default function ShorePowerDashboard() {
     </>
   );
 
+  // 拖曳 widget 時：用「矩形重疊」找出目前撞到哪一個 widget（用來做 is-target 高亮）
   const computeTargetKey = (layout, movingItem) => {
     if (!movingItem) return null;
     const a = { x: movingItem.x, y: movingItem.y, w: movingItem.w, h: movingItem.h };
@@ -694,7 +775,13 @@ export default function ShorePowerDashboard() {
     return hit?.i ?? null;
   };
 
+  /*
+    這個函式就是「儀表板拼裝表」：
+    key = widget 的名稱（layout 的 i）
+    回傳對應的 SectionCard + 內容元件
+   */
   const renderWidgetByKey = (key, { overlay = false } = {}) => {
+    // 每張 widget 的右上角都放：調整大小 + 拖曳把手
     const rightWrap = (k) => (
       <div className="sp-cardRight">
         <button type="button" className="sp-iconBtn" title="調整卡片大小" onClick={(e) => openSizePopover(k, e)}>
@@ -704,6 +791,7 @@ export default function ShorePowerDashboard() {
       </div>
     );
 
+    // overlay 模式是給 rglOverlay 預覽用的：避免點擊/互動穿透造成奇怪行為
     const overlayProps = overlay ? { onClickCapture: (e) => e.preventDefault() } : {};
 
     if (key === "shipStatus") {
@@ -743,22 +831,23 @@ export default function ShorePowerDashboard() {
     }
 
     if (key === "berth") {
-      // ✅ 這裡是本次關鍵修正：DragOverlay 用 createPortal 掛到 body，避免被 transform 影響而偏移
+      // DragOverlay 若放在 RGL 的 transform 容器內，拖曳時容易產生位移/縮放錯亂
+      // 這裡用 createPortal 掛到 body，讓 overlay 脫離 transform 影響
       const overlayNode =
         typeof document !== "undefined"
           ? createPortal(
-              <DragOverlay dropAnimation={null} adjustScale={false} className="sp-dndOverlay">
-                {activeBerthItem ? (
-                  <div
-                    className="sp-berthOverlay"
-                    style={berthOverlaySize.w ? { width: berthOverlaySize.w, height: berthOverlaySize.h } : undefined}
-                  >
-                    <BerthCard item={activeBerthItem} onClick={() => {}} />
-                  </div>
-                ) : null}
-              </DragOverlay>,
-              document.body
-            )
+            <DragOverlay dropAnimation={null} adjustScale={false} className="sp-dndOverlay">
+              {activeBerthItem ? (
+                <div
+                  className="sp-berthOverlay"
+                  style={berthOverlaySize.w ? { width: berthOverlaySize.w, height: berthOverlaySize.h } : undefined}
+                >
+                  <BerthCard item={activeBerthItem} onClick={() => { }} />
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )
           : null;
 
       return (
@@ -853,7 +942,9 @@ export default function ShorePowerDashboard() {
           compactType="vertical"
           useCSSTransforms={true}
           draggableHandle=".sp-dragHandle"
+          // 內容區不要誤觸拖曳：輸入框/按鈕/船位列表/size popover 都排除
           draggableCancel=".sp-card__bd, input, button, .sp-berthList, .sp-sizePopover"
+          // 只把「可見」的 widget layout 丟給 RGL（不可見的 layout 我們自己在 cfg 裡保留）
           layouts={{
             lg: (cfg.layout || DEFAULT_CFG.layout).filter((l) => visibleKeys.includes(l.i)),
           }}
@@ -862,6 +953,7 @@ export default function ShorePowerDashboard() {
             const key = newItem?.i;
             setDragState({ draggingKey: key, targetKey: null });
 
+            // 把被拖曳的 widget 位置/尺寸記下來，畫 rglOverlay 預覽
             try {
               const rect = element?.getBoundingClientRect?.();
               if (rect && e) {
@@ -887,6 +979,7 @@ export default function ShorePowerDashboard() {
             const target = computeTargetKey(layout, newItem);
             setDragState((p) => ({ draggingKey: p.draggingKey, targetKey: target }));
 
+            // overlay 跟著滑鼠移動
             if (e && rglOverlay.on) {
               setRglOverlay((p) => (p.on ? { ...p, x: e.clientX - p.dx, y: e.clientY - p.dy } : p));
             }
@@ -896,6 +989,7 @@ export default function ShorePowerDashboard() {
             setRglOverlay({ on: false, key: null, x: 0, y: 0, w: 0, h: 0, dx: 0, dy: 0 });
           }}
           onResize={(_, item) => {
+            // 這個提示主要是讓使用者知道「現在卡片幾格高」
             setResizeHint({
               show: true,
               key: item.i,
@@ -919,6 +1013,7 @@ export default function ShorePowerDashboard() {
               ].join(" ")}
             >
               {renderWidgetByKey(k)}
+
               {resizeHint.show && resizeHint.key === k ? (
                 <div className="sp-resizeHint">
                   {resizeHint.w}×{resizeHint.h} 格 · 約 {Math.round(resizeHint.pxH)}px 高
@@ -931,12 +1026,15 @@ export default function ShorePowerDashboard() {
 
       {SizePopover}
 
+      {/* rglOverlay：拖曳 widget 的「跟隨預覽」 */}
       {rglOverlay.on && rglOverlay.key ? (
         <div
           className="sp-rglOverlay"
           style={{ left: rglOverlay.x, top: rglOverlay.y, width: rglOverlay.w, height: rglOverlay.h }}
         >
-          <div className="sp-rglOverlay__inner">{renderWidgetByKey(rglOverlay.key, { overlay: true })}</div>
+          <div className="sp-rglOverlay__inner">
+            {renderWidgetByKey(rglOverlay.key, { overlay: true })}
+          </div>
         </div>
       ) : null}
     </div>

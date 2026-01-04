@@ -1,4 +1,4 @@
-// 岸電假資料（之後可換成 API 回傳）
+// 岸電假資料
 export const BERTHS = Array.from({ length: 11 }).map((_, i) => {
   const id = i + 1;
   const statuses = ["POWERING", "READY", "ALARM", "OFFLINE"];

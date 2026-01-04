@@ -1,9 +1,14 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import Dashboard from "./pages/dashboard/Dashboard";
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./index.css";
 
+import { AuthProvider } from "./auth/AuthContext";
+import RequireAuth from "./auth/RequireAuth";
+import AppLayout from "./layout/AppLayout";
+
+import Dashboard from "./pages/dashboard/Dashboard";
 import Login from "./pages/Login";
 
+// 各頁面
 import ShorePowerDashboard from "./pages/shorePower/ShorePowerDashboard"; //岸電儀表板
 
 import RealtimeMonitor from "./pages/power-water/RealtimeMonitor"; //即時監控模組
@@ -38,51 +43,81 @@ import PaymentSupport from "./pages/billing-system/PaymentSupport"; //支付方�
 import BillNotification from "./pages/billing-system/BillNotification"; //帳單通知功能
 import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
 
-import "./index.css";
+import BerthBooking from "./pages/user/BerthBooking"; //船位預約
+import MyBookings from "./pages/user/MyBookings"; //我的預約 / 停泊費用
+
+// 先做一個假「個人帳戶設定頁」
+function Account() {
+  return (
+    <div style={{ padding: 18 }}>
+      <h3 style={{ marginBottom: 8 }}>個人帳戶設定</h3>
+      <div style={{ color: "#64748b" }}>（目前僅做畫面呈現，尚未串接資料）</div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="container-fluid d-flex flex-nowrap p-0" style={{ height: "100vh" }}>
-        <Sidebar />
-        {/* 重點：加上 main-content class，讓它自己捲動 */}
-        <div className="main-content flex-grow-1 overflow-auto" style={{ minWidth: 0, height: "100vh" }}>
-          <Routes>
-            {/* ----------新版--------- */}
-            <Route path="/shore-power" element={<ShorePowerDashboard />} />
-            {/* ----------舊版--------- */}
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/realtime" element={<RealtimeMonitor />} />
-            <Route path="/BerthMaster" element={<BerthMaster />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/billing" element={<BillingModule />} />
-            <Route path="/user-binding" element={<UserBinding />} />
-            <Route path="/remote-control" element={<RemoteControl />} />
-            <Route path="/ais" element={<AisIntegration />} />
-            <Route path="/image-recognition" element={<ShipImageRecognition />} />
-            <Route path="/owner-ship" element={<OwnerShipManage />} />
-            <Route path="/access-log" element={<AccessRecords />} />
-            <Route path="/personnel" element={<PersonnelAuthorization />} />
-            <Route path="/equipment" element={<DeviceAccessManage />} />
-            <Route path="/alerts" element={<AlarmEvents />} />
-            <Route path="/schedule" element={<ScheduleManage />} />
-            <Route path="/camera" element={<CameraManage />} />
-            <Route path="/storage" element={<StorageManage />} />
-            <Route path="/ai-analysis" element={<AiAnalysis />} />
-            <Route path="/monitoring" element={<MonitorViewManage />} />
-            <Route path="/notifications" element={<AlertNotification />} />
-            <Route path="/network" element={<NetworkManage />} />
-            <Route path="/wired" element={<WiredDeviceManage />} />
-            <Route path="/wireless" element={<WirelessDeviceManage />} />
-            <Route path="/items" element={<ChargeItemManage />} />
-            <Route path="/rates" element={<RateLogicManage />} />
-            <Route path="/payment-methods" element={<PaymentSupport />} />
-            <Route path="/billing-notice" element={<BillNotification />} />
-            <Route path="/backend" element={<AdminManage />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </div>
-      </div>
-    </BrowserRouter>
+    <AuthProvider>
+      {/*  basename={import.meta.env.BASE_URL} */}
+      <HashRouter >
+        <Routes>
+          {/*  入口：直接導到系統首頁（會被 RequireAuth 擋住→去 login） */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/*  登入頁：獨立，不套 AppLayout */}
+          <Route path="/login" element={<Login />} />
+          {/*  系統區：一律要登入 + 套 Layout */}
+          <Route
+            path="/*"
+            element={
+              <RequireAuth>
+                <AppLayout>
+                  <Routes>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    {/* ----------新版--------- */}
+                    <Route path="/shore-power" element={<ShorePowerDashboard />} />
+                    {/* 使用者專區 */}
+                    <Route path="/user/berth-booking" element={<BerthBooking />} />
+                    <Route path="/user/my-bookings" element={<MyBookings />} />
+                    <Route path="/account" element={<Account />} />
+                    {/* ----------舊版--------- */}
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/realtime" element={<RealtimeMonitor />} />
+                    <Route path="/BerthMaster" element={<BerthMaster />} />
+                    <Route path="/history" element={<History />} />
+                    <Route path="/billing" element={<BillingModule />} />
+                    <Route path="/user-binding" element={<UserBinding />} />
+                    <Route path="/remote-control" element={<RemoteControl />} />
+                    <Route path="/ais" element={<AisIntegration />} />
+                    <Route path="/image-recognition" element={<ShipImageRecognition />} />
+                    <Route path="/owner-ship" element={<OwnerShipManage />} />
+                    <Route path="/access-log" element={<AccessRecords />} />
+                    <Route path="/personnel" element={<PersonnelAuthorization />} />
+                    <Route path="/equipment" element={<DeviceAccessManage />} />
+                    <Route path="/alerts" element={<AlarmEvents />} />
+                    <Route path="/schedule" element={<ScheduleManage />} />
+                    <Route path="/camera" element={<CameraManage />} />
+                    <Route path="/storage" element={<StorageManage />} />
+                    <Route path="/ai-analysis" element={<AiAnalysis />} />
+                    <Route path="/monitoring" element={<MonitorViewManage />} />
+                    <Route path="/notifications" element={<AlertNotification />} />
+                    <Route path="/network" element={<NetworkManage />} />
+                    <Route path="/wired" element={<WiredDeviceManage />} />
+                    <Route path="/wireless" element={<WirelessDeviceManage />} />
+                    <Route path="/items" element={<ChargeItemManage />} />
+                    <Route path="/rates" element={<RateLogicManage />} />
+                    <Route path="/payment-methods" element={<PaymentSupport />} />
+                    <Route path="/billing-notice" element={<BillNotification />} />
+                    <Route path="/backend" element={<AdminManage />} />
+                    {/* 找不到路由就回 dashboard，避免空白頁 */}
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  </Routes>
+                </AppLayout>
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </HashRouter>
+    </AuthProvider>
   );
 }
