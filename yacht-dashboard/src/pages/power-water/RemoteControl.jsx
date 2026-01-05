@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import Swal from "sweetalert2";
 
-/* ======== 初始資料產生（與之前相同） ======== */
+/* ======== 初始資料產生 ======== */
 const rand = (min, max) => Math.round((Math.random() * (max - min) + min) * 100) / 100;
 const yesno = () => Math.random() > 0.5;
 const ONLINE = () => Math.random() > 0.15;
@@ -11,7 +11,7 @@ const genDefaultSchedule = () => ({
   days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
   start: "18:00",
   end: "06:00",
-  exceptions: [], // ["2025-11-05","2025-12-31"]
+  exceptions: [],
 });
 
 const genShorePower = () =>
@@ -38,24 +38,49 @@ const genLighting = () =>
 
 const genAC = () => ({
   units: [
-    { id: 1, name: "主機 A", online: ONLINE(), running: yesno(), currentTemp: rand(18, 33), minTemp: 22, maxTemp: 28, isPreferred: true },
-    { id: 2, name: "主機 B", online: ONLINE(), running: yesno(), currentTemp: rand(18, 33), minTemp: 22, maxTemp: 28, isPreferred: false },
-    { id: 3, name: "備援 C", online: ONLINE(), running: yesno(), currentTemp: rand(18, 33), minTemp: 22, maxTemp: 28, isPreferred: false },
+    {
+      id: 1,
+      name: "冷氣主機 A",
+      online: ONLINE(),
+      running: yesno(),
+      currentTemp: rand(18, 33),
+      minTemp: 22,
+      maxTemp: 28,
+      isPreferred: true,
+    },
+    {
+      id: 2,
+      name: "冷氣主機 B",
+      online: ONLINE(),
+      running: yesno(),
+      currentTemp: rand(18, 33),
+      minTemp: 22,
+      maxTemp: 28,
+      isPreferred: false,
+    },
+    {
+      id: 3,
+      name: "備援 冷氣主機 C",
+      online: ONLINE(),
+      running: yesno(),
+      currentTemp: rand(18, 33),
+      minTemp: 22,
+      maxTemp: 28,
+      isPreferred: false,
+    },
+  ],
+});
+
+const genVent = () => ({
+  units: [
+    { id: 101, name: "通風扇 A", online: ONLINE(), state: "正常", on: yesno(), schedule: genDefaultSchedule() },
+    { id: 102, name: "通風扇 B", online: ONLINE(), state: "正常", on: yesno(), schedule: genDefaultSchedule() },
+    { id: 103, name: "備援 通風扇 C", online: ONLINE(), state: "正常", on: yesno(), schedule: genDefaultSchedule() },
   ],
 });
 
 const genFire = () =>
   ["碼頭 A 區", "碼頭 B 區", "燃料補給區", "倉儲棟"].map((n, i) => ({
-    id: i + 1,
-    name: n,
-    online: ONLINE(),
-    state: "正常",
-    on: yesno(),
-    schedule: genDefaultSchedule(),
-  }));
-
-const genVent = () =>
-  ["停車場通風", "機房排風", "油氣收集", "地下層通風"].map((n, i) => ({
     id: i + 1,
     name: n,
     online: ONLINE(),
@@ -75,10 +100,10 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
     { key: "Sat", label: "週六" },
     { key: "Sun", label: "週日" },
   ];
+
   const [local, setLocal] = useState(() => value || genDefaultSchedule());
   const [newException, setNewException] = useState("");
 
-  // 每次打開時同步資料
   useMemo(() => {
     if (show) {
       setLocal(value || genDefaultSchedule());
@@ -108,7 +133,6 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
   };
 
   const handleSave = () => {
-    // 基本驗證
     if (local.enable) {
       if (!local.start || !local.end) {
         Swal.fire("資料不完整", "請設定開始與結束時間。", "warning");
@@ -134,7 +158,6 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
           </div>
 
           <div className="modal-body">
-            {/* 啟用開關 */}
             <div className="form-check form-switch mb-3">
               <input
                 className="form-check-input"
@@ -148,7 +171,6 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
               </label>
             </div>
 
-            {/* 星期多選 */}
             <div className="mb-3">
               <label className="form-label d-block">星期</label>
               <div className="d-flex flex-wrap gap-2">
@@ -170,7 +192,6 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
               </div>
             </div>
 
-            {/* 時間區間 */}
             <div className="row g-3 align-items-end mb-3">
               <div className="col-md-4">
                 <label className="form-label">開始時間</label>
@@ -193,27 +214,20 @@ function ScheduleModal({ show, onClose, value, onSave, title }) {
                 />
               </div>
               <div className="col-md-4">
-                <div className="form-text">
-                  可跨午夜，例如 18:00 ~ 06:00（隔日）
-                </div>
+                <div className="form-text">可跨午夜，例如 18:00 ~ 06:00（隔日）</div>
               </div>
             </div>
 
-            {/* 例外日 */}
             <div className="mb-2">
               <label className="form-label d-block">例外日（不套用排程）</label>
               <div className="d-flex gap-2">
-                <input
-                  type="date"
-                  className="form-control"
-                  value={newException}
-                  onChange={(e) => setNewException(e.target.value)}
-                />
+                <input type="date" className="form-control" value={newException} onChange={(e) => setNewException(e.target.value)} />
                 <button className="btn btn-outline-primary" type="button" onClick={addException}>
                   新增
                 </button>
               </div>
             </div>
+
             <div className="mt-2">
               {local.exceptions?.length ? (
                 <div className="d-flex flex-wrap gap-2">
@@ -258,10 +272,12 @@ export default function RemoteControl() {
   const [shore, setShore] = useState(genShorePower());
   const [lighting, setLighting] = useState(genLighting());
   const [ac, setAc] = useState(genAC());
+  const [ventState, setVentState] = useState(genVent());
   const [fire, setFire] = useState(genFire());
-  const [vent, setVent] = useState(genVent());
 
-  // 岸電控制
+  /* =========================
+     船席岸電：供電、頻率（美規/歐規）
+  ========================= */
   const toggleShorePower = async (row) => {
     if (!row.online) return Swal.fire("離線中", "設備離線，無法切換供電。", "warning");
     const isOn = row.powerOn;
@@ -272,39 +288,39 @@ export default function RemoteControl() {
       showCancelButton: true,
     }).then((r) => r.isConfirmed);
     if (!ok) return;
-    setShore((prev) =>
-      prev.map((d) => (d.id === row.id ? { ...d, powerOn: !isOn, frequency: !isOn ? 60 : 0 } : d))
-    );
+
+    setShore((prev) => prev.map((d) => (d.id === row.id ? { ...d, powerOn: !isOn, frequency: !isOn ? 60 : 0 } : d)));
     Swal.fire("完成", `${row.name} 供電已${isOn ? "關閉" : "開啟"}`, "success");
   };
 
-  const setShoreFrequency = async (row) => {
-    if (!row.online || !row.powerOn)
-      return Swal.fire("無法設定", "請先確認設備在線且供電為 ON。", "warning");
-    const { value: freq } = await Swal.fire({
+  const setShoreFrequencyStandard = async (row, targetHz) => {
+    if (!row.online || !row.powerOn) return Swal.fire("無法設定", "請先確認設備在線且供電為 ON。", "warning");
+
+    const label = targetHz === 60 ? "美規 60Hz" : "歐規 50Hz";
+    const ok = await Swal.fire({
       title: `設定變頻器頻率 - ${row.name}`,
-      input: "number",
-      inputLabel: "頻率 (Hz, 30~70)",
-      inputValue: row.frequency,
+      html: `確認要切換為 <b>${label}</b> 嗎？`,
+      icon: "question",
       showCancelButton: true,
-      preConfirm: (v) => {
-        const n = Number(v);
-        if (n < 30 || n > 70) Swal.showValidationMessage("請輸入 30~70 之間的值");
-      },
-    });
-    if (!freq && freq !== 0) return;
-    setShore((prev) => prev.map((d) => (d.id === row.id ? { ...d, frequency: Number(freq) } : d)));
-    Swal.fire("完成", `${row.name} 頻率已更新為 ${freq} Hz`, "success");
+      confirmButtonText: "確認切換",
+    }).then((r) => r.isConfirmed);
+
+    if (!ok) return;
+
+    setShore((prev) => prev.map((d) => (d.id === row.id ? { ...d, frequency: targetHz } : d)));
+    Swal.fire("完成", `${row.name} 頻率已更新為 ${targetHz} Hz`, "success");
   };
 
-  // ======== 可視化排程（通用） ========
+  /* =========================
+     共用：排程 Modal
+  ========================= */
   const [scheduleModal, setScheduleModal] = useState({
     show: false,
     title: "",
-    getList: null,    // () => array
-    setList: null,    // setter
-    targetId: null,   // number
-    value: null,      // schedule object
+    getList: null,
+    setList: null,
+    targetId: null,
+    value: null,
   });
 
   const openSchedule = (title, getList, setList, row) => {
@@ -328,7 +344,9 @@ export default function RemoteControl() {
     Swal.fire("已儲存", "排程設定已更新。", "success");
   };
 
-  // 照明/消防/通風開關（共用）
+  /* =========================
+     共用：開關切換
+  ========================= */
   const toggleOnOff = (getter, setter, row) => {
     if (!row.online) return Swal.fire("離線中", "設備離線，無法切換電源。", "warning");
     Swal.fire({
@@ -343,23 +361,23 @@ export default function RemoteControl() {
     });
   };
 
-  // 冷氣備援 & 溫度
+  /* =========================
+     冷氣：備援切換 & 溫度
+  ========================= */
   const switchToBackup = async (unit) => {
     const onlineUnits = ac.units.filter((u) => u.id !== unit.id && u.online);
-    if (!onlineUnits.length)
-      return Swal.fire("無備援主機", "沒有在線的備援主機可切換。", "info");
+    if (!onlineUnits.length) return Swal.fire("無備援主機", "沒有在線的備援主機可切換。", "info");
+
     const { value: targetId } = await Swal.fire({
-      title: `切換備援主機 - ${unit.name}`,
+      title: `切換備援冷氣主機 - ${unit.name}`,
       input: "select",
       inputOptions: onlineUnits.reduce((o, u) => ((o[u.id] = u.name), o), {}),
       showCancelButton: true,
     });
     if (!targetId) return;
+
     const id = Number(targetId);
-    setAc((prev) => ({
-      ...prev,
-      units: prev.units.map((u) => ({ ...u, isPreferred: u.id === id })),
-    }));
+    setAc((prev) => ({ ...prev, units: prev.units.map((u) => ({ ...u, isPreferred: u.id === id })) }));
     Swal.fire("完成", `已切換到備援主機 ${onlineUnits.find((u) => u.id === id)?.name}`, "success");
   };
 
@@ -385,36 +403,63 @@ export default function RemoteControl() {
       },
     });
     if (!formValues) return;
+
     setAc((prev) => ({
       ...prev,
-      units: prev.units.map((u) =>
-        u.id === unit.id ? { ...u, minTemp: formValues.min, maxTemp: formValues.max } : u
-      ),
+      units: prev.units.map((u) => (u.id === unit.id ? { ...u, minTemp: formValues.min, maxTemp: formValues.max } : u)),
     }));
     Swal.fire("完成", `${unit.name} 溫度上下限已更新`, "success");
   };
 
+  /* =========================
+     ✅ 冷氣 + 通風 合併成同表資料
+  ========================= */
+  const hvacRows = useMemo(() => {
+    const acRows = ac.units.map((u) => ({
+      kind: "AC",
+      id: `AC-${u.id}`,
+      rawId: u.id,
+      name: u.name,
+      online: u.online,
+      runOrOn: u.running,
+      currentTemp: u.currentTemp,
+      minTemp: u.minTemp,
+      maxTemp: u.maxTemp,
+      isPreferred: u.isPreferred,
+      raw: u,
+    }));
+
+    const ventRows = ventState.units.map((v) => ({
+      kind: "VENT",
+      id: `VENT-${v.id}`,
+      rawId: v.id,
+      name: v.name,
+      online: v.online,
+      runOrOn: v.on,
+      state: v.state,
+      schedule: v.schedule,
+      raw: v,
+    }));
+
+    return [...acRows, ...ventRows];
+  }, [ac.units, ventState.units]);
+
   const TabBtn = ({ id, label }) => (
-    <button
-      className={`btn btn-sm me-2 ${tab === id ? "btn-primary" : "btn-outline-primary"}`}
-      onClick={() => setTab(id)}
-    >
+    <button className={`btn btn-sm me-2 ${tab === id ? "btn-primary" : "btn-outline-primary"}`} onClick={() => setTab(id)}>
       {label}
     </button>
   );
 
-  /* ======== UI ======== */
   return (
     <div className="container mt-4">
       <h3 className="mb-3 text-primary">遠端控管功能</h3>
 
-      {/* 分頁按鈕 */}
+      {/* 分頁按鈕（✅ 通風 tab 已移除） */}
       <div className="mb-3">
         <TabBtn id="shore" label="船席岸電設定" />
         <TabBtn id="light" label="照明系統設定" />
-        <TabBtn id="ac" label="冷氣主機設定" />
+        <TabBtn id="ac" label="冷氣主機設定（含通風）" />
         <TabBtn id="fire" label="消防系統設定" />
-        <TabBtn id="vent" label="排風(通風)系統設定" />
       </div>
 
       {/* 船席岸電設定 */}
@@ -437,32 +482,38 @@ export default function RemoteControl() {
               <tr key={row.id}>
                 <td>{row.name}</td>
                 <td>
-                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>
-                    {row.online ? "在線" : "離線"}
-                  </span>
+                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>{row.online ? "在線" : "離線"}</span>
                 </td>
                 <td>{row.shoreState}</td>
                 <td>
-                  <span className={`badge ${row.powerOn ? "bg-primary" : "bg-dark"}`}>
-                    {row.powerOn ? "ON" : "OFF"}
-                  </span>
+                  <span className={`badge ${row.powerOn ? "bg-primary" : "bg-dark"}`}>{row.powerOn ? "ON" : "OFF"}</span>
                 </td>
                 <td>{row.frequency} Hz</td>
                 <td>{row.currentA} A</td>
                 <td>{row.loadPct}%</td>
                 <td className="text-nowrap">
-                  <button
-                    className={`btn btn-sm me-2 ${row.powerOn ? "btn-danger" : "btn-success"}`}
-                    onClick={() => toggleShorePower(row)}
-                  >
+                  <button className={`btn btn-sm me-2 ${row.powerOn ? "btn-danger" : "btn-success"}`} onClick={() => toggleShorePower(row)}>
                     {row.powerOn ? "關閉電源" : "開啟電源"}
                   </button>
-                  <button
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={() => setShoreFrequency(row)}
-                  >
-                    設定變頻器頻率
-                  </button>
+
+                  <div className="btn-group" role="group" aria-label="Frequency">
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => setShoreFrequencyStandard(row, 60)}
+                      disabled={!row.online || !row.powerOn}
+                      type="button"
+                    >
+                      美規(60Hz)
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => setShoreFrequencyStandard(row, 50)}
+                      disabled={!row.online || !row.powerOn}
+                      type="button"
+                    >
+                      歐規(50Hz)
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -487,27 +538,17 @@ export default function RemoteControl() {
               <tr key={row.id}>
                 <td>{row.name}</td>
                 <td>
-                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>
-                    {row.online ? "在線" : "離線"}
-                  </span>
+                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>{row.online ? "在線" : "離線"}</span>
                 </td>
                 <td>{row.state}</td>
                 <td>
-                  <span className={`badge ${row.on ? "bg-primary" : "bg-dark"}`}>
-                    {row.on ? "開" : "關"}
-                  </span>
+                  <span className={`badge ${row.on ? "bg-primary" : "bg-dark"}`}>{row.on ? "開" : "關"}</span>
                 </td>
                 <td className="text-nowrap">
-                  <button
-                    className={`btn btn-sm me-2 ${row.on ? "btn-danger" : "btn-success"}`}
-                    onClick={() => toggleOnOff(() => lighting, setLighting, row)}
-                  >
+                  <button className={`btn btn-sm me-2 ${row.on ? "btn-danger" : "btn-success"}`} onClick={() => toggleOnOff(() => lighting, setLighting, row)}>
                     {row.on ? "關閉電源" : "開啟電源"}
                   </button>
-                  <button
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={() => openSchedule(`排程設定 - ${row.name}`, () => lighting, setLighting, row)}
-                  >
+                  <button className="btn btn-sm btn-outline-primary" onClick={() => openSchedule(`排程設定 - ${row.name}`, () => lighting, setLighting, row)}>
                     排程設定
                   </button>
                 </td>
@@ -517,53 +558,103 @@ export default function RemoteControl() {
         </table>
       )}
 
-      {/* 冷氣主機設定 */}
+      {/* ✅ 冷氣主機設定（同表含通風） */}
       {tab === "ac" && (
         <table className="table table-bordered text-center align-middle">
           <thead className="table-primary">
             <tr>
-              <th>主機名稱</th>
+              <th>設備類型</th>
+              <th>設備名稱</th>
               <th>連線狀態</th>
-              <th>運行狀態</th>
+              <th>運行/開關狀態</th>
               <th>目前溫度</th>
               <th>上下限</th>
               <th>預設/現用</th>
+              <th>排程</th>
               <th>遠端控管功能</th>
             </tr>
           </thead>
           <tbody>
-            {ac.units.map((u) => (
-              <tr key={u.id}>
-                <td>{u.name}</td>
-                <td>
-                  <span className={`badge ${u.online ? "bg-success" : "bg-secondary"}`}>
-                    {u.online ? "在線" : "離線"}
-                  </span>
-                </td>
-                <td>
-                  <span className={`badge ${u.running ? "bg-primary" : "bg-dark"}`}>
-                    {u.running ? "運行中" : "待機"}
-                  </span>
-                </td>
-                <td>{u.currentTemp} °C</td>
-                <td>{u.minTemp} ~ {u.maxTemp} °C</td>
-                <td>{u.isPreferred ? "✔ 預設/現用" : "—"}</td>
-                <td className="text-nowrap">
-                  <button
-                    className="btn btn-sm btn-outline-primary me-2"
-                    onClick={() => switchToBackup(u)}
-                  >
-                    切換備援冷氣主機
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setTempRange(u)}
-                  >
-                    設定溫度上下限
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {hvacRows.map((row) => {
+              const isAC = row.kind === "AC";
+              const isVENT = row.kind === "VENT";
+
+              return (
+                <tr key={row.id}>
+                  <td>
+                    <span className={`badge ${isAC ? "bg-info" : "bg-success"}`}>{isAC ? "冷氣主機" : "通風/排風"}</span>
+                  </td>
+
+                  <td>{row.name}</td>
+
+                  <td>
+                    <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>{row.online ? "在線" : "離線"}</span>
+                  </td>
+
+                  <td>
+                    <span className={`badge ${row.runOrOn ? "bg-primary" : "bg-dark"}`}>{row.runOrOn ? (isAC ? "運行中" : "開") : (isAC ? "待機" : "關")}</span>
+                  </td>
+
+                  {/* 冷氣才顯示溫度；通風顯示 - */}
+                  <td>{isAC ? `${row.currentTemp} °C` : "-"}</td>
+
+                  {/* 冷氣才顯示上下限；通風顯示 - */}
+                  <td>{isAC ? `${row.minTemp} ~ ${row.maxTemp} °C` : "-"}</td>
+
+                  {/* 冷氣才顯示預設/現用；通風顯示 - */}
+                  <td>{isAC ? (row.isPreferred ? "✔ 預設/現用" : "—") : "-"}</td>
+
+                  {/* 通風才顯示排程按鈕；冷氣顯示 - */}
+                  <td className="text-nowrap">
+                    {isVENT ? (
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() =>
+                          openSchedule(
+                            `排程設定 - ${row.name}`,
+                            () => ventState.units,
+                            (nextList) => setVentState((p) => ({ ...p, units: nextList })),
+                            row.raw
+                          )
+                        }
+                      >
+                        排程設定
+                      </button>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td className="text-nowrap">
+                    {isAC ? (
+                      <>
+                        <button className="btn btn-sm btn-outline-primary me-2" onClick={() => switchToBackup(row.raw)}>
+                          切換備援冷氣主機
+                        </button>
+                        <button className="btn btn-sm btn-outline-secondary" onClick={() => setTempRange(row.raw)}>
+                          設定溫度上下限
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className={`btn btn-sm me-2 ${row.raw.on ? "btn-danger" : "btn-success"}`}
+                          onClick={() =>
+                            toggleOnOff(
+                              () => ventState.units,
+                              (nextList) => setVentState((p) => ({ ...p, units: nextList })),
+                              row.raw
+                            )
+                          }
+                        >
+                          {row.raw.on ? "關閉電源" : "開啟電源"}
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -585,74 +676,17 @@ export default function RemoteControl() {
               <tr key={row.id}>
                 <td>{row.name}</td>
                 <td>
-                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>
-                    {row.online ? "在線" : "離線"}
-                  </span>
+                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>{row.online ? "在線" : "離線"}</span>
                 </td>
                 <td>{row.state}</td>
                 <td>
-                  <span className={`badge ${row.on ? "bg-primary" : "bg-dark"}`}>
-                    {row.on ? "開" : "關"}
-                  </span>
+                  <span className={`badge ${row.on ? "bg-primary" : "bg-dark"}`}>{row.on ? "開" : "關"}</span>
                 </td>
                 <td className="text-nowrap">
-                  <button
-                    className={`btn btn-sm me-2 ${row.on ? "btn-danger" : "btn-success"}`}
-                    onClick={() => toggleOnOff(() => fire, setFire, row)}
-                  >
+                  <button className={`btn btn-sm me-2 ${row.on ? "btn-danger" : "btn-success"}`} onClick={() => toggleOnOff(() => fire, setFire, row)}>
                     {row.on ? "關閉電源" : "開啟電源"}
                   </button>
-                  <button
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={() => openSchedule(`排程設定 - ${row.name}`, () => fire, setFire, row)}
-                  >
-                    排程設定
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {/* 通風(排風)系統設定 */}
-      {tab === "vent" && (
-        <table className="table table-bordered text-center align-middle">
-          <thead className="table-success">
-            <tr>
-              <th>設備名稱</th>
-              <th>連線狀態</th>
-              <th>設備狀態</th>
-              <th>開關狀態</th>
-              <th>遠端控管功能</th>
-            </tr>
-          </thead>
-          <tbody>
-            {vent.map((row) => (
-              <tr key={row.id}>
-                <td>{row.name}</td>
-                <td>
-                  <span className={`badge ${row.online ? "bg-success" : "bg-secondary"}`}>
-                    {row.online ? "在線" : "離線"}
-                  </span>
-                </td>
-                <td>{row.state}</td>
-                <td>
-                  <span className={`badge ${row.on ? "bg-primary" : "bg-dark"}`}>
-                    {row.on ? "開" : "關"}
-                  </span>
-                </td>
-                <td className="text-nowrap">
-                  <button
-                    className={`btn btn-sm me-2 ${row.on ? "btn-danger" : "btn-success"}`}
-                    onClick={() => toggleOnOff(() => vent, setVent, row)}
-                  >
-                    {row.on ? "關閉電源" : "開啟電源"}
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={() => openSchedule(`排程設定 - ${row.name}`, () => vent, setVent, row)}
-                  >
+                  <button className="btn btn-sm btn-outline-primary" onClick={() => openSchedule(`排程設定 - ${row.name}`, () => fire, setFire, row)}>
                     排程設定
                   </button>
                 </td>
@@ -663,13 +697,7 @@ export default function RemoteControl() {
       )}
 
       {/* 可視化排程 Modal */}
-      <ScheduleModal
-        show={scheduleModal.show}
-        title={scheduleModal.title}
-        value={scheduleModal.value}
-        onClose={closeSchedule}
-        onSave={saveSchedule}
-      />
+      <ScheduleModal show={scheduleModal.show} title={scheduleModal.title} value={scheduleModal.value} onClose={closeSchedule} onSave={saveSchedule} />
     </div>
   );
 }
