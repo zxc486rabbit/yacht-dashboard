@@ -43,18 +43,10 @@ import PaymentSupport from "./pages/billing-system/PaymentSupport"; //支付方�
 import BillNotification from "./pages/billing-system/BillNotification"; //帳單通知功能
 import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
 
+
 import BerthBooking from "./pages/user/BerthBooking"; //船位預約
 import MyBookings from "./pages/user/MyBookings"; //我的預約 / 停泊費用
-
-// 先做一個假「個人帳戶設定頁」
-function Account() {
-  return (
-    <div style={{ padding: 18 }}>
-      <h3 style={{ marginBottom: 8 }}>個人帳戶設定</h3>
-      <div style={{ color: "#64748b" }}>（目前僅做畫面呈現，尚未串接資料）</div>
-    </div>
-  );
-}
+import AccountSettings from "./pages/user/AccountSettings";
 
 export default function App() {
   return (
@@ -79,7 +71,7 @@ export default function App() {
                     {/* 使用者專區 */}
                     <Route path="/user/berth-booking" element={<BerthBooking />} />
                     <Route path="/user/my-bookings" element={<MyBookings />} />
-                    <Route path="/account" element={<Account />} />
+                    <Route path="/account" element={<AccountSettings />} />
                     {/* ----------舊版--------- */}
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/realtime" element={<RealtimeMonitor />} />
