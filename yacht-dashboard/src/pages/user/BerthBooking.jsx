@@ -363,7 +363,7 @@ export default function BerthBooking() {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <div style={{ fontSize: 13, color: "#334155", marginBottom: 6 }}>停泊多久</div>
             <select
               className="form-select"
@@ -376,7 +376,7 @@ export default function BerthBooking() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div>
             <div style={{ fontSize: 13, color: "#334155", marginBottom: 6 }}>船名</div>
