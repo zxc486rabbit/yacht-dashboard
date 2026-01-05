@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import EyeIcon from '../../components/EyeIcon';
 import './AccountSettings.css';
 import {
   getUserProfile,
@@ -30,6 +31,10 @@ const AccountSettings = () => {
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdError, setPwdError] = useState('');
   const [pwdSuccess, setPwdSuccess] = useState('');
+  // 密碼顯示/隱藏
+  const [showOldPwd, setShowOldPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   // 會員資料
   const [yachts, setYachts] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -185,16 +190,64 @@ const AccountSettings = () => {
         {showPwdEdit ? (
           <form onSubmit={handlePwdSave} style={{ marginBottom: 12 }}>
             <div className="form-group">
-              <label>舊密碼</label>
-              <input type="password" name="oldPassword" value={pwdForm.oldPassword} onChange={handlePwdChange} disabled={pwdLoading} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <label style={{ marginBottom: 0 }}>舊密碼</label>
+                <span
+                  style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={() => setShowOldPwd((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showOldPwd ? '隱藏密碼' : '顯示密碼'}
+                >
+                  <EyeIcon open={showOldPwd} />
+                </span>
+              </div>
+              <input
+                type={showOldPwd ? 'text' : 'password'}
+                name="oldPassword"
+                value={pwdForm.oldPassword}
+                onChange={handlePwdChange}
+                disabled={pwdLoading}
+              />
             </div>
             <div className="form-group">
-              <label>新密碼</label>
-              <input type="password" name="newPassword" value={pwdForm.newPassword} onChange={handlePwdChange} disabled={pwdLoading} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <label style={{ marginBottom: 0 }}>新密碼</label>
+                <span
+                  style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={() => setShowNewPwd((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showNewPwd ? '隱藏密碼' : '顯示密碼'}
+                >
+                  <EyeIcon open={showNewPwd} />
+                </span>
+              </div>
+              <input
+                type={showNewPwd ? 'text' : 'password'}
+                name="newPassword"
+                value={pwdForm.newPassword}
+                onChange={handlePwdChange}
+                disabled={pwdLoading}
+              />
             </div>
             <div className="form-group">
-              <label>確認新密碼</label>
-              <input type="password" name="confirmPassword" value={pwdForm.confirmPassword} onChange={handlePwdChange} disabled={pwdLoading} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <label style={{ marginBottom: 0 }}>確認新密碼</label>
+                <span
+                  style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={() => setShowConfirmPwd((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showConfirmPwd ? '隱藏密碼' : '顯示密碼'}
+                >
+                  <EyeIcon open={showConfirmPwd} />
+                </span>
+              </div>
+              <input
+                type={showConfirmPwd ? 'text' : 'password'}
+                name="confirmPassword"
+                value={pwdForm.confirmPassword}
+                onChange={handlePwdChange}
+                disabled={pwdLoading}
+              />
             </div>
             {pwdError && <div style={{ color: 'red', marginBottom: 8 }}>{pwdError}</div>}
             <div className="form-actions">
