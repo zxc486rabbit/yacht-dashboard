@@ -123,7 +123,7 @@ const AccountSettings = () => {
           className={`tab-item ${activeTab === 'yachts' ? 'active' : ''}`}
           onClick={() => setActiveTab('yachts')}
         >
-          我的遊艇
+          遊艇資訊
         </button>
         <button 
           className={`tab-item ${activeTab === 'berth-record' ? 'active' : ''}`}
