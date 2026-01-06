@@ -186,17 +186,13 @@ const AccountSettings = () => {
                 />
               </div>
             </div>
-            {/* 姓名與身分證並排在同一個 form-group */}
+            {/* 姓名與身分證在同一個 div */}
             <div className="form-row">
-              <div className="form-group name-field" style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
-                <div>
-                  <label><span className="required">*</span>姓名</label>
-                  <input name="name" value={form.name} onChange={handleChange} />
-                </div>
-                <div>
-                  <label><span className="required">*</span>身分證/護照</label>
-                  <input name="idNumber" value={form.idNumber} onChange={handleChange} />
-                </div>
+              <div className="form-group name-field" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                <label><span className="required">*</span>姓名</label>
+                <label><span className="required">*</span>身分證/護照</label>
+                <input name="name" value={form.name} onChange={handleChange} />
+                <input name="idNumber" value={form.idNumber} onChange={handleChange} />
               </div>
             </div>
             {/* 會員帳號與 Email */}
