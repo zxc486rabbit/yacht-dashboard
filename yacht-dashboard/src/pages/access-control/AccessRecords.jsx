@@ -18,24 +18,35 @@ export default function AccessRecords() {
     "杜依婷","馮育仁","韓佳珍","葉志成","程芷涵",
   ];
 
+  const methods = ["人臉辨識", "刷卡", "密碼", "遠端"];
+
   // ---- 假資料（可接 API 後替換）----
   const initialRecords = useMemo(
     () =>
-      Array.from({ length: 25 }, (_, i) => ({
-        id: i + 1,
-        name: names[i],
-        cardId: `AIC-${1000 + i}`,
-        time: `2024-07-18 0${(i % 9) + 1}:30`,
-        action: i % 2 === 0 ? "進入" : "離開",
-      })),
+      Array.from({ length: 25 }, (_, i) => {
+        const method = methods[i % methods.length];
+        const isRemote = method === "遠端";
+        const action = isRemote ? "門開" : i % 2 === 0 ? "進入" : "離開";
+
+        return {
+          id: i + 1,
+          // 遠端：姓名 & userID 皆空
+          name: isRemote ? "" : names[i],
+          userId: isRemote ? "" : `AIC-${1000 + i}`,
+          method, // 人臉辨識 / 刷卡 / 密碼 / 遠端
+          time: `2024-07-18 0${(i % 9) + 1}:30`,
+          action, // 進入 / 離開 / 門開
+        };
+      }),
     []
   );
 
-  // ---- 查詢條件（合併：姓名/卡號）----
-  const [qKeyword, setQKeyword] = useState("");   // 人員姓名或卡號
-  const [qFrom, setQFrom] = useState("");         // 起（datetime-local）
-  const [qTo, setQTo] = useState("");             // 迄（datetime-local）
-  const [qAction, setQAction] = useState("all");  // 動作
+  // ---- 查詢條件（合併：姓名/userID）----
+  const [qKeyword, setQKeyword] = useState("");     // 姓名或 userID
+  const [qFrom, setQFrom] = useState("");           // 起（datetime-local）
+  const [qTo, setQTo] = useState("");               // 迄（datetime-local）
+  const [qAction, setQAction] = useState("all");    // 動作
+  const [qMethod, setQMethod] = useState("all");    // 方式
 
   // ---- 分頁 ----
   const [page, setPage] = useState(1);
@@ -48,22 +59,28 @@ export default function AccessRecords() {
     const to = qTo ? new Date(qTo) : null;
 
     return initialRecords.filter((r) => {
-      // 1) 關鍵字（姓名 or 卡號）
+      // 1) 關鍵字（姓名 or userID）
       if (kw) {
-        const hit = r.name.includes(kw) || r.cardId.includes(kw);
+        const hit =
+          (r.name || "").includes(kw) ||
+          (r.userId || "").includes(kw);
         if (!hit) return false;
       }
+
       // 2) 動作
       if (qAction !== "all" && r.action !== qAction) return false;
 
-      // 3) 時間區間
+      // 3) 方式
+      if (qMethod !== "all" && r.method !== qMethod) return false;
+
+      // 4) 時間區間
       const t = parseDateTime(r.time);
       if (from && t && t < from) return false;
       if (to && t && t > to) return false;
 
       return true;
     });
-  }, [initialRecords, qKeyword, qFrom, qTo, qAction]);
+  }, [initialRecords, qKeyword, qFrom, qTo, qAction, qMethod]);
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
   const safePage = Math.min(page, totalPages);
@@ -80,6 +97,7 @@ export default function AccessRecords() {
     setQFrom("");
     setQTo("");
     setQAction("all");
+    setQMethod("all");
     setPage(1);
   };
 
@@ -93,7 +111,7 @@ export default function AccessRecords() {
         style={{ whiteSpace: "nowrap" }}
       >
         <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 280 }}>
-          <label htmlFor="kw" className="form-label mb-1">關鍵字（姓名 / 卡號）</label>
+          <label htmlFor="kw" className="form-label mb-1">關鍵字（姓名 / userID）</label>
           <input
             id="kw"
             type="text"
@@ -137,6 +155,23 @@ export default function AccessRecords() {
             <option value="all">全部</option>
             <option value="進入">進入</option>
             <option value="離開">離開</option>
+            <option value="門開">門開</option>
+          </select>
+        </div>
+
+        <div className="d-flex flex-column flex-shrink-0" style={{ minWidth: 170 }}>
+          <label htmlFor="method" className="form-label mb-1">方式</label>
+          <select
+            id="method"
+            className="form-select"
+            value={qMethod}
+            onChange={onFilterChange(setQMethod)}
+          >
+            <option value="all">全部</option>
+            <option value="人臉辨識">人臉辨識</option>
+            <option value="刷卡">刷卡</option>
+            <option value="密碼">密碼</option>
+            <option value="遠端">遠端</option>
           </select>
         </div>
 
@@ -153,8 +188,9 @@ export default function AccessRecords() {
           <thead className="table-info sticky-top">
             <tr>
               <th style={{ width: 80 }}>序號</th>
-              <th>人員姓名</th>
-              <th>卡號</th>
+              <th>姓名</th>
+              <th>userID</th>
+              <th style={{ width: 140 }}>方式</th>
               <th style={{ minWidth: 180 }}>時間</th>
               <th style={{ width: 120 }}>動作</th>
             </tr>
@@ -162,28 +198,42 @@ export default function AccessRecords() {
           <tbody>
             {pageRecords.length === 0 ? (
               <tr>
-                <td colSpan="5" className="py-4 text-muted">查無資料</td>
+                <td colSpan="6" className="py-4 text-muted">查無資料</td>
               </tr>
             ) : (
-              pageRecords.map((rec) => (
-                <tr key={rec.id}>
-                  <td>{rec.id}</td>
-                  <td>{rec.name}</td>
-                  <td>{rec.cardId}</td>
-                  <td>{rec.time}</td>
-                  <td>
-                    {rec.action === "進入" ? (
-                      <span className="badge bg-success">
-                        <i className="fas fa-door-open me-1" /> 進入
-                      </span>
-                    ) : (
-                      <span className="badge bg-danger">
-                        <i className="fas fa-door-closed me-1" /> 離開
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))
+              pageRecords.map((rec) => {
+                const isRemote = rec.method === "遠端";
+                const showName = isRemote ? "" : rec.name;
+                const showUserId = isRemote ? "" : rec.userId;
+
+                return (
+                  <tr key={rec.id}>
+                    <td>{rec.id}</td>
+                    <td className={isRemote ? "text-muted" : ""}>{showName}</td>
+                    <td className={isRemote ? "text-muted" : ""}>{showUserId}</td>
+                    {/* 方式：純文字顯示 */}
+                    <td>{rec.method}</td>
+                    <td>{rec.time}</td>
+                    <td>
+                      {rec.action === "進入" && (
+                        <span className="badge bg-success">
+                          <i className="fas fa-door-open me-1" /> 進入
+                        </span>
+                      )}
+                      {rec.action === "離開" && (
+                        <span className="badge bg-danger">
+                          <i className="fas fa-door-closed me-1" /> 離開
+                        </span>
+                      )}
+                      {rec.action === "門開" && (
+                        <span className="badge bg-dark">
+                          <i className="fas fa-unlock me-1" /> 門開
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
