@@ -13,12 +13,16 @@ const AccountSettings = () => {
 
   const [form, setForm] = useState({
     name: '',
+    idNumber: '',
+    account: 'user123456',
     email: '',
     phone: '',
     address: '',
     emergencyName: '',
     emergencyPhone: ''
   });
+
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   // const [loading, setLoading] = useState(true); // Removed: unused
   const [success, setSuccess] = useState('');
@@ -37,10 +41,22 @@ const AccountSettings = () => {
   // const [showConfirmPwd, setShowConfirmPwd] = useState(false); // Removed: unused
 
   useEffect(() => {
-    getUserProfile().then(data => {
-      setForm(data);
-      // setLoading(false); // Removed: loading state no longer used
-    });
+    // 從 localStorage 讀取資料
+    const savedData = localStorage.getItem('userProfile');
+    const savedAvatar = localStorage.getItem('userAvatar');
+    
+    if (savedData) {
+      setForm(JSON.parse(savedData));
+    } else {
+      getUserProfile().then(data => {
+        setForm(data);
+        // setLoading(false); // Removed: loading state no longer used
+      });
+    }
+    
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar);
+    }
   }, []);
 
   const handleChange = e => {
@@ -48,6 +64,11 @@ const AccountSettings = () => {
   };
 
   const handleSave = async () => {
+    // 保存到 localStorage
+    localStorage.setItem('userProfile', JSON.stringify(form));
+    if (avatarUrl) {
+      localStorage.setItem('userAvatar', avatarUrl);
+    }
     await updateUserProfile(form);
     setSuccess('會員資料已更新');
     setTimeout(() => setSuccess(''), 3000);
@@ -107,14 +128,77 @@ const AccountSettings = () => {
       {/* 基本資料 */}
       <div className="section-block">
         <h3 className="section-title">基本資訊</h3>
+        {/* 大頭貼獨立一行 */}
+        <div className="form-row">
+          <div className="form-group" style={{alignItems: 'flex-start', width: '100%'}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ color: '#aaa' }}>無照片</span>
+                )}
+              </div>
+              <input type="file" accept="image/*"
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    // 轉換為 base64
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setAvatarUrl(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                  } else {
+                    setAvatarUrl('');
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        {/* 姓名與身分證並排 */}
         <div className="form-row">
           <div className="form-group">
             <label><span className="required">*</span>姓名</label>
             <input name="name" value={form.name} onChange={handleChange} />
           </div>
           <div className="form-group">
+            <label><span className="required">*</span>身分證</label>
+            <input name="idNumber" value={form.idNumber} onChange={handleChange} />
+          </div>
+        </div>
+        {/* 會員帳號與 Email */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>會員帳號</label>
+            <input name="account" value={form.account} disabled />
+          </div>
+          <div className="form-group">
             <label>Email</label>
             <input name="email" value={form.email} onChange={handleChange} />
+          </div>
+        </div>
+        {/* 手機與地址 */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>手機</label>
+            <input name="phone" value={form.phone} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>地址</label>
+            <input name="address" value={form.address} onChange={handleChange} />
+          </div>
+        </div>
+        {/* 緊急聯絡人 */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>緊急聯絡人</label>
+            <input name="emergencyName" value={form.emergencyName} onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>緊急聯絡人電話</label>
+            <input name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange} />
           </div>
         </div>
       </div>
