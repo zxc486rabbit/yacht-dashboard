@@ -48,6 +48,11 @@ import BerthBooking from "./pages/user/BerthBooking"; //船位預約
 import MyBookings from "./pages/user/MyBookings"; //我的預約 / 停泊費用
 import AccountSettings from "./pages/user/AccountSettings";
 
+// 新增：Account 子分頁
+import MyYachts from "./pages/user/MyYachts";
+import PaymentMethods from "./pages/user/PaymentMethods";
+import BillingHistory from "./pages/user/BillingHistory";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -72,6 +77,13 @@ export default function App() {
                     <Route path="/user/berth-booking" element={<BerthBooking />} />
                     <Route path="/user/my-bookings" element={<MyBookings />} />
                     <Route path="/account" element={<AccountSettings />} />
+
+                    {/* Account 主頁與子頁 */}
+                    <Route path="/account" element={<AccountSettings />} />
+                    <Route path="/account/yachts" element={<MyYachts />} />
+                    <Route path="/account/payments" element={<PaymentMethods />} />
+                    <Route path="/account/billing" element={<BillingHistory />} />
+
                     {/* ----------舊版--------- */}
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/realtime" element={<RealtimeMonitor />} />
