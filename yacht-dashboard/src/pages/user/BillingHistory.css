@@ -1,0 +1,106 @@
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.billing-table th,
+.billing-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.billing-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.billing-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.unpaid {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.partial {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #007bff;
+  padding: 4px 8px;
+}
+
+.toggle-btn:hover {
+  color: #0056b3;
+}
+
+.expanded-row td {
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+.item-details h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.detail-table {
+  width: 100%;
+  max-width: 500px;
+  border-collapse: collapse;
+}
+
+.detail-table th,
+.detail-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.detail-table th {
+  background-color: #e9ecef;
+  font-weight: 600;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-settings-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

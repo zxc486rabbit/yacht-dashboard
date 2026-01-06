@@ -52,6 +52,7 @@ import AccountSettings from "./pages/user/AccountSettings";
 import MyYachts from "./pages/user/MyYachts";
 import PaymentMethods from "./pages/user/PaymentMethods";
 import BillingHistory from "./pages/user/BillingHistory";
+import BerthRecord from "./pages/user/BerthRecord";
 
 export default function App() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
                     {/* Account 主頁與子頁 */}
                     <Route path="/account" element={<AccountSettings />} />
                     <Route path="/account/yachts" element={<MyYachts />} />
+                    <Route path="/account/berth-record" element={<BerthRecord />} />
                     <Route path="/account/payments" element={<PaymentMethods />} />
                     <Route path="/account/billing" element={<BillingHistory />} />
 

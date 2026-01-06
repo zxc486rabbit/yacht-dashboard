@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
 import EyeIcon from '../../components/EyeIcon';
 import "./AccountSettings.css";
 import {
@@ -8,8 +7,14 @@ import {
   changePassword
 } from '../../services/userApi';
 
+// 導入子組件
+import MyYachts from './MyYachts';
+import BerthRecord from './BerthRecord';
+import PaymentMethods from './PaymentMethods';
+import BillingHistory from './BillingHistory';
+
 const AccountSettings = () => {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('basic');
 
   const [form, setForm] = useState({
     name: '',
@@ -106,173 +111,201 @@ const AccountSettings = () => {
     <div className="account-settings-container">
       <h2 className="page-title">會員資料編輯</h2>
 
-      {/* 快速入口 */}
-      <div className="quick-links">
-        <div className="quick-link-card" onClick={() => navigate('/account/yachts')}>
-          <div className="quick-link-title">我的遊艇</div>
-          <div className="quick-link-desc">管理遊艇與停泊</div>
-        </div>
-
-        <div className="quick-link-card" onClick={() => navigate('/account/payments')}>
-          <div className="quick-link-title">支付方式</div>
-          <div className="quick-link-desc">信用卡與銀行帳戶</div>
-        </div>
-
-        <div className="quick-link-card" onClick={() => navigate('/account/billing')}>
-          <div className="quick-link-title">收費紀錄</div>
-          <div className="quick-link-desc">帳單與付款查詢</div>
-        </div>
+      {/* Tab 導航 */}
+      <div className="tab-navigation">
+        <button 
+          className={`tab-item ${activeTab === 'basic' ? 'active' : ''}`}
+          onClick={() => setActiveTab('basic')}
+        >
+          基本資訊
+        </button>
+        <button 
+          className={`tab-item ${activeTab === 'yachts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('yachts')}
+        >
+          我的遊艇
+        </button>
+        <button 
+          className={`tab-item ${activeTab === 'berth-record' ? 'active' : ''}`}
+          onClick={() => setActiveTab('berth-record')}
+        >
+          船隻停泊紀錄
+        </button>
+        <button 
+          className={`tab-item ${activeTab === 'payments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('payments')}
+        >
+          支付方式
+        </button>
+        <button 
+          className={`tab-item ${activeTab === 'billing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('billing')}
+        >
+          繳費紀錄
+        </button>
       </div>
 
-      {success && <div className="success-message">{success}</div>}
+      {/* Tab 內容 */}
+      {activeTab === 'basic' && (
+        <>
+          {success && <div className="success-message">{success}</div>}
 
-      {/* 基本資料 */}
-      <div className="section-block">
-        <h3 className="section-title">基本資訊</h3>
-        {/* 大頭貼獨立一行 */}
-        <div className="form-row">
-          <div className="form-group" style={{alignItems: 'flex-start', width: '100%'}}>
-            <div 
-              style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              onClick={() => document.getElementById('avatar-upload').click()}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ color: '#aaa' }}>點擊上傳</span>
-              )}
+          {/* 基本資料 */}
+          <div className="section-block">
+            <h3 className="section-title">基本資訊</h3>
+            {/* 大頭貼獨立一行 */}
+            <div className="form-row">
+              <div className="form-group" style={{alignItems: 'flex-start', width: '100%'}}>
+                <div 
+                  style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  onClick={() => document.getElementById('avatar-upload').click()}
+                >
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ color: '#aaa' }}>點擊上傳</span>
+                  )}
+                </div>
+                <input 
+                  id="avatar-upload"
+                  type="file" 
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAvatarUrl(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      setAvatarUrl('');
+                    }
+                  }}
+                />
+              </div>
             </div>
-            <input 
-              id="avatar-upload"
-              type="file" 
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={e => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setAvatarUrl(reader.result);
-                  };
-                  reader.readAsDataURL(file);
-                } else {
-                  setAvatarUrl('');
-                }
-              }}
-            />
-          </div>
-        </div>
-        {/* 姓名與身分證並排 */}
-        <div className="form-row">
-          <div className="form-group name-field">
-            <label><span className="required">*</span>姓名</label>
-            <input name="name" value={form.name} onChange={handleChange} />
-          </div>
-          <div className="form-group id-field">
-            <label><span className="required">*</span>身分證/護照</label>
-            <input name="idNumber" value={form.idNumber} onChange={handleChange} />
-          </div>
-        </div>
-        {/* 會員帳號與 Email */}
-        <div className="form-row">
-          <div className="form-group">
-            <label>會員帳號</label>
-            <input name="account" value={form.account} disabled />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input name="email" value={form.email} onChange={handleChange} />
-          </div>
-        </div>
-        {/* 手機與地址 */}
-        <div className="form-row">
-          <div className="form-group">
-            <label>手機</label>
-            <input name="phone" value={form.phone} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>地址</label>
-            <input name="address" value={form.address} onChange={handleChange} />
-          </div>
-        </div>
-        {/* 緊急聯絡人 */}
-        <div className="form-row">
-          <div className="form-group">
-            <label>緊急聯絡人</label>
-            <input name="emergencyName" value={form.emergencyName} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>緊急聯絡人電話</label>
-            <input name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange} />
-          </div>
-        </div>
-      </div>
-
-      {/* 密碼 */}
-      <div className="section-block">
-        <h3 className="section-title">變更密碼</h3>
-        <button className="submit-btn" type="button" onClick={() => setShowPwdModal(true)} style={{marginBottom: '20px'}}>更新密碼</button>
-      </div>
-
-      <div className="form-actions">
-        <button className="submit-btn" onClick={handleSave}>儲存變更</button>
-      </div>
-
-      {/* 密碼彈窗 */}
-      {showPwdModal && (
-        <div className="modal-overlay" onClick={() => setShowPwdModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>變更密碼</h3>
-            {pwdSuccess && <div className="success-message">{pwdSuccess}</div>}
-            {pwdError && <div className="error-message">{pwdError}</div>}
-            <form onSubmit={handlePwdSave}>
-              <div className="form-group" style={{marginBottom: '16px'}}>
-                <label>舊密碼</label>
-                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
-                  <input type={showOldPwd ? 'text' : 'password'}
-                    value={pwdForm.oldPassword}
-                    onChange={e => setPwdForm({ ...pwdForm, oldPassword: e.target.value })}
-                  />
-                  <span className="eye-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
-                    <EyeIcon open={showOldPwd} />
-                  </span>
+            {/* 姓名與身分證並排在同一個 form-group */}
+            <div className="form-row">
+              <div className="form-group name-field" style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
+                <div>
+                  <label><span className="required">*</span>姓名</label>
+                  <input name="name" value={form.name} onChange={handleChange} />
+                </div>
+                <div>
+                  <label><span className="required">*</span>身分證/護照</label>
+                  <input name="idNumber" value={form.idNumber} onChange={handleChange} />
                 </div>
               </div>
-
-              <div className="form-group" style={{marginBottom: '16px'}}>
-                <label>新密碼</label>
-                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
-                  <input type={showNewPwd ? 'text' : 'password'}
-                    value={pwdForm.newPassword}
-                    onChange={e => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
-                  />
-                  <span className="eye-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
-                    <EyeIcon open={showNewPwd} />
-                  </span>
-                </div>
+            </div>
+            {/* 會員帳號與 Email */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>會員帳號</label>
+                <input name="account" value={form.account} disabled />
               </div>
-
-              <div className="form-group" style={{marginBottom: '24px'}}>
-                <label>確認新密碼</label>
-                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
-                  <input type={showConfirmPwd ? 'text' : 'password'}
-                    value={pwdForm.confirmPassword}
-                    onChange={e => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
-                  />
-                  <span className="eye-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
-                    <EyeIcon open={showConfirmPwd} />
-                  </span>
-                </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input name="email" value={form.email} onChange={handleChange} />
               </div>
-
-              <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
-                <button className="submit-btn" type="button" onClick={() => setShowPwdModal(false)} style={{background: '#6c757d'}}>取消</button>
-                <button className="submit-btn" type="submit">確認</button>
+            </div>
+            {/* 手機與地址 */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>手機</label>
+                <input name="phone" value={form.phone} onChange={handleChange} />
               </div>
-            </form>
+              <div className="form-group">
+                <label>地址</label>
+                <input name="address" value={form.address} onChange={handleChange} />
+              </div>
+            </div>
+            {/* 緊急聯絡人 */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>緊急聯絡人</label>
+                <input name="emergencyName" value={form.emergencyName} onChange={handleChange} />
+              </div>
+              <div className="form-group">
+                <label>緊急聯絡人電話</label>
+                <input name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange} />
+              </div>
+            </div>
           </div>
-        </div>
+
+          {/* 密碼 */}
+          <div className="section-block">
+            <h3 className="section-title">變更密碼</h3>
+            <button className="submit-btn" type="button" onClick={() => setShowPwdModal(true)} style={{marginBottom: '20px'}}>更新密碼</button>
+          </div>
+
+          <div className="form-actions">
+            <button className="submit-btn" onClick={handleSave}>儲存變更</button>
+          </div>
+
+          {/* 密碼彈窗 */}
+          {showPwdModal && (
+            <div className="modal-overlay" onClick={() => setShowPwdModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3>變更密碼</h3>
+                {pwdSuccess && <div className="success-message">{pwdSuccess}</div>}
+                {pwdError && <div className="error-message">{pwdError}</div>}
+                <form onSubmit={handlePwdSave}>
+                  <div className="form-group" style={{marginBottom: '16px'}}>
+                    <label>舊密碼</label>
+                    <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                      <input type={showOldPwd ? 'text' : 'password'}
+                        value={pwdForm.oldPassword}
+                        onChange={e => setPwdForm({ ...pwdForm, oldPassword: e.target.value })}
+                      />
+                      <span className="eye-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
+                        <EyeIcon open={showOldPwd} />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{marginBottom: '16px'}}>
+                    <label>新密碼</label>
+                    <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                      <input type={showNewPwd ? 'text' : 'password'}
+                        value={pwdForm.newPassword}
+                        onChange={e => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                      />
+                      <span className="eye-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
+                        <EyeIcon open={showNewPwd} />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{marginBottom: '24px'}}>
+                    <label>確認新密碼</label>
+                    <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                      <input type={showConfirmPwd ? 'text' : 'password'}
+                        value={pwdForm.confirmPassword}
+                        onChange={e => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                      />
+                      <span className="eye-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
+                        <EyeIcon open={showConfirmPwd} />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+                    <button className="submit-btn" type="button" onClick={() => setShowPwdModal(false)} style={{background: '#6c757d'}}>取消</button>
+                    <button className="submit-btn" type="submit">確認</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </>
       )}
+
+      {activeTab === 'yachts' && <MyYachts />}
+      {activeTab === 'berth-record' && <BerthRecord />}
+      {activeTab === 'payments' && <PaymentMethods />}
+      {activeTab === 'billing' && <BillingHistory />}
     </div>
   );
 };

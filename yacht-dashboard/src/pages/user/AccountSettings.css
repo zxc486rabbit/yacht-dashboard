@@ -35,7 +35,40 @@
   padding-bottom: 12px;
 }
 
-/* ===== 快速入口卡片 ===== */
+/* ===== Tab 導航 ===== */
+.tab-navigation {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-item {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  bottom: -2px;
+}
+
+.tab-item:hover {
+  color: #17a2b8;
+  background-color: rgba(23, 162, 184, 0.05);
+}
+
+.tab-item.active {
+  color: #17a2b8;
+  border-bottom-color: #17a2b8;
+  font-weight: 600;
+}
+
+/* ===== 快速入口卡片 (保留以防需要) ===== */
 .quick-links {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
