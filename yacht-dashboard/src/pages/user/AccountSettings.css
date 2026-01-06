@@ -188,6 +188,45 @@
   background: #138496;
 }
 
+/* ===== 姓名欄位縮短 ===== */
+.name-field input {
+  max-width: 300px;
+}
+
+/* ===== 身分證/護照欄位縮短 ===== */
+.id-field input {
+  max-width: 300px;
+}
+
+/* ===== Modal 彈窗 ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #17a2b8;
+}
+
 /* ===== RWD ===== */
 @media (max-width: 768px) {
   .form-row {

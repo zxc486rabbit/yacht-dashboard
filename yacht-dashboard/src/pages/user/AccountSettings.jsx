@@ -38,6 +38,7 @@ const AccountSettings = () => {
   const [showOldPwd, setShowOldPwd] = useState(false);
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [showPwdModal, setShowPwdModal] = useState(false);
   // const [showConfirmPwd, setShowConfirmPwd] = useState(false); // Removed: unused
 
   useEffect(() => {
@@ -131,40 +132,44 @@ const AccountSettings = () => {
         {/* 大頭貼獨立一行 */}
         <div className="form-row">
           <div className="form-group" style={{alignItems: 'flex-start', width: '100%'}}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <span style={{ color: '#aaa' }}>無照片</span>
-                )}
-              </div>
-              <input type="file" accept="image/*"
-                onChange={e => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    // 轉換為 base64
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setAvatarUrl(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                  } else {
-                    setAvatarUrl('');
-                  }
-                }}
-              />
+            <div 
+              style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              onClick={() => document.getElementById('avatar-upload').click()}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span style={{ color: '#aaa' }}>點擊上傳</span>
+              )}
             </div>
+            <input 
+              id="avatar-upload"
+              type="file" 
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setAvatarUrl(reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                } else {
+                  setAvatarUrl('');
+                }
+              }}
+            />
           </div>
         </div>
         {/* 姓名與身分證並排 */}
         <div className="form-row">
-          <div className="form-group">
+          <div className="form-group name-field">
             <label><span className="required">*</span>姓名</label>
             <input name="name" value={form.name} onChange={handleChange} />
           </div>
-          <div className="form-group">
-            <label><span className="required">*</span>身分證</label>
+          <div className="form-group id-field">
+            <label><span className="required">*</span>身分證/護照</label>
             <input name="idNumber" value={form.idNumber} onChange={handleChange} />
           </div>
         </div>
@@ -206,57 +211,68 @@ const AccountSettings = () => {
       {/* 密碼 */}
       <div className="section-block">
         <h3 className="section-title">變更密碼</h3>
-        {pwdSuccess && <div className="success-message">{pwdSuccess}</div>}
-        {pwdError && <div className="error-message">{pwdError}</div>}
-
-        <form onSubmit={handlePwdSave}>
-          <div className="form-row password-vertical">
-            <div className="form-group">
-              <label>舊密碼</label>
-              <div className="password-input-wrapper">
-                <input type={showOldPwd ? 'text' : 'password'}
-                  value={pwdForm.oldPassword}
-                  onChange={e => setPwdForm({ ...pwdForm, oldPassword: e.target.value })}
-                />
-                <span className="eye-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
-                  <EyeIcon open={showOldPwd} />
-                </span>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>新密碼</label>
-              <div className="password-input-wrapper">
-                <input type={showNewPwd ? 'text' : 'password'}
-                  value={pwdForm.newPassword}
-                  onChange={e => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
-                />
-                <span className="eye-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
-                  <EyeIcon open={showNewPwd} />
-                </span>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>確認新密碼</label>
-              <div className="password-input-wrapper">
-                <input type={showConfirmPwd ? 'text' : 'password'}
-                  value={pwdForm.confirmPassword}
-                  onChange={e => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
-                />
-                <span className="eye-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
-                  <EyeIcon open={showConfirmPwd} />
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-actions form-actions-inline">
-            <button className="submit-btn" type="submit">更新密碼</button>
-            <button className="submit-btn" type="button" onClick={handleSave}>儲存變更</button>
-          </div>
-        </form>
+        <button className="submit-btn" type="button" onClick={() => setShowPwdModal(true)} style={{marginBottom: '20px'}}>更新密碼</button>
       </div>
+
+      <div className="form-actions">
+        <button className="submit-btn" onClick={handleSave}>儲存變更</button>
+      </div>
+
+      {/* 密碼彈窗 */}
+      {showPwdModal && (
+        <div className="modal-overlay" onClick={() => setShowPwdModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>變更密碼</h3>
+            {pwdSuccess && <div className="success-message">{pwdSuccess}</div>}
+            {pwdError && <div className="error-message">{pwdError}</div>}
+            <form onSubmit={handlePwdSave}>
+              <div className="form-group" style={{marginBottom: '16px'}}>
+                <label>舊密碼</label>
+                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                  <input type={showOldPwd ? 'text' : 'password'}
+                    value={pwdForm.oldPassword}
+                    onChange={e => setPwdForm({ ...pwdForm, oldPassword: e.target.value })}
+                  />
+                  <span className="eye-icon" onClick={() => setShowOldPwd(!showOldPwd)}>
+                    <EyeIcon open={showOldPwd} />
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group" style={{marginBottom: '16px'}}>
+                <label>新密碼</label>
+                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                  <input type={showNewPwd ? 'text' : 'password'}
+                    value={pwdForm.newPassword}
+                    onChange={e => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                  />
+                  <span className="eye-icon" onClick={() => setShowNewPwd(!showNewPwd)}>
+                    <EyeIcon open={showNewPwd} />
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group" style={{marginBottom: '24px'}}>
+                <label>確認新密碼</label>
+                <div className="password-input-wrapper" style={{maxWidth: '100%'}}>
+                  <input type={showConfirmPwd ? 'text' : 'password'}
+                    value={pwdForm.confirmPassword}
+                    onChange={e => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                  />
+                  <span className="eye-icon" onClick={() => setShowConfirmPwd(!showConfirmPwd)}>
+                    <EyeIcon open={showConfirmPwd} />
+                  </span>
+                </div>
+              </div>
+
+              <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+                <button className="submit-btn" type="button" onClick={() => setShowPwdModal(false)} style={{background: '#6c757d'}}>取消</button>
+                <button className="submit-btn" type="submit">確認</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
