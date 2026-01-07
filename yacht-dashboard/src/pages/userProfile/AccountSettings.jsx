@@ -9,7 +9,7 @@ import BerthRecord from "./BerthRecord";
 import PaymentMethods from "./PaymentMethods";
 import BillingHistory from "./BillingHistory";
 
-import "./AccountSettings.css";
+import "../../styles/userProfile/AccountSettings.css";
 
 const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState("basic");

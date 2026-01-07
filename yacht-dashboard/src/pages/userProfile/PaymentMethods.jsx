@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "./PaymentMethods.css";
+import "../../styles/userProfile/PaymentMethods.css";
 
 // ------- helpers -------
 const maskLast4 = (last4) => (last4 ? `****${String(last4).padStart(4, "0")}` : "****----");

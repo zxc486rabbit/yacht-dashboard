@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import "./BillingHistory.css";
+import "../../styles/userProfile/BillingHistory.css";
 
 // helpers
 const fmtDate = (d) => (d ? String(d).slice(0, 10) : "-");

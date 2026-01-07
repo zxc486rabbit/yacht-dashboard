@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import EyeIcon from "../../components/EyeIcon";
 import { getUserProfile, updateUserProfile, changePassword } from "../../services/userApi";
-import "./AccountBasicProfile.css"; 
+import "../../styles/userProfile/AccountBasicProfile.css"; 
 
 const AccountBasicProfile = () => {
   const [form, setForm] = useState({

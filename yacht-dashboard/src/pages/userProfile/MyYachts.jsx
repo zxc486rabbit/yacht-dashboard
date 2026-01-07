@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "./MyYachts.css";
+import "../../styles/userProfile/MyYachts.css";
 
 /** ========= 可重用欄位元件 ========= */
 const FormRow = ({

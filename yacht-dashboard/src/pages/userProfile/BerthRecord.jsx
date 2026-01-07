@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "./BerthRecord.css";
+import "../../styles/userProfile/BerthRecord.css";
 
 const fmtDate = (d) => (d ? String(d).slice(0, 10) : "-");
 
