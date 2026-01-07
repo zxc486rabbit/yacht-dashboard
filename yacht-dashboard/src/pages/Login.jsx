@@ -22,7 +22,7 @@ export default function Login() {
   const from = location.state?.from || "/dashboard";
 
   // 交通部航港局網站（先放外連入口）
-  const mtNetApplyUrl = "https://web02.mtnet.gov.tw/";
+  const mtNetApplyUrl = "https://yberth.motcmpb.gov.tw/YberthM2/Portal";
 
   // Vite 的 public 靜態檔是「直接從根路徑取」，不要再寫 /public
   // import.meta.env.BASE_URL 會跟你的 base（例如 github pages）一起變動
