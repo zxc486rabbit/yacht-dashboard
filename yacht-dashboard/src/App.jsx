@@ -44,15 +44,16 @@ import BillNotification from "./pages/billing-system/BillNotification"; //帳單
 import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
 
 
-import BerthBooking from "./pages/user/BerthBooking"; //船位預約
-import MyBookings from "./pages/user/MyBookings"; //我的預約 / 停泊費用
-import AccountSettings from "./pages/user/AccountSettings";
+import BerthBooking from "./pages/userCenter/BerthBooking"; //船位預約
+import MyBookings from "./pages/userCenter/MyBookings"; //我的預約 / 停泊費用
+import AccountSettings from "./pages/userProfile/AccountSettings";
 
 // 新增：Account 子分頁
-import MyYachts from "./pages/user/MyYachts";
-import PaymentMethods from "./pages/user/PaymentMethods";
-import BillingHistory from "./pages/user/BillingHistory";
-import BerthRecord from "./pages/user/BerthRecord";
+import AccountBasicProfile from "./pages/userProfile/AccountBasicProfile";
+import MyYachts from "./pages/userProfile/MyYachts";
+import PaymentMethods from "./pages/userProfile/PaymentMethods";
+import BillingHistory from "./pages/userProfile/BillingHistory";
+import BerthRecord from "./pages/userProfile/BerthRecord";
 
 export default function App() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
 
                     {/* Account 主頁與子頁 */}
                     <Route path="/account" element={<AccountSettings />} />
+                    <Route path="/account/basic-profile" element={<AccountBasicProfile />} />
                     <Route path="/account/yachts" element={<MyYachts />} />
                     <Route path="/account/berth-record" element={<BerthRecord />} />
                     <Route path="/account/payments" element={<PaymentMethods />} />
