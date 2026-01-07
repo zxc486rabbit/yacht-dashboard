@@ -136,6 +136,17 @@ export default function Sidebar() {
         { label: "我的預約 / 停泊費用", path: "/user/my-bookings" },
       ],
     },
+
+    {
+      icon: <FaClipboardList />,
+      label: "RBAC 權限管理",
+      children: [
+        { label: "權限矩陣", path: "/rbac/permissions" },
+        { label: "角色管理（UI）", path: "/rbac/roles" },
+        { label: "審計紀錄（UI）", path: "/rbac/audit" },
+      ],
+    },
+
   ];
 
   const handleLogout = () => {
