@@ -1,4 +1,3 @@
-// src/page/rbac/PermissionManagement.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import "./rbac.styles.css";
 import RolePermissions from "./RolePermissions";
@@ -77,7 +76,11 @@ export default function PermissionManagement() {
           aria-labelledby="rbac-tab-role"
           hidden={active !== "role"}
         >
-          {active === "role" ? <RolePermissions /> : null}
+          {active === "role" ? (
+            <div className="rbac-card-wrap">
+              <RolePermissions />
+            </div>
+          ) : null}
         </section>
 
         <section
@@ -86,7 +89,11 @@ export default function PermissionManagement() {
           aria-labelledby="rbac-tab-account"
           hidden={active !== "account"}
         >
-          {active === "account" ? <AccountManagement /> : null}
+          {active === "account" ? (
+            <div className="rbac-card-wrap">
+              <AccountManagement />
+            </div>
+          ) : null}
         </section>
       </div>
     </div>
