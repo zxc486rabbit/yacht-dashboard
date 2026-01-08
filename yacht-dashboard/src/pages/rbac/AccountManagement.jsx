@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./rbac.styles.css";
 
-// ====== 假資料（之後可接 API） ======
-const ROLE_OPTIONS = ["管理者", "工程師", "一般用戶(船長及船員)", "廠商"];
+// ====== 假資料 ======
+// 角色改為：管理者 / 工程師 / 船長 / 船員
+const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
+
+// 工務段：只在「管理者 / 工程師」顯示
 const SECTION_OPTIONS = ["工務段A", "工務段B", "工務段C", "所有工務段"];
 
 const seed = [
@@ -17,9 +20,9 @@ const seed = [
   },
   {
     id: 2,
-    name: "分局承辦姓名",
-    email: "officer1@abc.com.tw",
-    username: "officer1",
+    name: "工程師A",
+    email: "engineerA@abc.com.tw",
+    username: "engineerA",
     role: "工程師",
     section: "工務段A",
     locked: false,
@@ -78,22 +81,24 @@ const seed = [
     section: "工務段A",
     locked: true,
   },
+
+  // 船長 / 船員（不綁工務段）
   {
     id: 9,
-    name: "廠商A",
-    email: "vendorA@abc.com.tw",
-    username: "vendorA",
-    role: "廠商",
-    section: "工務段A",
+    name: "船長A",
+    email: "captainA@abc.com.tw",
+    username: "captainA",
+    role: "船長",
+    section: "",
     locked: false,
   },
   {
     id: 10,
-    name: "廠商A1",
-    email: "vendorA1@abc.com.tw",
-    username: "vendorA1",
-    role: "廠商",
-    section: "工務段A",
+    name: "船員A1",
+    email: "crewA1@abc.com.tw",
+    username: "crewA1",
+    role: "船員",
+    section: "",
     locked: false,
   },
 ];
@@ -107,10 +112,7 @@ function Modal({ title, size = "md", onClose, children, footer }) {
   }, [onClose]);
 
   return (
-    <div
-      className="backdrop"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
-    >
+    <div className="backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
       <div className={`modal ${size === "sm" ? "sm" : ""}`}>
         <div className="modal-head">
           <h3 className="modal-title">{title}</h3>
@@ -127,13 +129,13 @@ function Modal({ title, size = "md", onClose, children, footer }) {
   );
 }
 
-function mkEmptyAccount(rolePreset = "") {
+function mkEmptyAccount() {
   return {
     name: "",
     email: "",
     username: "",
     password: "",
-    role: rolePreset,
+    role: "",
     section: "",
     locked: false,
   };
@@ -142,12 +144,7 @@ function mkEmptyAccount(rolePreset = "") {
 // ====== Pagination ======
 function PageButton({ active, children, onClick, disabled }) {
   return (
-    <button
-      className={`pg-btn ${active ? "active" : ""}`}
-      onClick={onClick}
-      disabled={disabled}
-      type="button"
-    >
+    <button className={`pg-btn ${active ? "active" : ""}`} onClick={onClick} disabled={disabled} type="button">
       {children}
     </button>
   );
@@ -172,14 +169,19 @@ export default function AccountManagement() {
   const [form, setForm] = useState(mkEmptyAccount());
   const [showPwd, setShowPwd] = useState(false);
 
-  const editRow = useMemo(
-    () => rows.find((r) => r.id === editId) || null,
-    [rows, editId]
-  );
-  const pwdRow = useMemo(
-    () => rows.find((r) => r.id === pwdId) || null,
-    [rows, pwdId]
-  );
+  const editRow = useMemo(() => rows.find((r) => r.id === editId) || null, [rows, editId]);
+  const pwdRow = useMemo(() => rows.find((r) => r.id === pwdId) || null, [rows, pwdId]);
+
+  // 只有 管理者/工程師 顯示工務段
+  const showSection = useMemo(() => ["管理者", "工程師"].includes(form.role), [form.role]);
+
+  // 角色切到 船長/船員 時，自動清空工務段避免殘留
+  useEffect(() => {
+    if (!showSection && form.section) {
+      setForm((p) => ({ ...p, section: "" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSection]);
 
   const filtered = useMemo(() => {
     const keyword = q.trim().toLowerCase();
@@ -212,7 +214,6 @@ export default function AccountManagement() {
   // pagination render (1..5 ... last)
   const pageButtons = useMemo(() => {
     const btns = [];
-    // 目前頁左右各 1
 
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) btns.push(i);
@@ -236,19 +237,13 @@ export default function AccountManagement() {
 
   // ====== handlers ======
   const openAdd = () => {
-    setForm(mkEmptyAccount(""));
-    setShowPwd(false);
-    setAddOpen(true);
-  };
-
-  const openAddVendorSub = () => {
-    setForm(mkEmptyAccount("廠商"));
+    setForm(mkEmptyAccount());
     setShowPwd(false);
     setAddOpen(true);
   };
 
   const saveAdd = () => {
-    if (!form.name.trim() || !form.username.trim() || !form.role.trim()) return;
+    if (!form.name.trim() || !form.username.trim() || !form.role.trim() || !form.password.trim()) return;
 
     const newRow = {
       id: Date.now(),
@@ -256,7 +251,8 @@ export default function AccountManagement() {
       email: form.email.trim(),
       username: form.username.trim(),
       role: form.role,
-      section: form.section || "",
+      // 船長/船員：不存工務段
+      section: ["管理者", "工程師"].includes(form.role) ? (form.section || "") : "",
       locked: !!form.locked,
     };
 
@@ -289,7 +285,8 @@ export default function AccountManagement() {
               email: form.email.trim(),
               username: form.username.trim(),
               role: form.role,
-              section: form.section || "",
+              // ✅ 船長/船員：不存工務段
+              section: ["管理者", "工程師"].includes(form.role) ? (form.section || "") : "",
               locked: !!form.locked,
             }
           : r
@@ -387,21 +384,24 @@ export default function AccountManagement() {
         </select>
       </div>
 
-      <div className="form-row">
-        <div className="label">工務段:</div>
-        <select
-          className="select"
-          value={form.section}
-          onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
-        >
-          <option value="">工務段</option>
-          {SECTION_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* ✅ 工務段：只對 管理者/工程師 顯示 */}
+      {showSection ? (
+        <div className="form-row">
+          <div className="label">工務段:</div>
+          <select
+            className="select"
+            value={form.section}
+            onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
+          >
+            <option value="">工務段</option>
+            {SECTION_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
         <div className="label">鎖定:</div>
@@ -435,9 +435,6 @@ export default function AccountManagement() {
         </div>
 
         <div className="acct-right">
-          <button className="btn btn-yellow" onClick={openAddVendorSub} type="button">
-            新增廠商子帳號
-          </button>
           <button className="btn btn-yellow" onClick={openAdd} type="button">
             新增帳號
           </button>
@@ -448,10 +445,12 @@ export default function AccountManagement() {
       <table className="table">
         <thead>
           <tr>
-            {/* ✅ 加上 th-sort class（顯示排序 icon） */}
-            <th className="th-sort" style={{ width: "30%" }}>姓名</th>
-            <th className="th-sort" style={{ width: "25%" }}>帳號</th>
-
+            <th className="th-sort" style={{ width: "30%" }}>
+              姓名
+            </th>
+            <th className="th-sort" style={{ width: "25%" }}>
+              帳號
+            </th>
             <th style={{ width: "20%" }}>角色</th>
             <th style={{ width: "25%" }}>操作</th>
           </tr>
