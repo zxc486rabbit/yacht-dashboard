@@ -153,6 +153,9 @@ function PageButton({ active, children, onClick, disabled }) {
 export default function AccountManagement() {
   const [rows, setRows] = useState(seed);
 
+  // 表格列選取
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
   // 搜尋
   const [q, setQ] = useState("");
 
@@ -165,12 +168,19 @@ export default function AccountManagement() {
   const [editId, setEditId] = useState(null);
   const [pwdId, setPwdId] = useState(null);
 
+  // 刪除確認 modal
+  const [delOpen, setDelOpen] = useState(false);
+  const [delTargetId, setDelTargetId] = useState(null);
+
   // 表單
   const [form, setForm] = useState(mkEmptyAccount());
   const [showPwd, setShowPwd] = useState(false);
 
   const editRow = useMemo(() => rows.find((r) => r.id === editId) || null, [rows, editId]);
   const pwdRow = useMemo(() => rows.find((r) => r.id === pwdId) || null, [rows, pwdId]);
+
+  // 刪除目標 row（用來顯示資訊）
+  const delRowObj = useMemo(() => rows.find((r) => r.id === delTargetId) || null, [rows, delTargetId]);
 
   // 只有 管理者/工程師 顯示工務段
   const showSection = useMemo(() => ["管理者", "工程師"].includes(form.role), [form.role]);
@@ -236,6 +246,14 @@ export default function AccountManagement() {
   }, [page, totalPages]);
 
   // ====== handlers ======
+  const toggleSelectRow = (rowId) => {
+    setSelectedRowId((prev) => (prev === rowId ? null : rowId));
+  };
+
+  const stopRowClick = (e) => {
+    e.stopPropagation();
+  };
+
   const openAdd = () => {
     setForm(mkEmptyAccount());
     setShowPwd(false);
@@ -285,7 +303,7 @@ export default function AccountManagement() {
               email: form.email.trim(),
               username: form.username.trim(),
               role: form.role,
-              // ✅ 船長/船員：不存工務段
+              // 船長/船員：不存工務段
               section: ["管理者", "工程師"].includes(form.role) ? (form.section || "") : "",
               locked: !!form.locked,
             }
@@ -307,8 +325,25 @@ export default function AccountManagement() {
     setPwdId(null);
   };
 
-  const delRow = (id) => {
-    setRows((prev) => prev.filter((r) => r.id !== id));
+  // 開啟刪除確認 modal
+  const openDel = (row) => {
+    setDelTargetId(row.id);
+    setDelOpen(true);
+  };
+
+  // 關閉刪除確認 modal
+  const closeDel = () => {
+    setDelOpen(false);
+    setDelTargetId(null);
+  };
+
+  // 真正執行刪除（只有按「確定刪除」才會跑）
+  const confirmDel = () => {
+    if (delTargetId == null) return;
+    setRows((prev) => prev.filter((r) => r.id !== delTargetId));
+    // 如果剛好刪的是被選取那列，也一併清掉選取
+    setSelectedRowId((prev) => (prev === delTargetId ? null : prev));
+    closeDel();
   };
 
   // ====== shared form fields ======
@@ -384,7 +419,7 @@ export default function AccountManagement() {
         </select>
       </div>
 
-      {/* ✅ 工務段：只對 管理者/工程師 顯示 */}
+      {/* 工務段：只對 管理者/工程師 顯示 */}
       {showSection ? (
         <div className="form-row">
           <div className="label">工務段:</div>
@@ -464,7 +499,15 @@ export default function AccountManagement() {
             </tr>
           ) : (
             paged.map((r) => (
-              <tr key={r.id}>
+              <tr
+                key={r.id}
+                className={[
+                  "tr-row",
+                  selectedRowId === r.id ? "is-selected" : "",
+                  r.locked ? "is-locked" : "",
+                ].join(" ")}
+                onClick={() => toggleSelectRow(r.id)}
+              >
                 <td>
                   <div className="role-name">
                     {r.name}
@@ -474,14 +517,14 @@ export default function AccountManagement() {
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.username}</td>
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.role}</td>
                 <td>
-                  <div className="op-col">
+                  <div className="op-col" onClickCapture={stopRowClick}>
                     <button className="btn btn-green" onClick={() => openPwd(r)} type="button">
                       修改密碼
                     </button>
                     <button className="btn btn-green" onClick={() => openEdit(r)} type="button">
                       修改
                     </button>
-                    <button className="btn btn-red" onClick={() => delRow(r.id)} type="button">
+                    <button className="btn btn-red" onClick={() => openDel(r)} type="button">
                       刪除
                     </button>
                   </div>
@@ -624,6 +667,39 @@ export default function AccountManagement() {
               >
                 {showPwd ? "🙈" : "👁"}
               </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {/* ====== Modal：刪除確認（避免誤刪） ====== */}
+      {delOpen ? (
+        <Modal
+          title="確認刪除"
+          size="sm"
+          onClose={closeDel}
+          footer={
+            <>
+              <button className="btn" style={{ background: "#9ca3af" }} onClick={closeDel} type="button">
+                取消
+              </button>
+              <button className="btn btn-red" onClick={confirmDel} type="button" disabled={!delRowObj}>
+                確定刪除
+              </button>
+            </>
+          }
+        >
+          <div style={{ fontWeight: 900, marginBottom: 10 }}>此操作無法復原，請再次確認是否要刪除以下帳號：</div>
+
+          <div className="small-muted" style={{ lineHeight: 1.9 }}>
+            <div>
+              姓名：<span style={{ fontWeight: 900, color: "#111827" }}>{delRowObj?.name ?? "-"}</span>
+            </div>
+            <div>
+              帳號：<span style={{ fontWeight: 900, color: "#111827" }}>{delRowObj?.username ?? "-"}</span>
+            </div>
+            <div>
+              角色：<span style={{ fontWeight: 900, color: "#111827" }}>{delRowObj?.role ?? "-"}</span>
             </div>
           </div>
         </Modal>
