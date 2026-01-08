@@ -1,0 +1,562 @@
+/* ===============================
+   RealtimeMonitor.css
+   即時監控頁 全域樣式
+   =============================== */
+
+/* ===== 基本版面 ===== */
+.rm-page {
+  padding: 18px;
+  background: #f6f7fb;
+  color: #0f172a;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.rm-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.rm-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0d6efd;
+  letter-spacing: 0.3px;
+}
+
+.rm-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.rm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.rm-muted {
+  color: #64748b;
+}
+
+.rm-danger {
+  color: #dc3545;
+  font-weight: 800;
+}
+
+.rm-warn {
+  color: #f59e0b;
+  font-weight: 800;
+}
+
+/* ===== Panel / 卡片基底 ===== */
+.rm-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.rm-kpi {
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: left;
+  height: 100%;
+}
+
+.rm-kpi-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.rm-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.rm-kpi-value-sm {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* ===== 船席卡片 Grid ===== */
+.rm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 14px;
+}
+
+.rm-card {
+  text-align: left;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+.rm-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.rm-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef2f7;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+}
+
+.rm-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rm-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rm-card-body {
+  padding: 14px;
+}
+
+.rm-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.rm-big {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.rm-spark-wrap {
+  min-width: 130px;
+}
+
+.rm-spark-color {
+  color: #0d6efd;
+}
+
+.rm-spark {
+  display: block;
+}
+
+.rm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.rm-stat {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  padding: 8px;
+  min-height: 56px;
+}
+
+.rm-progress {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.rm-alarms {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rm-card-foot {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== 狀態燈 ===== */
+.rm-lamp {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
+}
+
+.rm-lamp.ok {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+}
+
+.rm-lamp.warn {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+}
+
+.rm-lamp.alarm {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.rm-lamp.off {
+  background: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
+}
+
+/* ===== 相電錶 Bar 版 ===== */
+.rm-phase-panel {
+  padding: 14px;
+}
+
+.rm-phase-avg {
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  padding: 0 10px;
+  border-radius: 999px;
+}
+
+.rm-phase-bars {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.rm-phasebar {
+  border: 1px solid #eef2f7;
+  background: #fbfdff;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.rm-phasebar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rm-phasebar-tag {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  border: 1px solid #eef2f7;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.rm-phasebar-R .rm-phasebar-tag {
+  border-color: rgba(220, 53, 69, 0.35);
+  background: rgba(220, 53, 69, 0.10);
+}
+
+.rm-phasebar-S .rm-phasebar-tag {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.rm-phasebar-T .rm-phasebar-tag {
+  border-color: rgba(13, 110, 253, 0.35);
+  background: rgba(13, 110, 253, 0.10);
+}
+
+.rm-phasebar-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.rm-phasebar-v {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.rm-phasebar-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #eef2f7;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.rm-phasebar-pill.ok {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.rm-phasebar-pill.warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.rm-phasebar-pill.alarm {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.rm-phasebar-track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+
+.rm-phasebar-range {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.rm-phasebar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+}
+
+.rm-phasebar-fill.ok {
+  background: rgba(34, 197, 94, 0.55);
+}
+
+.rm-phasebar-fill.warn {
+  background: rgba(245, 158, 11, 0.55);
+}
+
+.rm-phasebar-fill.alarm {
+  background: rgba(239, 68, 68, 0.60);
+}
+
+.rm-phasebar-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.18);
+}
+
+.rm-phasebar-dot.ok {
+  background: #22c55e;
+}
+
+.rm-phasebar-dot.warn {
+  background: #f59e0b;
+}
+
+.rm-phasebar-dot.alarm {
+  background: #ef4444;
+}
+
+.rm-phasebar-foot {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== Drawer ===== */
+.rm-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.35);
+  z-index: 1040;
+}
+
+.rm-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 420px;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  box-shadow: -16px 0 30px rgba(15, 23, 42, 0.18);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+}
+
+.rm-drawer-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+}
+
+.rm-drawer-body {
+  padding: 14px;
+  overflow-y: auto;
+}
+
+/* Drawer 內小卡 */
+.rm-mini {
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.rm-mini-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.rm-mini-value {
+  font-weight: 900;
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+.rm-alarm-item {
+  padding: 10px;
+  border: 1px solid #fee2e2;
+  background: #fff5f5;
+  border-radius: 12px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .rm-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .rm-drawer {
+    width: 92vw;
+  }
+}
+/* ===== 1) 狀態燈：異常閃爍（可選 WARN 慢閃） ===== */
+@keyframes rmBlink {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.35); }
+}
+
+/* ALARM 閃爍 */
+.rm-lamp.alarm {
+  animation: rmBlink 0.9s ease-in-out infinite;
+}
+
+/* 如果你也想 WARN 慢閃，把這段取消註解
+.rm-lamp.warn {
+  animation: rmBlink 1.8s ease-in-out infinite;
+}
+*/
+
+/* 尊重使用者降低動態效果 */
+@media (prefers-reduced-motion: reduce) {
+  .rm-lamp.alarm,
+  .rm-lamp.warn {
+    animation: none !important;
+  }
+}
+
+/* ===== 2) 相電錶：三欄緊湊版 + 平滑過渡 ===== */
+
+/* 三欄 */
+.rm-phase-bars-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* 緊湊卡 */
+.rm-phasebar-compact {
+  padding: 10px;
+}
+
+.rm-phasebar-compact .rm-phasebar-top {
+  margin-bottom: 6px;
+}
+
+.rm-phasebar-compact .rm-phasebar-tag {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.rm-phasebar-compact .rm-phasebar-v {
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+/* 讓 bar 更矮一點 */
+.rm-phasebar-compact .rm-phasebar-track {
+  height: 10px;
+}
+
+/* 狀態 pill 改成一行小標 */
+.rm-phasebar-compact .rm-phasebar-pill {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+/* 平滑過渡：fill 寬度、dot 位置都滑順 */
+.rm-phasebar-fill {
+  transition: width 650ms ease;
+}
+
+.rm-phasebar-dot {
+  transition: left 650ms ease;
+}
+
+/* 你如果也想 range 滑順（通常不會動，可加也無妨） */
+.rm-phasebar-range {
+  transition: left 650ms ease, width 650ms ease;
+}
+
+/* 手機：改回一欄避免擠 */
+@media (max-width: 576px) {
+  .rm-phase-bars-3 {
+    grid-template-columns: 1fr;
+  }
+}

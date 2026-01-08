@@ -71,11 +71,12 @@ export default function Sidebar() {
       label: "岸電控制系統",
       children: [
         { label: "岸電儀錶板", path: "/shore-power" },
-        { label: "即時監控模組", path: "/realtime" },
+        { label: "即時監控", path: "/realtime" },
         { label: "船舶基本檔", path: "/BerthMaster" },
-        { label: "遠端控管功能", path: "/remote-control" },
-        { label: "用戶資訊綁定 ?", path: "/user-binding" },
-        { label: "歷史紀錄查詢", path: "/history" },
+        { label: "遠端控管", path: "/remote-control" },
+        // { label: "用戶資訊綁定 ?", path: "/user-binding" },
+        { label: "歷史報表", path: "/history" },
+        { label: "告警中心", path: "/alarm-center" },
       ],
     },
     {
@@ -118,6 +119,14 @@ export default function Sidebar() {
       ],
     },
     {
+     icon: <FaUserCircle />,
+     label: "使用者專區",
+     children: [
+       { label: "船位預約", path: "/user/berth-booking" },
+       { label: "我的預約 / 停泊費用", path: "/user/my-bookings" },
+     ],
+   },
+    {
       icon: <FaFileInvoiceDollar />,
       label: "支付計費系統",
       children: [
@@ -126,14 +135,6 @@ export default function Sidebar() {
         { label: "支付方式支援", path: "/payment-methods" },
         { label: "帳單通知功能", path: "/billing-notice" },
         { label: "後台管理功能", path: "/backend" },
-      ],
-    },
-     {
-      icon: <FaUserCircle />,
-      label: "使用者專區",
-      children: [
-        { label: "船位預約", path: "/user/berth-booking" },
-        { label: "我的預約 / 停泊費用", path: "/user/my-bookings" },
       ],
     },
     {

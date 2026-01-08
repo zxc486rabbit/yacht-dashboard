@@ -906,11 +906,11 @@ export default function ShorePowerDashboard() {
       return (
         <SectionCard title="快捷入口" right={rightWrap("shortcuts")}>
           <div className="sp-shortcuts" {...overlayProps}>
-            <button className="sp-btn" type="button">進入：席位控制</button>
+            <button className="sp-btn" type="button">進入：即時監控</button>
             <button className="sp-btn" type="button">進入：告警中心</button>
-            <button className="sp-btn" type="button">進入：排程器</button>
+            <button className="sp-btn" type="button">進入：船舶基本檔</button>
             <button className="sp-btn" type="button">進入：歷史報表</button>
-            <button className="sp-btn" type="button">進入：操作稽核</button>
+            <button className="sp-btn" type="button">進入：遠端控管</button>
           </div>
         </SectionCard>
       );
