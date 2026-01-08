@@ -345,10 +345,22 @@
   font-size: 12px;
   font-weight: 700;
   color: #fff;
+
+  /* 做個防呆：即使沒有對應 class，也不會變成白字白底看不到 */
+  background: #9ca3af;
 }
 
+/* 兼容命名：read/write/delete 或 view/edit/delete */
 .rbac-card .chip.read{ background: #60a5fa; }
+.rbac-card .chip.view{ background: #60a5fa; }
+
 .rbac-card .chip.write{ background: #34d399; }
+.rbac-card .chip.edit{ background: #34d399; }
+
+/* 避免 OPS key 不一致又隱形 */
+.rbac-card .chip.update{ background: #34d399; }
+.rbac-card .chip.create{ background: #34d399; }
+
 .rbac-card .chip.delete{ background: #f87171; }
 
 /* -------------------------
