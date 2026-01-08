@@ -24,12 +24,6 @@
   --shadow:0 14px 30px rgba(0,0,0,.18);
 
   color: var(--text);
-}
-
-/* -------------------------
-   Layout
--------------------------- */
-.rbac-card{
   background: var(--card);
   padding: 24px;
   border-radius: 14px;
@@ -45,7 +39,7 @@
 }
 
 /* -------------------------
-   Buttons (scoped)
+   Buttons (RBAC only)
 -------------------------- */
 .rbac-card .btn{
   padding: 8px 16px;
@@ -66,7 +60,7 @@
 .rbac-card .btn-red{ background: var(--red); color: #fff; }
 
 /* -------------------------
-   Table
+   Table (RBAC list table)
 -------------------------- */
 .rbac-card .rbac-table{
   width: 100%;
@@ -89,22 +83,18 @@
 }
 
 /* -------------------------
-   Role column
+   Role / Ops column
 -------------------------- */
-.rbac-card .role-name{
-  font-weight: 800;
-}
+.rbac-card .role-name{ font-weight: 800; }
 
-/* -------------------------
-   Operation column
--------------------------- */
 .rbac-card .op-col{
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* =========================================================
-   Modal (RBAC custom modal)
+   Modal
    ========================================================= */
 
 .rbac-card .rbac-backdrop{
@@ -129,6 +119,10 @@
   width: min(420px, calc(100vw - 24px));
 }
 
+.rbac-card .rbac-modal.lg{
+  width: min(1100px, calc(100vw - 24px));
+}
+
 .rbac-card .rbac-modal-head{
   display: flex;
   justify-content: space-between;
@@ -140,6 +134,7 @@
 .rbac-card .rbac-modal-title{
   font-size: 18px;
   font-weight: 900;
+  margin: 0;
 }
 
 .rbac-card .rbac-modal-body{
@@ -159,10 +154,11 @@
   background: transparent;
   font-size: 22px;
   cursor: pointer;
+  line-height: 1;
 }
 
 /* =========================================================
-   Permission Table (inside modal)
+   Permission Table (legacy inside modal)
    ========================================================= */
 
 .rbac-card .perm-table{
@@ -176,13 +172,119 @@
   border-bottom: 1px solid var(--line);
 }
 
-.rbac-card .perm-name{
-  font-weight: 800;
-}
+.rbac-card .perm-name{ font-weight: 800; }
 
 .rbac-card .perm-group{
   font-size: 12px;
   color: var(--muted);
+}
+
+/* =========================================================
+   Permission Editor Layout
+   For "左側系統大項下拉 + 右側細項權限"
+   Classes used in RolePermissions.jsx:
+   .perm-layout .perm-left .perm-right .perm-group-head/body ...
+   ========================================================= */
+
+.rbac-card .perm-layout{
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 14px;
+
+  /* 讓右側列表可滾動：body內部自己控制 */
+  height: 70vh;
+  max-height: 70vh;
+}
+
+.rbac-card .perm-left{
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafafa;
+  padding: 10px;
+  overflow: auto;
+}
+
+.rbac-card .perm-right{
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rbac-card .perm-right-head{
+  display: grid;
+  grid-template-columns: 55% 45%;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: #fafafa;
+  font-weight: 900;
+}
+
+.rbac-card .perm-right-body{
+  padding: 10px 12px;
+  overflow: auto;
+}
+
+.rbac-card .perm-row{
+  display: grid;
+  grid-template-columns: 55% 45%;
+  gap: 10px;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+}
+
+.rbac-card .perm-group-hint{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* Left accordion */
+.rbac-card .perm-group{ margin-bottom: 10px; }
+
+.rbac-card .perm-group-head{
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #f3f4f6;
+  padding: 10px 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.rbac-card .perm-group-title{ font-weight: 900; }
+
+.rbac-card .perm-group-body{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .25s ease;
+  padding: 0 6px;
+}
+
+.rbac-card .perm-group-body.open{
+  max-height: 900px;
+  padding: 10px 6px;
+}
+
+.rbac-card .perm-subitem{
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.rbac-card .perm-subitem:hover{
+  background: #e5e7eb;
 }
 
 /* =========================================================
@@ -248,6 +350,15 @@
 .rbac-card .chip.read{ background: #60a5fa; }
 .rbac-card .chip.write{ background: #34d399; }
 .rbac-card .chip.delete{ background: #f87171; }
+
+/* -------------------------
+   Small muted text
+-------------------------- */
+.rbac-card .small-muted{
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
 
 /* =========================================================
    Forms

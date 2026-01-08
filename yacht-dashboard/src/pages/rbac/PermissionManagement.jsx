@@ -1,9 +1,10 @@
 // src/page/rbac/PermissionManagement.jsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./rbac.styles.css";
 import RolePermissions from "./RolePermissions";
 import AccountManagement from "./AccountManagement";
 
+const LS_KEY = "rbac.permissionManagement.activeTab";
 
 export default function PermissionManagement() {
   const tabs = useMemo(
@@ -14,7 +15,28 @@ export default function PermissionManagement() {
     []
   );
 
-  const [active, setActive] = useState("role");
+  const [active, setActive] = useState(() => {
+    const saved = localStorage.getItem(LS_KEY);
+    return saved && tabs.some((t) => t.key === saved) ? saved : "role";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(LS_KEY, active);
+  }, [active]);
+
+  const handleKeyDown = (e) => {
+    // Left/Right to switch tabs
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+    e.preventDefault();
+    const idx = tabs.findIndex((t) => t.key === active);
+    const nextIdx =
+      e.key === "ArrowRight"
+        ? (idx + 1) % tabs.length
+        : (idx - 1 + tabs.length) % tabs.length;
+
+    setActive(tabs[nextIdx].key);
+  };
 
   return (
     <div className="rbac-page">
@@ -22,21 +44,51 @@ export default function PermissionManagement() {
         <h1 className="rbac-title">權限管理</h1>
       </div>
 
-      <div className="rbac-tabs">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            className={`rbac-tab ${active === t.key ? "active" : ""}`}
-            onClick={() => setActive(t.key)}
-            type="button"
-          >
-            {t.label}
-          </button>
-        ))}
+      <div
+        className="rbac-tabs"
+        role="tablist"
+        aria-label="權限管理分頁"
+        onKeyDown={handleKeyDown}
+      >
+        {tabs.map((t) => {
+          const isActive = active === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              className={`rbac-tab ${isActive ? "active" : ""}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`rbac-panel-${t.key}`}
+              id={`rbac-tab-${t.key}`}
+              tabIndex={isActive ? 0 : -1}
+              onClick={() => setActive(t.key)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
-      {active === "role" ? <RolePermissions /> : <AccountManagement />}
+      <div className="rbac-content">
+        <section
+          role="tabpanel"
+          id="rbac-panel-role"
+          aria-labelledby="rbac-tab-role"
+          hidden={active !== "role"}
+        >
+          {active === "role" ? <RolePermissions /> : null}
+        </section>
 
+        <section
+          role="tabpanel"
+          id="rbac-panel-account"
+          aria-labelledby="rbac-tab-account"
+          hidden={active !== "account"}
+        >
+          {active === "account" ? <AccountManagement /> : null}
+        </section>
+      </div>
     </div>
   );
 }

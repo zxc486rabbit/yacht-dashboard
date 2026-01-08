@@ -19,7 +19,11 @@ function Modal({ title, size = "md", onClose, children, footer }) {
       className="rbac-backdrop"
       onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className={`rbac-modal ${size === "sm" ? "sm" : ""}`}>
+      <div
+        className={`rbac-modal ${
+          size === "sm" ? "sm" : size === "lg" ? "lg" : ""
+        }`}
+      >
         <div className="rbac-modal-head">
           <h3 className="rbac-modal-title">{title}</h3>
           <button
@@ -101,6 +105,40 @@ function MultiSelectOps({ valueSet, onChange }) {
       ) : null}
     </div>
   );
+}
+
+/** 把 permissionRows 轉成「系統大項 -> 細項列表」
+ *  目前 row.group 是一段中文（例如：門禁管制系統、影像監控系統...）
+ *  會依 group 分組，並以指定順序輸出
+ */
+function buildGroups(permissionRows) {
+  const ORDER = [
+    "岸電控制系統",
+    "船舶識別系統",
+    "門禁管制系統",
+    "影像監控系統",
+    "通訊傳輸系統",
+    "支付計費系統",
+  ];
+
+  const map = new Map();
+  permissionRows.forEach((row) => {
+    const g = row.group || "未分類";
+    if (!map.has(g)) map.set(g, []);
+    map.get(g).push(row);
+  });
+
+  // 依 ORDER 排序，沒有在 ORDER 的放最後
+  const keys = Array.from(map.keys()).sort((a, b) => {
+    const ia = ORDER.indexOf(a);
+    const ib = ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b, "zh-Hant");
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+
+  return keys.map((k) => ({ key: k, title: k, items: map.get(k) }));
 }
 
 export default function RolePermissions() {
@@ -220,6 +258,29 @@ export default function RolePermissions() {
 
   const closePermModal = () => setPermRoleId(null);
 
+  // ====== 編輯權限 Modal：左側下拉選系統 / 右側只顯示該系統細項 ======
+  const permGroups = useMemo(() => buildGroups(permissionRows), [permissionRows]);
+
+  const [activeSystemKey, setActiveSystemKey] = useState(
+    permGroups?.[0]?.key ?? ""
+  );
+
+  // 每次開啟編輯權限 Modal，預設選第一個系統
+  useEffect(() => {
+    if (!permRole) return;
+    setActiveSystemKey(permGroups?.[0]?.key ?? "");
+  }, [permRole, permGroups]);
+
+  const activeGroup = useMemo(
+    () => permGroups.find((g) => g.key === activeSystemKey) || null,
+    [permGroups, activeSystemKey]
+  );
+
+  const scrollToRow = (rowKey) => {
+    const el = document.getElementById(`perm-row-${rowKey}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   return (
     <div className="rbac-card">
       <div className="rbac-actions">
@@ -304,6 +365,7 @@ export default function RolePermissions() {
       {permRole ? (
         <Modal
           title={`編輯 ${permRole.name} 權限`}
+          size="lg"
           onClose={closePermModal}
           footer={
             <>
@@ -325,39 +387,84 @@ export default function RolePermissions() {
             </>
           }
         >
-          <table className="perm-table">
-            <thead>
-              <tr>
-                <th style={{ width: "55%" }}>權限名稱</th>
-                <th style={{ width: "45%" }}>操作權限</th>
-              </tr>
-            </thead>
-            <tbody>
-              {permissionRows.map((row) => {
-                const setVal =
-                  rolePermMap?.[permRole.id]?.[row.key] instanceof Set
-                    ? rolePermMap[permRole.id][row.key]
-                    : new Set([]);
+          <div className="perm-layout">
+            {/* Left: 系統下拉 + 細項清單 */}
+            <aside className="perm-left">
+              <div style={{ marginBottom: 10 }}>
+                {/* 點擊下拉選單時，大標題變成下拉選到的系統
+                   這邊下拉就是最主要的系統標題 */}
+                <select
+                  className="select"
+                  value={activeSystemKey}
+                  onChange={(e) => setActiveSystemKey(e.target.value)}
+                >
+                  {permGroups.map((g) => (
+                    <option key={g.key} value={g.key}>
+                      {g.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                return (
-                  <tr key={row.key}>
-                    <td>
-                      <div className="perm-name">{row.name}</div>
-                      <div className="perm-group">{row.group}</div>
-                    </td>
-                    <td>
-                      <MultiSelectOps
-                        valueSet={setVal}
-                        onChange={(nextSet) =>
-                          updateRolePermissionRow(permRole.id, row.key, nextSet)
-                        }
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+              <div>
+                {(activeGroup?.items || []).map((row) => (
+                  <button
+                    key={row.key}
+                    type="button"
+                    className="perm-subitem"
+                    onClick={() => scrollToRow(row.key)}
+                    title={row.name}
+                  >
+                    {row.name}
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            {/* Right: 只顯示目前系統的細項權限 */}
+            <section className="perm-right">
+              <div className="perm-right-head">
+                <div className="col-name">權限名稱</div>
+                <div className="col-op">操作權限</div>
+              </div>
+
+              <div className="perm-right-body">
+                {(activeGroup?.items || []).map((row) => {
+                  const setVal =
+                    rolePermMap?.[permRole.id]?.[row.key] instanceof Set
+                      ? rolePermMap[permRole.id][row.key]
+                      : new Set([]);
+
+                  return (
+                    <div
+                      className="perm-row"
+                      key={row.key}
+                      id={`perm-row-${row.key}`}
+                    >
+                      <div className="col-name">
+                        <div className="perm-name">{row.name}</div>
+                        <div className="perm-group-hint">{row.group}</div>
+                      </div>
+                      <div className="col-op">
+                        <MultiSelectOps
+                          valueSet={setVal}
+                          onChange={(nextSet) =>
+                            updateRolePermissionRow(permRole.id, row.key, nextSet)
+                          }
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {!activeGroup ? (
+                  <div style={{ padding: "10px 0", color: "#6b7280" }}>
+                    沒有可顯示的系統或細項。
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          </div>
         </Modal>
       ) : null}
 
