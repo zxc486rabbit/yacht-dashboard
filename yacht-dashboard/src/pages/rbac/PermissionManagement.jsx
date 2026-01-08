@@ -2,6 +2,8 @@
 import React, { useMemo, useState } from "react";
 import "./rbac.styles.css";
 import RolePermissions from "./RolePermissions";
+import AccountManagement from "./AccountManagement";
+
 
 export default function PermissionManagement() {
   const tabs = useMemo(
@@ -33,13 +35,8 @@ export default function PermissionManagement() {
         ))}
       </div>
 
-      {active === "role" ? (
-        <RolePermissions />
-      ) : (
-        <div className="rbac-card">
-          <div className="small-muted">帳號權限頁面：下一步再接。</div>
-        </div>
-      )}
+      {active === "role" ? <RolePermissions /> : <AccountManagement />}
+
     </div>
   );
 }

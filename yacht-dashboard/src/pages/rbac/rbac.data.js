@@ -53,7 +53,7 @@ export function buildPermissionRows() {
   return rows;
 }
 
-// 操作權限定義（你截圖中顯示：檢視/編輯/刪除）
+// 操作權限定義（顯示：檢視/編輯/刪除）
 export const OPS = [
   { key: "view", label: "檢視" },
   { key: "edit", label: "編輯" },
@@ -66,7 +66,7 @@ export const DEFAULT_ROLES = [
   { id: "role_user", name: "一般用戶(船長及船員)", level: "一般使用" },
 ];
 
-// 建立每個角色的預設權限（你可依需求調整）
+// 建立每個角色的預設權限（可依需求調整）
 export function buildDefaultRolePermissions() {
   const rows = buildPermissionRows();
 

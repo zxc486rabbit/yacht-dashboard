@@ -5,8 +5,11 @@
   --card:#ffffff;
   --text:#1f2a37;
   --muted:#6b7280;
-  --green:#34b46d;
-  --green-dark:#2ea35f;
+
+
+  --brand:#0599BB;
+  --brand-dark:#047a96;
+
   --purple:#6d28d9;
   --red:#ef4444;
   --yellow:#f59e0b;
@@ -55,8 +58,8 @@
   font-weight:700;
 }
 .rbac-tab.active{
-  border-color: rgba(52,180,109,.55);
-  box-shadow: 0 0 0 3px rgba(52,180,109,.18);
+  border-color: rgba(5,153,187,.55);
+  box-shadow: 0 0 0 3px rgba(5,153,187,.18);
 }
 
 .rbac-card{
@@ -86,8 +89,9 @@
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-.btn-green{ background:var(--green); }
-.btn-green:hover{ background:var(--green-dark); }
+
+.btn-green{ background:var(--brand); }
+.btn-green:hover{ background:var(--brand-dark); }
 
 .btn-yellow{ background:var(--yellow); }
 .btn-purple{ background:var(--purple); }
@@ -103,7 +107,7 @@
 }
 
 .table th{
-  background:var(--green);
+  background:var(--brand);
   color:#fff;
   font-size:20px;
   padding:12px;
@@ -213,8 +217,8 @@
   font-size:16px;
 }
 .input:focus, .select:focus{
-  box-shadow: 0 0 0 3px rgba(52,180,109,.18);
-  border-color: rgba(52,180,109,.55);
+  box-shadow: 0 0 0 3px rgba(5,153,187,.18);
+  border-color: rgba(5,153,187,.55);
 }
 
 /* Permission editor table inside modal */
@@ -228,7 +232,7 @@
 }
 
 .perm-table th{
-  background:var(--green);
+  background:var(--brand);
   color:#fff;
   padding:12px;
   font-size:16px;
@@ -293,7 +297,7 @@
 }
 
 .chip.view{ background: rgba(109,40,217,.12); color: var(--purple); }
-.chip.edit{ background: rgba(52,180,109,.14); color: var(--green-dark); }
+.chip.edit{ background: rgba(5,153,187,.14); color: var(--brand-dark); }
 .chip.delete{ background: rgba(239,68,68,.14); color: var(--red); }
 
 .ms-menu{
@@ -324,4 +328,137 @@
   color:var(--muted);
   font-weight:700;
   font-size:13px;
+}
+
+/* ===== Account management ===== */
+.acct-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.acct-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.acct-title{
+  margin:0;
+  font-size:40px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.acct-search{
+  width:260px;
+  height:42px;
+}
+
+.acct-right{
+  display:flex;
+  gap:12px;
+}
+
+/* 密碼眼睛 */
+.pwd-wrap{
+  position:relative;
+  width:100%;
+}
+.pwd-eye{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+}
+
+/* 鎖定徽章 */
+.lock-badge{
+  margin-left:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(239,68,68,.12);
+  color:var(--red);
+  font-weight:900;
+  font-size:12px;
+  border:1px solid rgba(239,68,68,.18);
+}
+
+/* Pagination */
+.pg-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:14px;
+}
+
+.pg-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.pg-btn{
+  min-width:40px;
+  height:40px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  font-weight:900;
+}
+
+.pg-btn.active{
+  border-color: rgba(5,153,187,.65);
+  box-shadow: 0 0 0 3px rgba(5,153,187,.18);
+}
+
+.pg-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.pg-dots{
+  padding:0 6px;
+  font-weight:900;
+  color:#6b7280;
+}
+
+.pg-right .pg-size{
+  width:140px;
+  height:42px;
+}
+
+/* 表頭排序 icon：對齊上/下三角 */
+.th-sort{
+  position:relative;
+  padding-right:30px !important;
+}
+.th-sort::before,
+.th-sort::after{
+  content:"";
+  position:absolute;
+  right:12px;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  opacity:.7;
+}
+.th-sort::before{
+  top:38%;
+  border-bottom:7px solid rgba(255,255,255,.85);
+}
+.th-sort::after{
+  top:56%;
+  border-top:7px solid rgba(255,255,255,.85);
 }
