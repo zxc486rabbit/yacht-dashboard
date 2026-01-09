@@ -104,8 +104,6 @@ const seed = [
 ];
 
 // ====== 共用 Modal ======
-// 修正重點：避免與 Bootstrap/Kaiadmin 的 .modal 衝突（常見 display:none）
-// 全部改用 .rbac-backdrop / .rbac-modal... 並與你的 rbac.styles.css 對齊
 function Modal({ title, size = "md", onClose, children, footer }) {
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose?.();
@@ -161,6 +159,104 @@ function PageButton({ active, children, onClick, disabled }) {
     </button>
   );
 }
+
+// ====== shared form fields ======
+const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, showSection }) => (
+  <>
+    <div className="form-row">
+      <div className="label">姓名:</div>
+      <input
+        className="input"
+        placeholder="姓名"
+        value={form.name}
+        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+      />
+    </div>
+
+    <div className="form-row">
+      <div className="label">電子郵箱:</div>
+      <input
+        className="input"
+        placeholder="電子郵箱"
+        value={form.email}
+        onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+      />
+    </div>
+
+    <div className="form-row">
+      <div className="label">帳號:</div>
+      <input
+        className="input"
+        placeholder="帳號"
+        value={form.username}
+        onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
+      />
+    </div>
+
+    {withPassword ? (
+      <div className="form-row">
+        <div className="label">密碼:</div>
+        <div className="pwd-wrap">
+          <input
+            className="input"
+            placeholder="密碼"
+            type={showPwd ? "text" : "password"}
+            value={form.password}
+            onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+          />
+          <button
+            type="button"
+            className="pwd-eye"
+            onClick={() => setShowPwd((s) => !s)}
+            aria-label="toggle password"
+            title={showPwd ? "隱藏" : "顯示"}
+          >
+            {showPwd ? "🙈" : "👁"}
+          </button>
+        </div>
+      </div>
+    ) : null}
+
+    <div className="form-row">
+      <div className="label">角色:</div>
+      <select className="select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
+        <option value="">角色選擇</option>
+        {ROLE_OPTIONS.map((r) => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* 工務段：只對 管理者/工程師 顯示 */}
+    {showSection ? (
+      <div className="form-row">
+        <div className="label">工務段:</div>
+        <select
+          className="select"
+          value={form.section}
+          onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
+        >
+          <option value="">工務段選擇</option>
+          {SECTION_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+    ) : null}
+
+    <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
+      <div className="label">鎖定:</div>
+      <label className="lock-row">
+        <input type="checkbox" checked={!!form.locked} onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))} />
+        <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
+      </label>
+    </div>
+  </>
+);
 
 export default function AccountManagement() {
   const [rows, setRows] = useState(seed);
@@ -359,104 +455,6 @@ export default function AccountManagement() {
     closeDel();
   };
 
-  // ====== shared form fields ======
-  const AccountFormFields = ({ withPassword }) => (
-    <>
-      <div className="form-row">
-        <div className="label">姓名:</div>
-        <input
-          className="input"
-          placeholder="姓名"
-          value={form.name}
-          onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-        />
-      </div>
-
-      <div className="form-row">
-        <div className="label">電子郵箱:</div>
-        <input
-          className="input"
-          placeholder="電子郵箱"
-          value={form.email}
-          onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-        />
-      </div>
-
-      <div className="form-row">
-        <div className="label">帳號:</div>
-        <input
-          className="input"
-          placeholder="帳號"
-          value={form.username}
-          onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
-        />
-      </div>
-
-      {withPassword ? (
-        <div className="form-row">
-          <div className="label">密碼:</div>
-          <div className="pwd-wrap">
-            <input
-              className="input"
-              placeholder="密碼"
-              type={showPwd ? "text" : "password"}
-              value={form.password}
-              onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-            />
-            <button
-              type="button"
-              className="pwd-eye"
-              onClick={() => setShowPwd((s) => !s)}
-              aria-label="toggle password"
-              title={showPwd ? "隱藏" : "顯示"}
-            >
-              {showPwd ? "🙈" : "👁"}
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="form-row">
-        <div className="label">角色:</div>
-        <select className="select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
-          <option value="">角色選擇</option>
-          {ROLE_OPTIONS.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* 工務段：只對 管理者/工程師 顯示 */}
-      {showSection ? (
-        <div className="form-row">
-          <div className="label">工務段:</div>
-          <select
-            className="select"
-            value={form.section}
-            onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
-          >
-            <option value="">工務段選擇</option>
-            {SECTION_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-
-      <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
-        <div className="label">鎖定:</div>
-        <label className="lock-row">
-          <input type="checkbox" checked={!!form.locked} onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))} />
-          <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
-        </label>
-      </div>
-    </>
-  );
-
   return (
     <div className="rbac-card">
       {/* Header row: 標題 + 右上按鈕 */}
@@ -526,8 +524,6 @@ export default function AccountManagement() {
       </div>
 
       {/* 表格 */}
-      {/* 建議你若要套用你 CSS 的 .rbac-table，可以把 className="table" 改成 "rbac-table"；
-         但這不影響 modal 是否顯示，所以這裡保持原樣。 */}
       <table className="table">
         <thead>
           <tr>
@@ -644,7 +640,7 @@ export default function AccountManagement() {
             </>
           }
         >
-          <AccountFormFields withPassword />
+          <AccountFormFields withPassword={true} form={form} setForm={setForm} showPwd={showPwd} setShowPwd={setShowPwd} showSection={showSection} />
         </Modal>
       ) : null}
 
@@ -665,7 +661,7 @@ export default function AccountManagement() {
             </>
           }
         >
-          <AccountFormFields withPassword={false} />
+          <AccountFormFields withPassword={false} form={form} setForm={setForm} showPwd={showPwd} setShowPwd={setShowPwd} showSection={showSection} />
         </Modal>
       ) : null}
 
