@@ -148,6 +148,8 @@ export default function RolePermissions() {
   const [deleteRoleId, setDeleteRoleId] = useState(null);
   const deleteRole = roles.find((r) => r.id === deleteRoleId) || null;
 
+  const [showAddRole, setShowAddRole] = useState(false);
+
   const [activeSystemKey, setActiveSystemKey] = useState(
     permGroups?.[0]?.key ?? ""
   );
@@ -167,7 +169,12 @@ export default function RolePermissions() {
       <div className="rbac-actions" style={{ justifyContent: "space-between" }}>
         <div>
           {rbac.isAdmin && (
-            <button className="btn btn-yellow">新增角色權限</button>
+            <button 
+              className="btn btn-yellow"
+              onClick={() => setShowAddRole(true)}
+            >
+              新增角色
+            </button>
           )}
         </div>
 
@@ -212,7 +219,7 @@ export default function RolePermissions() {
                     </button>
                   )}
 
-                  {rbac.canDeleteRole && (
+                  {rbac.canDeleteRole && r.id !== "role_admin" && (
                     <button 
                       className="btn btn-red"
                       onClick={() => setDeleteRoleId(r.id)}
@@ -352,6 +359,69 @@ export default function RolePermissions() {
           }
         >
           <p>確定要刪除角色 <strong>{deleteRole.name}</strong> 嗎？此操作無法復原。</p>
+        </Modal>
+      )}
+
+      {/* ====== Add Role Modal ====== */}
+      {showAddRole && rbac.isAdmin && (
+        <Modal
+          title="新增角色"
+          size="md"
+          onClose={() => setShowAddRole(false)}
+          footer={
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setShowAddRole(false)}>
+                取消
+              </button>
+              <button 
+                className="btn btn-yellow"
+                onClick={() => {
+                  // TODO: 實作新增角色邏輯
+                  const newRole = {
+                    id: `role_${Date.now()}`,
+                    name: '新角色',
+                    level: '一般使用'
+                  };
+                  setRoles(prev => [...prev, newRole]);
+                  alert('新增角色成功');
+                  setShowAddRole(false);
+                }}
+              >
+                新增
+              </button>
+            </div>
+          }
+        >
+          <div style={{ padding: '16px 0' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                角色名稱
+              </label>
+              <input 
+                type="text" 
+                className="input" 
+                placeholder="請輸入角色名稱"
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                權限等級
+              </label>
+              <select 
+                className="select" 
+                defaultValue="一般使用"
+                style={{ width: '100%' }}
+              >
+                {PERMISSION_LEVELS.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </Modal>
       )}
     </div>
