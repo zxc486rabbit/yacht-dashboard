@@ -114,6 +114,77 @@ function buildGroups(rows) {
 }
 
 /* =========================================================
+   權限配置策略：根據權限等級自動分配預設權限
+   ========================================================= */
+function buildPermissionsByLevel(level, permissionRows) {
+  const permissions = {};
+  
+  permissionRows.forEach((row) => {
+    const { key, group } = row;
+    
+    switch (level) {
+      case "最高權限":
+        // 管理者：所有模組的完整權限（檢視、編輯、刪除）
+        permissions[key] = new Set(["view", "edit", "delete"]);
+        break;
+        
+      case "工程維運":
+        // 工程師：技術維運相關權限
+        if (group === "岸電控制系統") {
+          permissions[key] = new Set(["view", "edit"]); // 可檢視編輯，刪除受限
+        } else if (group === "船舶識別系統") {
+          permissions[key] = new Set(["view", "edit"]);
+        } else if (group === "門禁管制系統") {
+          permissions[key] = new Set(["view", "edit"]);
+        } else if (group === "影像監控系統") {
+          permissions[key] = new Set(["view", "edit"]);
+        } else if (group === "通訊傳輸系統") {
+          permissions[key] = new Set(["view", "edit"]);
+        } else if (group === "支付計費系統") {
+          permissions[key] = new Set(["view"]); // 計費系統僅可檢視
+        } else if (group === "使用者專區") {
+          permissions[key] = new Set(["view"]);
+        } else {
+          permissions[key] = new Set(["view"]);
+        }
+        break;
+        
+      case "一般使用":
+        // 一般用戶（船長及船員）：主要使用自己相關的功能
+        if (group === "岸電控制系統") {
+          // 僅開放即時監控、歷史紀錄等檢視功能
+          if (row.name.includes("即時監控") || row.name.includes("歷史紀錄")) {
+            permissions[key] = new Set(["view"]);
+          } else {
+            permissions[key] = new Set([]);
+          }
+        } else if (group === "船舶識別系統") {
+          permissions[key] = new Set(["view"]);
+        } else if (group === "使用者專區") {
+          permissions[key] = new Set(["view", "edit"]); // 可管理自己的預約和資料
+        } else {
+          permissions[key] = new Set([]); // 其他系統無權限
+        }
+        break;
+        
+      case "訪客":
+        // 訪客：最低權限，僅能查看使用者專區
+        if (group === "使用者專區") {
+          permissions[key] = new Set(["view"]);
+        } else {
+          permissions[key] = new Set([]);
+        }
+        break;
+        
+      default:
+        permissions[key] = new Set([]);
+    }
+  });
+  
+  return permissions;
+}
+
+/* =========================================================
    Main Component
    ========================================================= */
 export default function RolePermissions() {
@@ -279,61 +350,86 @@ export default function RolePermissions() {
       )}
 
       {/* ====== Edit Role Modal ====== */}
-      {editRole && rbac.canEditRole && (
-        <Modal
-          title={`修改角色：${editRole.name}`}
-          size="md"
-          onClose={() => setEditRoleId(null)}
-          footer={
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost" onClick={() => setEditRoleId(null)}>
-                取消
-              </button>
-              <button 
-                className="btn btn-green"
-                onClick={() => {
-                  // TODO: 儲存角色變更
-                  alert('儲存角色變更');
-                  setEditRoleId(null);
-                }}
-              >
-                儲存
-              </button>
-            </div>
-          }
-        >
-          <div style={{ padding: '16px 0' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                角色名稱
-              </label>
-              <input 
-                type="text" 
-                className="input" 
-                defaultValue={editRole.name}
-                style={{ width: '100%' }}
-              />
-            </div>
+      {editRole && rbac.canEditRole && (() => {
+        const nameRef = React.createRef();
+        const levelRef = React.createRef();
+        
+        return (
+          <Modal
+            title={`修改角色：${editRole.name}`}
+            size="md"
+            onClose={() => setEditRoleId(null)}
+            footer={
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <button className="btn btn-ghost" onClick={() => setEditRoleId(null)}>
+                  取消
+                </button>
+                <button 
+                  className="btn btn-green"
+                  onClick={() => {
+                    const newName = nameRef.current?.value || editRole.name;
+                    const newLevel = levelRef.current?.value || editRole.level;
+                    
+                    // 更新角色資訊
+                    setRoles(prev => prev.map(r => 
+                      r.id === editRole.id 
+                        ? { ...r, name: newName, level: newLevel }
+                        : r
+                    ));
+                    
+                    // 根據新的權限等級更新權限配置
+                    const newPermissions = buildPermissionsByLevel(newLevel, permissionRows);
+                    setRolePermMap(prev => ({
+                      ...prev,
+                      [editRole.id]: newPermissions
+                    }));
+                    
+                    setEditRoleId(null);
+                  }}
+                >
+                  儲存
+                </button>
+              </div>
+            }
+          >
+            <div style={{ padding: '16px 0' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  角色名稱
+                </label>
+                <input 
+                  ref={nameRef}
+                  type="text" 
+                  className="input" 
+                  defaultValue={editRole.name}
+                  style={{ width: '100%' }}
+                />
+              </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                權限等級
-              </label>
-              <select 
-                className="select" 
-                defaultValue={editRole.level}
-                style={{ width: '100%' }}
-              >
-                {PERMISSION_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  權限等級
+                </label>
+                <select 
+                  ref={levelRef}
+                  className="select" 
+                  defaultValue={editRole.level}
+                  style={{ width: '100%' }}
+                >
+                  {PERMISSION_LEVELS.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  💡 變更權限等級會自動套用該等級的預設權限配置
+                </div>
+              </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        );
+      })()}
 
       {/* ====== Delete Role Modal ====== */}
       {deleteRole && rbac.canDeleteRole && (
@@ -363,67 +459,89 @@ export default function RolePermissions() {
       )}
 
       {/* ====== Add Role Modal ====== */}
-      {showAddRole && rbac.isAdmin && (
-        <Modal
-          title="新增角色"
-          size="md"
-          onClose={() => setShowAddRole(false)}
-          footer={
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost" onClick={() => setShowAddRole(false)}>
-                取消
-              </button>
-              <button 
-                className="btn btn-yellow"
-                onClick={() => {
-                  // TODO: 實作新增角色邏輯
-                  const newRole = {
-                    id: `role_${Date.now()}`,
-                    name: '新角色',
-                    level: '一般使用'
-                  };
-                  setRoles(prev => [...prev, newRole]);
-                  alert('新增角色成功');
-                  setShowAddRole(false);
-                }}
-              >
-                新增
-              </button>
-            </div>
-          }
-        >
-          <div style={{ padding: '16px 0' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                角色名稱
-              </label>
-              <input 
-                type="text" 
-                className="input" 
-                placeholder="請輸入角色名稱"
-                style={{ width: '100%' }}
-              />
-            </div>
+      {showAddRole && rbac.isAdmin && (() => {
+        const nameRef = React.createRef();
+        const levelRef = React.createRef();
+        
+        return (
+          <Modal
+            title="新增角色"
+            size="md"
+            onClose={() => setShowAddRole(false)}
+            footer={
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <button className="btn btn-ghost" onClick={() => setShowAddRole(false)}>
+                  取消
+                </button>
+                <button 
+                  className="btn btn-yellow"
+                  onClick={() => {
+                    const roleName = nameRef.current?.value || '新角色';
+                    const roleLevel = levelRef.current?.value || '一般使用';
+                    
+                    const newRoleId = `role_${Date.now()}`;
+                    const newRole = {
+                      id: newRoleId,
+                      name: roleName,
+                      level: roleLevel
+                    };
+                    
+                    // 新增角色
+                    setRoles(prev => [...prev, newRole]);
+                    
+                    // 根據權限等級自動分配預設權限
+                    const newPermissions = buildPermissionsByLevel(roleLevel, permissionRows);
+                    setRolePermMap(prev => ({
+                      ...prev,
+                      [newRoleId]: newPermissions
+                    }));
+                    
+                    setShowAddRole(false);
+                  }}
+                >
+                  新增
+                </button>
+              </div>
+            }
+          >
+            <div style={{ padding: '16px 0' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  角色名稱
+                </label>
+                <input 
+                  ref={nameRef}
+                  type="text" 
+                  className="input" 
+                  placeholder="請輸入角色名稱"
+                  style={{ width: '100%' }}
+                />
+              </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                權限等級
-              </label>
-              <select 
-                className="select" 
-                defaultValue="一般使用"
-                style={{ width: '100%' }}
-              >
-                {PERMISSION_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  權限等級
+                </label>
+                <select 
+                  ref={levelRef}
+                  className="select" 
+                  defaultValue="一般使用"
+                  style={{ width: '100%' }}
+                >
+                  {PERMISSION_LEVELS.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  💡 系統會根據所選權限等級自動配置對應的預設權限
+                </div>
+              </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        );
+      })()}
     </div>
   );
 }
