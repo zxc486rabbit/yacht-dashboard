@@ -175,6 +175,21 @@ function PageButton({ active, children, onClick, disabled }) {
   );
 }
 
+// ====== 密碼管理員/瀏覽器自動填入防護屬性（集中管理） ======
+const AUTOFILL_GUARD_PROPS = {
+  autoComplete: "off",
+  "data-lpignore": "true", // LastPass
+  "data-1p-ignore": "true", // 1Password
+  "data-bwignore": "true", // Bitwarden
+};
+
+const NEW_PASSWORD_GUARD_PROPS = {
+  autoComplete: "new-password",
+  "data-lpignore": "true",
+  "data-1p-ignore": "true",
+  "data-bwignore": "true",
+};
+
 // ====== shared form fields ======
 const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, showSection }) => (
   <>
@@ -185,6 +200,8 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
         placeholder="姓名"
         value={form.name}
         onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+        name="acct_name"
+        {...AUTOFILL_GUARD_PROPS}
       />
     </div>
 
@@ -195,6 +212,8 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
         placeholder="電子郵箱"
         value={form.email}
         onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+        name="acct_email"
+        {...AUTOFILL_GUARD_PROPS}
       />
     </div>
 
@@ -205,6 +224,8 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
         placeholder="帳號"
         value={form.username}
         onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
+        name="acct_username"
+        {...AUTOFILL_GUARD_PROPS}
       />
     </div>
 
@@ -218,6 +239,9 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
             type={showPwd ? "text" : "password"}
             value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+            name="acct_password"
+            // 新增帳號的密碼也避免被當成登入密碼自動帶入
+            {...NEW_PASSWORD_GUARD_PROPS}
           />
           <button
             type="button"
@@ -234,7 +258,13 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
 
     <div className="form-row">
       <div className="label">角色:</div>
-      <select className="select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
+      <select
+        className="select"
+        value={form.role}
+        onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
+        name="acct_role"
+        {...AUTOFILL_GUARD_PROPS}
+      >
         <option value="">角色選擇</option>
         {ROLE_OPTIONS.map((r) => (
           <option key={r} value={r}>
@@ -252,6 +282,8 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
           className="select"
           value={form.section}
           onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
+          name="acct_section"
+          {...AUTOFILL_GUARD_PROPS}
         >
           <option value="">工務段選擇</option>
           {SECTION_OPTIONS.map((s) => (
@@ -270,6 +302,7 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
           type="checkbox"
           checked={!!form.locked}
           onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
+          name="acct_locked"
         />
         <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
       </label>
@@ -333,7 +366,7 @@ export default function AccountManagement() {
   // 表格列選取
   const [selectedRowId, setSelectedRowId] = useState(null);
 
-  // 搜尋 - 分為三個獨立欄位
+  // 搜尋 - 分為三個獨立欄位（必須與任何 modal 操作完全解耦）
   const [searchName, setSearchName] = useState("");
   const [searchUsername, setSearchUsername] = useState("");
   const [searchRole, setSearchRole] = useState("");
@@ -497,6 +530,7 @@ export default function AccountManagement() {
   };
 
   const openPwd = (row) => {
+    // 修改密碼：必須與搜尋 state 完全解耦（避免任何人未來誤塞搜尋條件）
     setPwdCopied(false);
     setPwdForm(mkEmptyPwdForm());
     setPwdId(row.id);
@@ -617,6 +651,8 @@ export default function AccountManagement() {
             setPage(1);
           }}
           style={{ width: "30%", marginRight: "8px" }}
+          name="search_name"
+          {...AUTOFILL_GUARD_PROPS}
         />
         <input
           className="input"
@@ -627,6 +663,8 @@ export default function AccountManagement() {
             setPage(1);
           }}
           style={{ width: "25%", marginRight: "8px" }}
+          name="search_username"
+          {...AUTOFILL_GUARD_PROPS}
         />
         <input
           className="input"
@@ -637,6 +675,8 @@ export default function AccountManagement() {
             setPage(1);
           }}
           style={{ width: "20%", marginRight: "8px" }}
+          name="search_role"
+          {...AUTOFILL_GUARD_PROPS}
         />
 
         {/* 全部清除按鈕 */}
@@ -684,7 +724,9 @@ export default function AccountManagement() {
             paged.map((r) => (
               <tr
                 key={r.id}
-                className={["tr-row", selectedRowId === r.id ? "is-selected" : "", r.locked ? "is-locked" : ""].join(" ")}
+                className={["tr-row", selectedRowId === r.id ? "is-selected" : "", r.locked ? "is-locked" : ""].join(
+                  " "
+                )}
                 onClick={() => toggleSelectRow(r.id)}
               >
                 <td>
@@ -696,7 +738,6 @@ export default function AccountManagement() {
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.username}</td>
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.role}</td>
                 <td>
-                
                   <div className="op-col" onClick={stopRowClick}>
                     <button
                       className="btn btn-green"
@@ -753,6 +794,8 @@ export default function AccountManagement() {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
+            name="page_size"
+            {...AUTOFILL_GUARD_PROPS}
           >
             <option value={10}>10 條/頁</option>
             <option value={20}>20 條/頁</option>
@@ -900,6 +943,8 @@ export default function AccountManagement() {
                     touched: { ...p.touched, newPwd: true },
                   }))
                 }
+                name="pwd_new"
+                {...NEW_PASSWORD_GUARD_PROPS}
               />
               <button
                 type="button"
@@ -932,6 +977,8 @@ export default function AccountManagement() {
                     touched: { ...p.touched, confirmPwd: true },
                   }))
                 }
+                name="pwd_confirm"
+                {...NEW_PASSWORD_GUARD_PROPS}
               />
               <button
                 type="button"
