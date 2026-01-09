@@ -266,7 +266,11 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
     <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
       <div className="label">鎖定:</div>
       <label className="lock-row">
-        <input type="checkbox" checked={!!form.locked} onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))} />
+        <input
+          type="checkbox"
+          checked={!!form.locked}
+          onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
+        />
         <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
       </label>
     </div>
@@ -428,6 +432,7 @@ export default function AccountManagement() {
     setSelectedRowId((prev) => (prev === rowId ? null : rowId));
   };
 
+  // 用 onClick（冒泡）攔截，避免破壞 button onClick
   const stopRowClick = (e) => {
     e.stopPropagation();
   };
@@ -691,8 +696,15 @@ export default function AccountManagement() {
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.username}</td>
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.role}</td>
                 <td>
-                  <div className="op-col" onClickCapture={stopRowClick}>
-                    <button className="btn btn-green" onClick={() => openPwd(r)} type="button" disabled={r.locked}>
+                
+                  <div className="op-col" onClick={stopRowClick}>
+                    <button
+                      className="btn btn-green"
+                      onClick={() => openPwd(r)}
+                      type="button"
+                      disabled={r.locked}
+                      title={r.locked ? "帳號已鎖定，禁止修改密碼" : "修改密碼"}
+                    >
                       修改密碼
                     </button>
                     <button className="btn btn-green" onClick={() => openEdit(r)} type="button">
@@ -793,7 +805,12 @@ export default function AccountManagement() {
               <button className="btn" style={{ background: "#9ca3af" }} onClick={() => setEditId(null)} type="button">
                 取消
               </button>
-              <button className="btn btn-green" onClick={saveEdit} type="button" disabled={!form.name.trim() || !form.username.trim() || !form.role.trim()}>
+              <button
+                className="btn btn-green"
+                onClick={saveEdit}
+                type="button"
+                disabled={!form.name.trim() || !form.username.trim() || !form.role.trim()}
+              >
                 修改
               </button>
             </>
