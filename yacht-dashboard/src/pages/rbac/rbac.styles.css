@@ -111,7 +111,7 @@
   padding: 24px;
   border-radius: 14px;
 
-  /* 比照userProfile 的段落卡 */
+  /* 比照userProfile段落卡 */
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border: 1px solid rgba(0,0,0,0.06);
 }
@@ -460,16 +460,22 @@
 }
 
 /* =========================================================
-   Forms
+   Forms (UPDATED: 全部表單左右並排)
    ========================================================= */
 
 .rbac-card .form-row{
-  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .rbac-card .label{
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 800;
+  margin-bottom: 0;
+  color: #111827;
+  line-height: 1.2;
 }
 
 .rbac-card .input,
@@ -478,6 +484,52 @@
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--line);
+  background: #fff;
+}
+
+.rbac-card .input:focus,
+.rbac-card .select:focus{
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(5, 153, 187, 0.12);
+}
+
+/* Checkbox row (used in AccountManagement.jsx: lock-row) */
+.rbac-card .lock-row{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Password input wrapper + eye button */
+.rbac-card .pwd-wrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.rbac-card .pwd-wrap .input{
+  padding-right: 44px;
+}
+
+.rbac-card .pwd-eye{
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.85;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.rbac-card .pwd-eye:hover{
+  opacity: 1;
+  background: #f3f4f6;
 }
 
 /* =========================================================
@@ -564,6 +616,158 @@
 }
 
 /* =========================================================
+   Password Modal (Full version)
+   - rules + strength + generate + copy + errors
+   Scope: .rbac-card only
+   ========================================================= */
+
+.rbac-card .pwd-meta{
+  background: #f3f4f6;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 12px;
+  margin-bottom: 12px;
+}
+
+.rbac-card .pwd-meta-row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.rbac-card .pwd-meta-k{
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .2px;
+}
+
+.rbac-card .pwd-meta-v{
+  color: #111827;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.rbac-card .pwd-warn{
+  margin-top: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.rbac-card .pwd-tools{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.rbac-card .btn-ghost{
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: #111827;
+}
+
+.rbac-card .btn-ghost:hover:not(:disabled){
+  background: #f3f4f6;
+  border-color: var(--brand);
+}
+
+.rbac-card .pwd-strength{
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #ffffff;
+}
+
+.rbac-card .pwd-strength-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rbac-card .pwd-strength-label{
+  font-weight: 900;
+  color: #111827;
+}
+
+.rbac-card .pwd-strength-bar{
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.rbac-card .pwd-strength-fill{
+  height: 100%;
+  width: 0%;
+  background: var(--brand);
+  transition: width .18s ease, filter .18s ease;
+}
+
+.rbac-card .pwd-strength-fill.s0{ width: 0%; }
+.rbac-card .pwd-strength-fill.s1{ width: 20%; filter: saturate(.6) brightness(1.05); }
+.rbac-card .pwd-strength-fill.s2{ width: 40%; filter: saturate(.8) brightness(1.02); }
+.rbac-card .pwd-strength-fill.s3{ width: 60%; filter: saturate(1.0) brightness(1.00); }
+.rbac-card .pwd-strength-fill.s4{ width: 80%; filter: saturate(1.1) brightness(.98); }
+.rbac-card .pwd-strength-fill.s5{ width: 100%; filter: saturate(1.2) brightness(.96); }
+
+/* invalid + error */
+.rbac-card .input.is-invalid{
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
+}
+
+.rbac-card .field-error{
+  margin: -6px 0 8px 130px; /* 120 label + 10 gap */
+  color: #b91c1c;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.rbac-card .pwd-rules{
+  margin-top: 10px;
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+}
+
+.rbac-card .pwd-rules-title{
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.rbac-card .pwd-rules-list{
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 800;
+}
+
+.rbac-card .pwd-rules-list li{
+  position: relative;
+  padding-left: 4px;
+}
+
+.rbac-card .pwd-rules-list li.ok{
+  color: #065f46;
+}
+
+.rbac-card .pwd-rules-list li.ok::marker{
+  color: #10b981;
+}
+
+/* =========================================================
    RWD (align with AccountSettings.css)
    ========================================================= */
 
@@ -575,5 +779,16 @@
   .rbac-tabs{
     overflow-x: auto;
     white-space: nowrap;
+  }
+}
+
+/* Small screens: form rows stack */
+@media (max-width: 520px){
+  .rbac-card .form-row{
+    grid-template-columns: 1fr;
+  }
+
+  .rbac-card .field-error{
+    margin-left: 0;
   }
 }

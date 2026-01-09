@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./rbac.styles.css";
+import EyeIcon from "../../components/EyeIcon";
 
 // ====== 假資料 ======
 // 角色改為：管理者 / 工程師 / 船長 / 船員
@@ -151,6 +152,20 @@ function mkEmptyAccount() {
   };
 }
 
+// ====== Password form state（與新增/編輯分離，避免互相污染） ======
+function mkEmptyPwdForm() {
+  return {
+    newPwd: "",
+    confirmPwd: "",
+    showNew: false,
+    showConfirm: false,
+    touched: {
+      newPwd: false,
+      confirmPwd: false,
+    },
+  };
+}
+
 // ====== Pagination ======
 function PageButton({ active, children, onClick, disabled }) {
   return (
@@ -211,7 +226,7 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
             aria-label="toggle password"
             title={showPwd ? "隱藏" : "顯示"}
           >
-            {showPwd ? "🙈" : "👁"}
+            <EyeIcon open={showPwd} />
           </button>
         </div>
       </div>
@@ -258,6 +273,56 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
   </>
 );
 
+// ====== 密碼規則與工具 ======
+const pwdRules = {
+  minLen: 8,
+  hasLower: (s) => /[a-z]/.test(s),
+  hasUpper: (s) => /[A-Z]/.test(s),
+  hasDigit: (s) => /\d/.test(s),
+  hasSymbol: (s) => /[^A-Za-z0-9]/.test(s),
+};
+
+function evalPwd(pwd) {
+  const okMin = pwd.length >= pwdRules.minLen;
+  const okLower = pwdRules.hasLower(pwd);
+  const okUpper = pwdRules.hasUpper(pwd);
+  const okDigit = pwdRules.hasDigit(pwd);
+  const okSymbol = pwdRules.hasSymbol(pwd);
+
+  const score = [okMin, okLower, okUpper, okDigit, okSymbol].filter(Boolean).length; // 0~5
+  const allOk = okMin && okLower && okUpper && okDigit && okSymbol;
+
+  return { okMin, okLower, okUpper, okDigit, okSymbol, score, allOk };
+}
+
+function scoreLabel(score) {
+  if (score <= 1) return "弱";
+  if (score === 2) return "偏弱";
+  if (score === 3) return "普通";
+  if (score === 4) return "良好";
+  return "強";
+}
+
+function genStrongPassword(len = 12) {
+  const lowers = "abcdefghijklmnopqrstuvwxyz";
+  const uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const digits = "0123456789";
+  const symbols = "!@#$%^&*()-_=+[]{};:,.?/";
+  const all = lowers + uppers + digits + symbols;
+
+  const pick = (str) => str[Math.floor(Math.random() * str.length)];
+  // 至少各一
+  let base = [pick(lowers), pick(uppers), pick(digits), pick(symbols)];
+  while (base.length < len) base.push(pick(all));
+
+  // shuffle
+  for (let i = base.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [base[i], base[j]] = [base[j], base[i]];
+  }
+  return base.join("");
+}
+
 export default function AccountManagement() {
   const [rows, setRows] = useState(seed);
 
@@ -282,9 +347,13 @@ export default function AccountManagement() {
   const [delOpen, setDelOpen] = useState(false);
   const [delTargetId, setDelTargetId] = useState(null);
 
-  // 表單
+  // 表單（新增/編輯用）
   const [form, setForm] = useState(mkEmptyAccount());
   const [showPwd, setShowPwd] = useState(false);
+
+  // 修改密碼用表單（獨立）
+  const [pwdForm, setPwdForm] = useState(mkEmptyPwdForm());
+  const [pwdCopied, setPwdCopied] = useState(false);
 
   const editRow = useMemo(() => rows.find((r) => r.id === editId) || null, [rows, editId]);
   const pwdRow = useMemo(() => rows.find((r) => r.id === pwdId) || null, [rows, pwdId]);
@@ -423,15 +492,55 @@ export default function AccountManagement() {
   };
 
   const openPwd = (row) => {
-    setForm((p) => ({ ...p, password: "" }));
-    setShowPwd(false);
+    setPwdCopied(false);
+    setPwdForm(mkEmptyPwdForm());
     setPwdId(row.id);
   };
 
-  const savePwd = () => {
-    if (!form.password.trim()) return;
-    // 之後串 API：PUT /users/{id}/password
+  const closePwd = () => {
     setPwdId(null);
+    setPwdCopied(false);
+    setPwdForm(mkEmptyPwdForm());
+  };
+
+  const pwdEval = useMemo(() => evalPwd(pwdForm.newPwd), [pwdForm.newPwd]);
+  const pwdMatch = pwdForm.newPwd.length > 0 && pwdForm.newPwd === pwdForm.confirmPwd;
+
+  const pwdErrorNew = useMemo(() => {
+    if (!pwdForm.touched.newPwd) return "";
+    if (!pwdForm.newPwd) return "請輸入新密碼。";
+    if (!pwdEval.allOk) return "新密碼未符合安全規則。";
+    return "";
+  }, [pwdForm.touched.newPwd, pwdForm.newPwd, pwdEval.allOk]);
+
+  const pwdErrorConfirm = useMemo(() => {
+    if (!pwdForm.touched.confirmPwd) return "";
+    if (!pwdForm.confirmPwd) return "請再次輸入新密碼。";
+    if (!pwdMatch) return "兩次輸入不一致。";
+    return "";
+  }, [pwdForm.touched.confirmPwd, pwdForm.confirmPwd, pwdMatch]);
+
+  const canSavePwd = useMemo(() => {
+    return !!pwdRow && !pwdRow.locked && pwdEval.allOk && pwdMatch;
+  }, [pwdRow, pwdEval.allOk, pwdMatch]);
+
+  const savePwd = () => {
+    if (!canSavePwd) return;
+
+    // 之後串 API：PUT /users/{id}/password
+    // 目前先更新一個時間戳，表示已修改過密碼
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === pwdId
+          ? {
+              ...r,
+              passwordUpdatedAt: new Date().toISOString(),
+            }
+          : r
+      )
+    );
+
+    closePwd();
   };
 
   // 開啟刪除確認 modal
@@ -455,6 +564,28 @@ export default function AccountManagement() {
     closeDel();
   };
 
+  const handleGeneratePwd = () => {
+    const s = genStrongPassword(12);
+    setPwdCopied(false);
+    setPwdForm((p) => ({
+      ...p,
+      newPwd: s,
+      confirmPwd: s,
+      touched: { newPwd: true, confirmPwd: true },
+    }));
+  };
+
+  const handleCopyPwd = async () => {
+    try {
+      await navigator.clipboard.writeText(pwdForm.newPwd || "");
+      setPwdCopied(true);
+      window.setTimeout(() => setPwdCopied(false), 1200);
+    } catch {
+      // ignore
+      setPwdCopied(false);
+    }
+  };
+
   return (
     <div className="rbac-card">
       {/* Header row: 標題 + 右上按鈕 */}
@@ -471,7 +602,7 @@ export default function AccountManagement() {
       </div>
 
       {/* 搜尋欄位區域 - 對齊表格欄位 */}
-      <div style={{ display: "flex", gap: "0", marginBottom: "12px", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: "0", marginTop: "20px", marginBottom: "12px", alignItems: "center" }}>
         <input
           className="input"
           placeholder="搜尋姓名"
@@ -561,7 +692,7 @@ export default function AccountManagement() {
                 <td style={{ fontWeight: 900, fontSize: 18 }}>{r.role}</td>
                 <td>
                   <div className="op-col" onClickCapture={stopRowClick}>
-                    <button className="btn btn-green" onClick={() => openPwd(r)} type="button">
+                    <button className="btn btn-green" onClick={() => openPwd(r)} type="button" disabled={r.locked}>
                       修改密碼
                     </button>
                     <button className="btn btn-green" onClick={() => openEdit(r)} type="button">
@@ -640,7 +771,14 @@ export default function AccountManagement() {
             </>
           }
         >
-          <AccountFormFields withPassword={true} form={form} setForm={setForm} showPwd={showPwd} setShowPwd={setShowPwd} showSection={showSection} />
+          <AccountFormFields
+            withPassword={true}
+            form={form}
+            setForm={setForm}
+            showPwd={showPwd}
+            setShowPwd={setShowPwd}
+            showSection={showSection}
+          />
         </Modal>
       ) : null}
 
@@ -661,51 +799,146 @@ export default function AccountManagement() {
             </>
           }
         >
-          <AccountFormFields withPassword={false} form={form} setForm={setForm} showPwd={showPwd} setShowPwd={setShowPwd} showSection={showSection} />
+          <AccountFormFields
+            withPassword={false}
+            form={form}
+            setForm={setForm}
+            showPwd={showPwd}
+            setShowPwd={setShowPwd}
+            showSection={showSection}
+          />
         </Modal>
       ) : null}
 
-      {/* ====== Modal：修改密碼 ====== */}
+      {/* ====== Modal：修改密碼（加強版） ====== */}
       {pwdRow ? (
         <Modal
           title="修改密碼"
           size="sm"
-          onClose={() => setPwdId(null)}
+          onClose={closePwd}
           footer={
             <>
-              <button className="btn" style={{ background: "#9ca3af" }} onClick={() => setPwdId(null)} type="button">
+              <button className="btn" style={{ background: "#9ca3af" }} onClick={closePwd} type="button">
                 取消
               </button>
-              <button className="btn btn-green" onClick={savePwd} type="button" disabled={!form.password.trim()}>
+              <button
+                className="btn btn-green"
+                onClick={savePwd}
+                type="button"
+                disabled={!canSavePwd}
+                title={pwdRow.locked ? "帳號已鎖定，禁止修改密碼" : ""}
+              >
                 修改
               </button>
             </>
           }
         >
-          <div className="small-muted" style={{ marginBottom: 12 }}>
-            帳號：<span style={{ fontWeight: 900, color: "#111827" }}>{pwdRow.username}</span>
+          <div className="pwd-meta">
+            <div className="pwd-meta-row">
+              <span className="pwd-meta-k">帳號</span>
+              <span className="pwd-meta-v">{pwdRow.username}</span>
+            </div>
+            <div className="pwd-meta-row">
+              <span className="pwd-meta-k">角色</span>
+              <span className="pwd-meta-v">{pwdRow.role}</span>
+            </div>
+            {pwdRow.locked ? <div className="pwd-warn">此帳號目前為「鎖定」狀態，禁止修改密碼。</div> : null}
           </div>
 
+          <div className="pwd-tools">
+            <button className="btn btn-ghost" type="button" onClick={handleGeneratePwd} disabled={pwdRow.locked}>
+              產生安全密碼
+            </button>
+            <button className="btn btn-ghost" type="button" onClick={handleCopyPwd} disabled={!pwdForm.newPwd}>
+              {pwdCopied ? "已複製" : "複製密碼"}
+            </button>
+          </div>
+
+          {/* strength */}
+          <div className="pwd-strength">
+            <div className="pwd-strength-top">
+              <span className="small-muted">強度</span>
+              <span className="pwd-strength-label">{scoreLabel(pwdEval.score)}</span>
+            </div>
+            <div className="pwd-strength-bar" aria-label="password strength">
+              <div className={`pwd-strength-fill s${pwdEval.score}`} />
+            </div>
+          </div>
+
+          {/* New password */}
           <div className="form-row">
             <div className="label">新密碼:</div>
             <div className="pwd-wrap">
               <input
-                className="input"
+                className={`input ${pwdErrorNew ? "is-invalid" : ""}`}
                 placeholder="新密碼"
-                type={showPwd ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                type={pwdForm.showNew ? "text" : "password"}
+                value={pwdForm.newPwd}
+                disabled={pwdRow.locked}
+                onBlur={() => setPwdForm((p) => ({ ...p, touched: { ...p.touched, newPwd: true } }))}
+                onChange={(e) =>
+                  setPwdForm((p) => ({
+                    ...p,
+                    newPwd: e.target.value,
+                    touched: { ...p.touched, newPwd: true },
+                  }))
+                }
               />
               <button
                 type="button"
                 className="pwd-eye"
-                onClick={() => setShowPwd((s) => !s)}
+                onClick={() => setPwdForm((p) => ({ ...p, showNew: !p.showNew }))}
                 aria-label="toggle password"
-                title={showPwd ? "隱藏" : "顯示"}
+                title={pwdForm.showNew ? "隱藏" : "顯示"}
               >
-                {showPwd ? "🙈" : "👁"}
+                <EyeIcon open={pwdForm.showNew} />
               </button>
             </div>
+          </div>
+          {pwdErrorNew ? <div className="field-error">{pwdErrorNew}</div> : null}
+
+          {/* Confirm password */}
+          <div className="form-row" style={{ marginTop: 10 }}>
+            <div className="label">確認新密碼:</div>
+            <div className="pwd-wrap">
+              <input
+                className={`input ${pwdErrorConfirm ? "is-invalid" : ""}`}
+                placeholder="確認新密碼"
+                type={pwdForm.showConfirm ? "text" : "password"}
+                value={pwdForm.confirmPwd}
+                disabled={pwdRow.locked}
+                onBlur={() => setPwdForm((p) => ({ ...p, touched: { ...p.touched, confirmPwd: true } }))}
+                onChange={(e) =>
+                  setPwdForm((p) => ({
+                    ...p,
+                    confirmPwd: e.target.value,
+                    touched: { ...p.touched, confirmPwd: true },
+                  }))
+                }
+              />
+              <button
+                type="button"
+                className="pwd-eye"
+                onClick={() => setPwdForm((p) => ({ ...p, showConfirm: !p.showConfirm }))}
+                aria-label="toggle password"
+                title={pwdForm.showConfirm ? "隱藏" : "顯示"}
+              >
+                <EyeIcon open={pwdForm.showConfirm} />
+              </button>
+            </div>
+          </div>
+          {pwdErrorConfirm ? <div className="field-error">{pwdErrorConfirm}</div> : null}
+
+          {/* rules */}
+          <div className="pwd-rules">
+            <div className="pwd-rules-title">密碼規則</div>
+            <ul className="pwd-rules-list">
+              <li className={pwdEval.okMin ? "ok" : ""}>至少 {pwdRules.minLen} 個字元</li>
+              <li className={pwdEval.okLower ? "ok" : ""}>包含小寫字母 (a-z)</li>
+              <li className={pwdEval.okUpper ? "ok" : ""}>包含大寫字母 (A-Z)</li>
+              <li className={pwdEval.okDigit ? "ok" : ""}>包含數字 (0-9)</li>
+              <li className={pwdEval.okSymbol ? "ok" : ""}>包含特殊符號（例如 !@#）</li>
+            </ul>
           </div>
         </Modal>
       ) : null}
