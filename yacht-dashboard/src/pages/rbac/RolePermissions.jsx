@@ -107,10 +107,7 @@ function MultiSelectOps({ valueSet, onChange }) {
   );
 }
 
-/** 把 permissionRows 轉成「系統大項 -> 細項列表」
- *  目前 row.group 是一段中文（例如：門禁管制系統、影像監控系統...）
- *  會依 group 分組，並以指定順序輸出
- */
+/** 把 permissionRows 轉成「系統大項 -> 細項列表」 */
 function buildGroups(permissionRows) {
   const ORDER = [
     "岸電控制系統",
@@ -128,7 +125,6 @@ function buildGroups(permissionRows) {
     map.get(g).push(row);
   });
 
-  // 依 ORDER 排序，沒有在 ORDER 的放最後
   const keys = Array.from(map.keys()).sort((a, b) => {
     const ia = ORDER.indexOf(a);
     const ib = ORDER.indexOf(b);
@@ -143,7 +139,7 @@ function buildGroups(permissionRows) {
 
 export default function RolePermissions() {
   const permissionRows = useMemo(() => buildPermissionRows(), []);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const permGroups = useMemo(() => buildGroups(permissionRows), [permissionRows]);
 
   const [roles, setRoles] = useState(DEFAULT_ROLES);
   const [rolePermMap, setRolePermMap] = useState(() =>
@@ -164,6 +160,14 @@ export default function RolePermissions() {
   );
 
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
+
+  // ====== 刪除確認 modal ======
+  const [delOpen, setDelOpen] = useState(false);
+  const [delTargetId, setDelTargetId] = useState(null);
+  const delRoleObj = useMemo(
+    () => roles.find((r) => r.id === delTargetId) || null,
+    [roles, delTargetId]
+  );
 
   // forms
   const [roleForm, setRoleForm] = useState({ name: "", level: "" });
@@ -196,11 +200,7 @@ export default function RolePermissions() {
     setRoles((prev) =>
       prev.map((r) =>
         r.id === editRoleId
-          ? {
-              ...r,
-              name: roleForm.name.trim(),
-              level: roleForm.level.trim(),
-            }
+          ? { ...r, name: roleForm.name.trim(), level: roleForm.level.trim() }
           : r
       )
     );
@@ -215,7 +215,6 @@ export default function RolePermissions() {
   const saveAddRole = () => {
     const name = roleForm.name.trim();
     const level = roleForm.level.trim();
-
     if (!name) return;
 
     const id = `role_${Date.now()}`;
@@ -233,16 +232,35 @@ export default function RolePermissions() {
     setIsAddRoleOpen(false);
   };
 
-  const deleteRole = (roleId) => {
-    // 保守：管理者不給刪，可自行調整
-    if (roleId === "role_admin") return;
+  // ====== 刪除確認流程（避免誤刪） ======
+  const openDel = (role) => {
+    if (!role) return;
+    if (role.id === "role_admin") return; // 保守：管理者不可刪
+    setDelTargetId(role.id);
+    setDelOpen(true);
+  };
 
-    setRoles((prev) => prev.filter((r) => r.id !== roleId));
+  const closeDel = () => {
+    setDelOpen(false);
+    setDelTargetId(null);
+  };
+
+  const confirmDel = () => {
+    if (!delTargetId) return;
+    if (delTargetId === "role_admin") return;
+
+    // 若正在編輯/查看同一角色的 modal，先關閉
+    setPermRoleId((prev) => (prev === delTargetId ? null : prev));
+    setEditRoleId((prev) => (prev === delTargetId ? null : prev));
+
+    setRoles((prev) => prev.filter((r) => r.id !== delTargetId));
     setRolePermMap((prev) => {
       const next = { ...prev };
-      delete next[roleId];
+      delete next[delTargetId];
       return next;
     });
+
+    closeDel();
   };
 
   // 權限編輯：單列更新
@@ -259,8 +277,6 @@ export default function RolePermissions() {
   const closePermModal = () => setPermRoleId(null);
 
   // ====== 編輯權限 Modal：左側下拉選系統 / 右側只顯示該系統細項 ======
-  const permGroups = useMemo(() => buildGroups(permissionRows), [permissionRows]);
-
   const [activeSystemKey, setActiveSystemKey] = useState(
     permGroups?.[0]?.key ?? ""
   );
@@ -283,41 +299,19 @@ export default function RolePermissions() {
 
   return (
     <div className="rbac-card">
+      {/* 固定顯示 */}
       <div className="rbac-actions">
-        {!isEditMode ? (
-          <button
-            className="btn btn-green"
-            onClick={() => setIsEditMode(true)}
-            type="button"
-          >
-            編輯
-          </button>
-        ) : (
-          <>
-            <button
-              className="btn btn-yellow"
-              onClick={openAddRole}
-              type="button"
-            >
-              新增角色權限
-            </button>
-            <button
-              className="btn btn-green"
-              onClick={() => setIsEditMode(false)}
-              type="button"
-            >
-              完成編輯
-            </button>
-          </>
-        )}
+        <button className="btn btn-yellow" onClick={openAddRole} type="button">
+          新增角色
+        </button>
       </div>
 
-      {/* 對齊 scoped CSS：rbac-table */}
+      {/* 永遠顯示操作欄 */}
       <table className="rbac-table">
         <thead>
           <tr>
-            <th style={{ width: isEditMode ? "50%" : "100%" }}>角色</th>
-            {isEditMode ? <th style={{ width: "50%" }}>操作</th> : null}
+            <th style={{ width: "50%" }}>角色</th>
+            <th style={{ width: "50%" }}>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -327,39 +321,92 @@ export default function RolePermissions() {
                 <div className="role-name">{r.name}</div>
               </td>
 
-              {isEditMode ? (
-                <td>
-                  <div className="op-col">
-                    <button
-                      className="btn btn-purple"
-                      onClick={() => setPermRoleId(r.id)}
-                      type="button"
-                    >
-                      編輯權限
-                    </button>
-                    <button
-                      className="btn btn-green"
-                      onClick={() => openEditRole(r)}
-                      type="button"
-                    >
-                      修改
-                    </button>
-                    <button
-                      className="btn btn-red"
-                      onClick={() => deleteRole(r.id)}
-                      type="button"
-                      disabled={r.id === "role_admin"}
-                      title={r.id === "role_admin" ? "管理者不可刪除" : "刪除角色"}
-                    >
-                      刪除
-                    </button>
-                  </div>
-                </td>
-              ) : null}
+              <td>
+                <div className="op-col">
+                  <button
+                    className="btn btn-purple"
+                    onClick={() => setPermRoleId(r.id)}
+                    type="button"
+                  >
+                    編輯權限
+                  </button>
+
+                  <button
+                    className="btn btn-green"
+                    onClick={() => openEditRole(r)}
+                    type="button"
+                  >
+                    修改
+                  </button>
+
+                  <button
+                    className="btn btn-red"
+                    onClick={() => openDel(r)}
+                    type="button"
+                    disabled={r.id === "role_admin"}
+                    title={r.id === "role_admin" ? "管理者不可刪除" : "刪除角色"}
+                  >
+                    刪除
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* ====== Modal：刪除確認（避免誤刪） ====== */}
+      {delOpen ? (
+        <Modal
+          title="確認刪除"
+          size="sm"
+          onClose={closeDel}
+          footer={
+            <>
+              <button
+                className="btn"
+                style={{ background: "#9ca3af" }}
+                onClick={closeDel}
+                type="button"
+              >
+                取消
+              </button>
+              <button
+                className="btn btn-red"
+                onClick={confirmDel}
+                type="button"
+                disabled={!delRoleObj || delRoleObj?.id === "role_admin"}
+                title={
+                  delRoleObj?.id === "role_admin"
+                    ? "管理者不可刪除"
+                    : "確定刪除"
+                }
+              >
+                確定刪除
+              </button>
+            </>
+          }
+        >
+          <div style={{ fontWeight: 900, marginBottom: 10 }}>
+            此操作無法復原，請再次確認是否要刪除以下角色：
+          </div>
+
+          <div className="small-muted" style={{ lineHeight: 1.9 }}>
+            <div>
+              角色：{" "}
+              <span style={{ fontWeight: 900, color: "#111827" }}>
+                {delRoleObj?.name ?? "-"}
+              </span>
+            </div>
+            <div>
+              權限等級：{" "}
+              <span style={{ fontWeight: 900, color: "#111827" }}>
+                {delRoleObj?.level ?? "自訂"}
+              </span>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {/* ====== Modal: 編輯某角色權限（大 modal） ====== */}
       {permRole ? (
@@ -391,8 +438,6 @@ export default function RolePermissions() {
             {/* Left: 系統下拉 + 細項清單 */}
             <aside className="perm-left">
               <div style={{ marginBottom: 10 }}>
-                {/* 點擊下拉選單時，大標題變成下拉選到的系統
-                   這邊下拉就是最主要的系統標題 */}
                 <select
                   className="select"
                   value={activeSystemKey}
@@ -449,7 +494,11 @@ export default function RolePermissions() {
                         <MultiSelectOps
                           valueSet={setVal}
                           onChange={(nextSet) =>
-                            updateRolePermissionRow(permRole.id, row.key, nextSet)
+                            updateRolePermissionRow(
+                              permRole.id,
+                              row.key,
+                              nextSet
+                            )
                           }
                         />
                       </div>
