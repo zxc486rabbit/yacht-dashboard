@@ -236,7 +236,7 @@
   border-top: 1px solid var(--line);
 }
 
-.rbac-card .icon-x{
+.rbac-card .rbac-icon-x{
   border: none;
   background: transparent;
   font-size: 22px;

@@ -104,6 +104,8 @@ const seed = [
 ];
 
 // ====== 共用 Modal ======
+// 修正重點：避免與 Bootstrap/Kaiadmin 的 .modal 衝突（常見 display:none）
+// 全部改用 .rbac-backdrop / .rbac-modal... 並與你的 rbac.styles.css 對齊
 function Modal({ title, size = "md", onClose, children, footer }) {
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose?.();
@@ -112,18 +114,28 @@ function Modal({ title, size = "md", onClose, children, footer }) {
   }, [onClose]);
 
   return (
-    <div className="backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div className={`modal ${size === "sm" ? "sm" : ""}`}>
-        <div className="modal-head">
-          <h3 className="modal-title">{title}</h3>
-          <button className="icon-x" onClick={onClose} type="button" aria-label="close">
+    <div
+      className="rbac-backdrop"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
+      role="presentation"
+    >
+      <div
+        className={`rbac-modal ${size === "sm" ? "sm" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="rbac-modal-head">
+          <h3 className="rbac-modal-title">{title}</h3>
+          <button className="rbac-icon-x" onClick={onClose} type="button" aria-label="close">
             ×
           </button>
         </div>
 
-        <div className="modal-body">{children}</div>
+        <div className="rbac-modal-body">{children}</div>
 
-        {footer ? <div className="modal-foot">{footer}</div> : null}
+        {footer ? <div className="rbac-modal-foot">{footer}</div> : null}
       </div>
     </div>
   );
@@ -198,9 +210,10 @@ export default function AccountManagement() {
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       const nameMatch = searchName.trim() === "" || r.name.toLowerCase().includes(searchName.trim().toLowerCase());
-      const usernameMatch = searchUsername.trim() === "" || r.username.toLowerCase().includes(searchUsername.trim().toLowerCase());
+      const usernameMatch =
+        searchUsername.trim() === "" || r.username.toLowerCase().includes(searchUsername.trim().toLowerCase());
       const roleMatch = searchRole.trim() === "" || r.role.toLowerCase().includes(searchRole.trim().toLowerCase());
-      
+
       return nameMatch && usernameMatch && roleMatch;
     });
   }, [rows, searchName, searchUsername, searchRole]);
@@ -270,7 +283,7 @@ export default function AccountManagement() {
       username: form.username.trim(),
       role: form.role,
       // 船長/船員：不存工務段
-      section: ["管理者", "工程師"].includes(form.role) ? (form.section || "") : "",
+      section: ["管理者", "工程師"].includes(form.role) ? form.section || "" : "",
       locked: !!form.locked,
     };
 
@@ -304,7 +317,7 @@ export default function AccountManagement() {
               username: form.username.trim(),
               role: form.role,
               // 船長/船員：不存工務段
-              section: ["管理者", "工程師"].includes(form.role) ? (form.section || "") : "",
+              section: ["管理者", "工程師"].includes(form.role) ? form.section || "" : "",
               locked: !!form.locked,
             }
           : r
@@ -405,12 +418,8 @@ export default function AccountManagement() {
 
       <div className="form-row">
         <div className="label">角色:</div>
-        <select
-          className="select"
-          value={form.role}
-          onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
-        >
-          <option value="">角色</option>
+        <select className="select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
+          <option value="">角色選擇</option>
           {ROLE_OPTIONS.map((r) => (
             <option key={r} value={r}>
               {r}
@@ -428,7 +437,7 @@ export default function AccountManagement() {
             value={form.section}
             onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
           >
-            <option value="">工務段</option>
+            <option value="">工務段選擇</option>
             {SECTION_OPTIONS.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -441,11 +450,7 @@ export default function AccountManagement() {
       <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
         <div className="label">鎖定:</div>
         <label className="lock-row">
-          <input
-            type="checkbox"
-            checked={!!form.locked}
-            onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
-          />
+          <input type="checkbox" checked={!!form.locked} onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))} />
           <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
         </label>
       </div>
@@ -468,7 +473,7 @@ export default function AccountManagement() {
       </div>
 
       {/* 搜尋欄位區域 - 對齊表格欄位 */}
-      <div style={{ display: 'flex', gap: '0', marginBottom: '12px', alignItems: 'center' }}>
+      <div style={{ display: "flex", gap: "0", marginBottom: "12px", alignItems: "center" }}>
         <input
           className="input"
           placeholder="搜尋姓名"
@@ -477,7 +482,7 @@ export default function AccountManagement() {
             setSearchName(e.target.value);
             setPage(1);
           }}
-          style={{ width: '30%', marginRight: '8px' }}
+          style={{ width: "30%", marginRight: "8px" }}
         />
         <input
           className="input"
@@ -487,7 +492,7 @@ export default function AccountManagement() {
             setSearchUsername(e.target.value);
             setPage(1);
           }}
-          style={{ width: '25%', marginRight: '8px' }}
+          style={{ width: "25%", marginRight: "8px" }}
         />
         <input
           className="input"
@@ -497,13 +502,13 @@ export default function AccountManagement() {
             setSearchRole(e.target.value);
             setPage(1);
           }}
-          style={{ width: '20%', marginRight: '8px' }}
+          style={{ width: "20%", marginRight: "8px" }}
         />
-        
+
         {/* 全部清除按鈕 */}
-        <div style={{ width: '25%', display: 'flex', justifyContent: 'flex-start' }}>
+        <div style={{ width: "25%", display: "flex", justifyContent: "flex-start" }}>
           {(searchName || searchUsername || searchRole) && (
-            <button 
+            <button
               className="btn btn-ghost"
               onClick={() => {
                 setSearchName("");
@@ -512,7 +517,7 @@ export default function AccountManagement() {
                 setPage(1);
               }}
               type="button"
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ whiteSpace: "nowrap" }}
             >
               全部清除
             </button>
@@ -521,6 +526,8 @@ export default function AccountManagement() {
       </div>
 
       {/* 表格 */}
+      {/* 建議你若要套用你 CSS 的 .rbac-table，可以把 className="table" 改成 "rbac-table"；
+         但這不影響 modal 是否顯示，所以這裡保持原樣。 */}
       <table className="table">
         <thead>
           <tr>
@@ -545,11 +552,7 @@ export default function AccountManagement() {
             paged.map((r) => (
               <tr
                 key={r.id}
-                className={[
-                  "tr-row",
-                  selectedRowId === r.id ? "is-selected" : "",
-                  r.locked ? "is-locked" : "",
-                ].join(" ")}
+                className={["tr-row", selectedRowId === r.id ? "is-selected" : "", r.locked ? "is-locked" : ""].join(" ")}
                 onClick={() => toggleSelectRow(r.id)}
               >
                 <td>
@@ -656,12 +659,7 @@ export default function AccountManagement() {
               <button className="btn" style={{ background: "#9ca3af" }} onClick={() => setEditId(null)} type="button">
                 取消
               </button>
-              <button
-                className="btn btn-green"
-                onClick={saveEdit}
-                type="button"
-                disabled={!form.name.trim() || !form.username.trim() || !form.role.trim()}
-              >
+              <button className="btn btn-green" onClick={saveEdit} type="button" disabled={!form.name.trim() || !form.username.trim() || !form.role.trim()}>
                 修改
               </button>
             </>
