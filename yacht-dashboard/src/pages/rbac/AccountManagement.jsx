@@ -156,8 +156,10 @@ export default function AccountManagement() {
   // 表格列選取
   const [selectedRowId, setSelectedRowId] = useState(null);
 
-  // 搜尋
-  const [q, setQ] = useState("");
+  // 搜尋 - 分為三個獨立欄位
+  const [searchName, setSearchName] = useState("");
+  const [searchUsername, setSearchUsername] = useState("");
+  const [searchRole, setSearchRole] = useState("");
 
   // 分頁
   const [page, setPage] = useState(1);
@@ -194,16 +196,14 @@ export default function AccountManagement() {
   }, [showSection]);
 
   const filtered = useMemo(() => {
-    const keyword = q.trim().toLowerCase();
-    if (!keyword) return rows;
     return rows.filter((r) => {
-      return (
-        r.name.toLowerCase().includes(keyword) ||
-        r.username.toLowerCase().includes(keyword) ||
-        r.role.toLowerCase().includes(keyword)
-      );
+      const nameMatch = searchName.trim() === "" || r.name.toLowerCase().includes(searchName.trim().toLowerCase());
+      const usernameMatch = searchUsername.trim() === "" || r.username.toLowerCase().includes(searchUsername.trim().toLowerCase());
+      const roleMatch = searchRole.trim() === "" || r.role.toLowerCase().includes(searchRole.trim().toLowerCase());
+      
+      return nameMatch && usernameMatch && roleMatch;
     });
-  }, [rows, q]);
+  }, [rows, searchName, searchUsername, searchRole]);
 
   const totalPages = useMemo(() => {
     const n = Math.ceil(filtered.length / pageSize);
@@ -454,25 +454,69 @@ export default function AccountManagement() {
 
   return (
     <div className="rbac-card">
-      {/* Header row: 標題 + 快速搜尋 + 右上按鈕 */}
+      {/* Header row: 標題 + 右上按鈕 */}
       <div className="acct-head">
         <div className="acct-left">
           <h2 className="acct-title">帳號管理</h2>
-          <input
-            className="input acct-search"
-            placeholder="快速搜尋"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPage(1);
-            }}
-          />
         </div>
 
         <div className="acct-right">
           <button className="btn btn-yellow" onClick={openAdd} type="button">
             新增帳號
           </button>
+        </div>
+      </div>
+
+      {/* 搜尋欄位區域 - 對齊表格欄位 */}
+      <div style={{ display: 'flex', gap: '0', marginBottom: '12px', alignItems: 'center' }}>
+        <input
+          className="input"
+          placeholder="搜尋姓名"
+          value={searchName}
+          onChange={(e) => {
+            setSearchName(e.target.value);
+            setPage(1);
+          }}
+          style={{ width: '30%', marginRight: '8px' }}
+        />
+        <input
+          className="input"
+          placeholder="搜尋帳號"
+          value={searchUsername}
+          onChange={(e) => {
+            setSearchUsername(e.target.value);
+            setPage(1);
+          }}
+          style={{ width: '25%', marginRight: '8px' }}
+        />
+        <input
+          className="input"
+          placeholder="搜尋角色"
+          value={searchRole}
+          onChange={(e) => {
+            setSearchRole(e.target.value);
+            setPage(1);
+          }}
+          style={{ width: '20%', marginRight: '8px' }}
+        />
+        
+        {/* 全部清除按鈕 */}
+        <div style={{ width: '25%', display: 'flex', justifyContent: 'flex-start' }}>
+          {(searchName || searchUsername || searchRole) && (
+            <button 
+              className="btn btn-ghost"
+              onClick={() => {
+                setSearchName("");
+                setSearchUsername("");
+                setSearchRole("");
+                setPage(1);
+              }}
+              type="button"
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              全部清除
+            </button>
+          )}
         </div>
       </div>
 

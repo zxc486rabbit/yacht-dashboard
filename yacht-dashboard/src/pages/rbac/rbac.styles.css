@@ -481,6 +481,89 @@
 }
 
 /* =========================================================
+   Pagination (分頁樣式)
+   ========================================================= */
+
+.rbac-card .pg-bar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.rbac-card .pg-left{
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rbac-card .pg-right{
+  display: flex;
+  align-items: center;
+}
+
+.rbac-card .pg-btn{
+  min-width: 36px;
+  height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  background: #f9fafb;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text);
+}
+
+.rbac-card .pg-btn:hover:not(:disabled){
+  background: #e5e7eb;
+  border-color: var(--brand);
+}
+
+.rbac-card .pg-btn.active{
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  font-weight: 700;
+}
+
+.rbac-card .pg-btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+.rbac-card .pg-dots{
+  padding: 0 4px;
+  color: var(--muted);
+}
+
+.rbac-card .select.pg-size{
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #f9fafb;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.rbac-card .select.pg-size:hover{
+  background: #e5e7eb;
+  border-color: var(--brand);
+}
+
+.rbac-card .select.pg-size:focus{
+  outline: none;
+  border-color: var(--brand);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(5, 153, 187, 0.1);
+}
+
+/* =========================================================
    RWD (align with AccountSettings.css)
    ========================================================= */
 
