@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import EyeIcon from "../../components/EyeIcon";
 import { getUserProfile, updateUserProfile, changePassword } from "../../services/userApi";
+import { useAuth } from "../../auth/AuthContext";
 import "../../styles/userProfile/AccountBasicProfile.css"; 
 
 const AccountBasicProfile = () => {
+  const { user } = useAuth();
+  
   const [form, setForm] = useState({
     name: "",
     idNumber: "",
-    account: "user123456",
+    account: "",
     email: "",
     phone: "",
     address: "",
@@ -32,19 +35,34 @@ const AccountBasicProfile = () => {
   const [showPwdModal, setShowPwdModal] = useState(false);
 
   useEffect(() => {
-    const savedData = localStorage.getItem("userProfile");
-    const savedAvatar = localStorage.getItem("userAvatar");
-
-    if (savedData) {
-      setForm(JSON.parse(savedData));
-    } else {
-      getUserProfile().then((data) => {
-        if (data) setForm(data);
+    // 優先從登入狀態獲取資料
+    if (user) {
+      setForm({
+        name: user.realName || "",  // 真实姓名
+        idNumber: user.idNumber || "",
+        account: user.name || "",  // user.name 实际存的是登录账号
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        emergencyName: user.emergencyName || "",
+        emergencyPhone: user.emergencyPhone || "",
       });
-    }
+    } else {
+      // 如果沒有登入資料，則從 localStorage 或 API 獲取
+      const savedData = localStorage.getItem("userProfile");
+      const savedAvatar = localStorage.getItem("userAvatar");
 
-    if (savedAvatar) setAvatarUrl(savedAvatar);
-  }, []);
+      if (savedData) {
+        setForm(JSON.parse(savedData));
+      } else {
+        getUserProfile().then((data) => {
+          if (data) setForm(data);
+        });
+      }
+
+      if (savedAvatar) setAvatarUrl(savedAvatar);
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

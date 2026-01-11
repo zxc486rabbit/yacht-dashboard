@@ -719,7 +719,13 @@ export default function AccountManagement() {
                     <button className="btn btn-green" onClick={() => openEdit(r)} type="button">
                       修改
                     </button>
-                    <button className="btn btn-red" onClick={() => openDel(r)} type="button">
+                    <button 
+                      className="btn btn-red" 
+                      onClick={() => openDel(r)} 
+                      type="button"
+                      disabled={r.role === "管理者"}
+                      title={r.role === "管理者" ? "管理者帳號無法刪除" : "刪除"}
+                    >
                       刪除
                     </button>
                   </div>
