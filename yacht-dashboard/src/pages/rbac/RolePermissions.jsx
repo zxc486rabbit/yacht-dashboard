@@ -7,6 +7,9 @@ import {
   OPS,
 } from "./rbac.data";
 
+// 工務段選項
+const SECTION_OPTIONS = ["工務段A", "工務段B", "工務段C", "所有工務段"];
+
 /* =========================================================
    RBAC Hook（UI 層自我約束 / self-dogfooding）
    ========================================================= */
@@ -353,6 +356,7 @@ export default function RolePermissions() {
       {editRole && rbac.canEditRole && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
+        const sectionRef = React.createRef();
         
         return (
           <Modal
@@ -369,11 +373,12 @@ export default function RolePermissions() {
                   onClick={() => {
                     const newName = nameRef.current?.value || editRole.name;
                     const newLevel = levelRef.current?.value || editRole.level;
+                    const newSection = sectionRef.current?.value || editRole.section || '';
                     
                     // 更新角色資訊
                     setRoles(prev => prev.map(r => 
                       r.id === editRole.id 
-                        ? { ...r, name: newName, level: newLevel }
+                        ? { ...r, name: newName, level: newLevel, section: newSection }
                         : r
                     ));
                     
@@ -406,7 +411,7 @@ export default function RolePermissions() {
                 />
               </div>
 
-              <div>
+              <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
                   權限等級
                 </label>
@@ -424,6 +429,28 @@ export default function RolePermissions() {
                 </select>
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
                   💡 變更權限等級會自動套用該等級的預設權限配置
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  工務段
+                </label>
+                <select 
+                  ref={sectionRef}
+                  className="select" 
+                  defaultValue={editRole.section || ''}
+                  style={{ width: '100%' }}
+                >
+                  <option value="">工務段選擇</option>
+                  {SECTION_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  💡 只對管理者/工程師角色適用
                 </div>
               </div>
             </div>

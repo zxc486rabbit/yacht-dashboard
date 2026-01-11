@@ -191,7 +191,7 @@ const NEW_PASSWORD_GUARD_PROPS = {
 };
 
 // ====== shared form fields ======
-const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, showSection }) => (
+const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd }) => (
   <>
     <div className="form-row">
       <div className="label">姓名:</div>
@@ -273,27 +273,6 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, s
         ))}
       </select>
     </div>
-
-    {/* 工務段：只對 管理者/工程師 顯示 */}
-    {showSection ? (
-      <div className="form-row">
-        <div className="label">工務段:</div>
-        <select
-          className="select"
-          value={form.section}
-          onChange={(e) => setForm((p) => ({ ...p, section: e.target.value }))}
-          name="acct_section"
-          {...AUTOFILL_GUARD_PROPS}
-        >
-          <option value="">工務段選擇</option>
-          {SECTION_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
-    ) : null}
 
     <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
       <div className="label">鎖定:</div>
@@ -398,17 +377,6 @@ export default function AccountManagement() {
   // 刪除目標 row（用來顯示資訊）
   const delRowObj = useMemo(() => rows.find((r) => r.id === delTargetId) || null, [rows, delTargetId]);
 
-  // 只有 管理者/工程師 顯示工務段
-  const showSection = useMemo(() => ["管理者", "工程師"].includes(form.role), [form.role]);
-
-  // 角色切到 船長/船員 時，自動清空工務段避免殘留
-  useEffect(() => {
-    if (!showSection && form.section) {
-      setForm((p) => ({ ...p, section: "" }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSection]);
-
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       const nameMatch = searchName.trim() === "" || r.name.toLowerCase().includes(searchName.trim().toLowerCase());
@@ -485,8 +453,7 @@ export default function AccountManagement() {
       email: form.email.trim(),
       username: form.username.trim(),
       role: form.role,
-      // 船長/船員：不存工務段
-      section: ["管理者", "工程師"].includes(form.role) ? form.section || "" : "",
+      section: "",
       locked: !!form.locked,
     };
 
@@ -501,7 +468,7 @@ export default function AccountManagement() {
       username: row.username,
       password: "",
       role: row.role,
-      section: row.section || "",
+      section: "",
       locked: !!row.locked,
     });
     setEditId(row.id);
@@ -519,8 +486,7 @@ export default function AccountManagement() {
               email: form.email.trim(),
               username: form.username.trim(),
               role: form.role,
-              // 船長/船員：不存工務段
-              section: ["管理者", "工程師"].includes(form.role) ? form.section || "" : "",
+              section: "",
               locked: !!form.locked,
             }
           : r
@@ -627,13 +593,9 @@ export default function AccountManagement() {
 
   return (
     <div className="rbac-card">
-      {/* Header row: 標題 + 右上按鈕 */}
+      {/* Header row: 右上按鈕 */}
       <div className="acct-head">
-        <div className="acct-left">
-          <h2 className="acct-title">帳號管理</h2>
-        </div>
-
-        <div className="acct-right">
+        <div className="acct-right" style={{ marginLeft: "auto" }}>
           <button className="btn btn-yellow" onClick={openAdd} type="button">
             新增帳號
           </button>
@@ -666,9 +628,8 @@ export default function AccountManagement() {
           name="search_username"
           {...AUTOFILL_GUARD_PROPS}
         />
-        <input
-          className="input"
-          placeholder="搜尋角色"
+        <select
+          className="select"
           value={searchRole}
           onChange={(e) => {
             setSearchRole(e.target.value);
@@ -677,7 +638,14 @@ export default function AccountManagement() {
           style={{ width: "20%", marginRight: "8px" }}
           name="search_role"
           {...AUTOFILL_GUARD_PROPS}
-        />
+        >
+          <option value="">全部角色</option>
+          {ROLE_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
 
         {/* 全部清除按鈕 */}
         <div style={{ width: "25%", display: "flex", justifyContent: "flex-start" }}>
@@ -832,7 +800,6 @@ export default function AccountManagement() {
             setForm={setForm}
             showPwd={showPwd}
             setShowPwd={setShowPwd}
-            showSection={showSection}
           />
         </Modal>
       ) : null}
@@ -865,7 +832,6 @@ export default function AccountManagement() {
             setForm={setForm}
             showPwd={showPwd}
             setShowPwd={setShowPwd}
-            showSection={showSection}
           />
         </Modal>
       ) : null}

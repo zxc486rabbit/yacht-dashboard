@@ -63,7 +63,8 @@ export const OPS = [
 export const DEFAULT_ROLES = [
   { id: "role_admin", name: "管理者", level: "最高權限" },
   { id: "role_engineer", name: "工程師", level: "工程維運" },
-  { id: "role_user", name: "一般用戶(船長及船員)", level: "一般使用" },
+  { id: "role_captain", name: "船長", level: "一般使用" },
+  { id: "role_crew", name: "船員", level: "一般使用" },
 ];
 
 // 建立每個角色的預設權限（可依需求調整）
@@ -78,16 +79,31 @@ export function buildDefaultRolePermissions() {
   const engineer = {};
   rows.forEach((r) => (engineer[r.key] = new Set(["view", "edit"])));
 
-  // 一般用戶：只開使用者專區（示範：使用者專區 view，其它空）
-  const user = {};
+  // 船長：主要使用者專區及部分檢視功能
+  const captain = {};
   rows.forEach((r) => {
     const isUserArea = r.group === "使用者專區";
-    user[r.key] = new Set(isUserArea ? ["view"] : []);
+    const isShorepower = r.group === "岸電控制系統";
+    if (isUserArea) {
+      captain[r.key] = new Set(["view", "edit"]);
+    } else if (isShorepower) {
+      captain[r.key] = new Set(["view"]);
+    } else {
+      captain[r.key] = new Set([]);
+    }
+  });
+
+  // 船員：僅使用者專區檢視
+  const crew = {};
+  rows.forEach((r) => {
+    const isUserArea = r.group === "使用者專區";
+    crew[r.key] = new Set(isUserArea ? ["view"] : []);
   });
 
   return {
     role_admin: admin,
     role_engineer: engineer,
-    role_user: user,
+    role_captain: captain,
+    role_crew: crew,
   };
 }
