@@ -926,7 +926,6 @@ export default function ShorePowerDashboard() {
       <div className="sp-header">
         <div>
           <div className="sp-h1">岸電總覽</div>
-          <div className="sp-sub">11 席船位即時狀態、功率、用電用水與事件監控</div>
         </div>
       </div>
 

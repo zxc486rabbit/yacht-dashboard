@@ -327,7 +327,6 @@ export default function RealtimeMonitor() {
       <div className="rm-header">
         <div>
           <div className="rm-title">即時監控</div>
-          <div className="rm-subtitle">11 船席｜即時監看｜點船席展開詳細內容</div>
         </div>
 
         <div className="rm-actions">

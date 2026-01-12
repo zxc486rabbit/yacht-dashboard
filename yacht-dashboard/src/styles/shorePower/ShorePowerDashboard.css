@@ -27,7 +27,7 @@ html, body { overflow-x: hidden; }
   gap:16px;
   margin-bottom: 14px;
 }
-.sp-h1{ font-size: 20px; font-weight: 800; letter-spacing: .2px; }
+.sp-h1{ font-size: 1.2rem; font-weight: 800; letter-spacing: .2px; }
 .sp-sub{ color: var(--sp-muted); font-size: 13px; margin-top: 4px; }
 
 /* ShorePowerDashboard.jsx（搜尋輸入與狀態 tabs：用在 BerthFilters / 上方工具列） */

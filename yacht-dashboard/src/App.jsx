@@ -17,6 +17,8 @@ import History from "./pages/power-water/History"; //歷史紀錄查詢
 import BillingModule from "./pages/power-water/BillingModule"; //計費收費模組
 import UserBinding from "./pages/power-water/UserBinding"; //用戶資訊綁定
 import RemoteControl from "./pages/power-water/RemoteControl"; //遠端控管功能
+import AlarmCenter from "./pages/power-water/AlarmCenter"; //告警中心
+
 import AisIntegration from "./pages/ship-identification/AisIntegration"; //AIS整合模組
 import ShipImageRecognition from "./pages/ship-identification/ShipImageRecognition"; //船舶影像辨識
 import OwnerShipManage from "./pages/ship-identification/OwnerShipManage"; //船主船隻管理
@@ -75,8 +77,13 @@ export default function App() {
                 <AppLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
-                    {/* ----------新版--------- */}
+                    {/* ----------新版岸電--------- */}
                     <Route path="/shore-power" element={<ShorePowerDashboard />} />
+                    <Route path="/realtime" element={<RealtimeMonitor />} />
+                    <Route path="/BerthMaster" element={<BerthMaster />} />
+                    <Route path="/remote-control" element={<RemoteControl />} />
+                    <Route path="/history" element={<History />} />
+                    <Route path="/alarm-center" element={<AlarmCenter />} />
                     {/* 使用者專區 */}
                     <Route path="/user/berth-booking" element={<BerthBooking />} />
                     <Route path="/user/my-bookings" element={<MyBookings />} />
@@ -92,16 +99,12 @@ export default function App() {
                     <Route path="/account/yachts" element={<MyYachts />} />
                     <Route path="/account/berth-record" element={<BerthRecord />} />
                     <Route path="/account/payments" element={<PaymentMethods />} />
-                    <Route path="/account/billing" element={<BillingHistory />} />
+                    <Route path="/account/billing" element={<BillingHistory />} />                  
 
                     {/* ----------舊版--------- */}
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/realtime" element={<RealtimeMonitor />} />
-                    <Route path="/BerthMaster" element={<BerthMaster />} />
-                    <Route path="/history" element={<History />} />
+                    <Route path="/" element={<Dashboard />} />                                                         
                     <Route path="/billing" element={<BillingModule />} />
-                    <Route path="/user-binding" element={<UserBinding />} />
-                    <Route path="/remote-control" element={<RemoteControl />} />
+                    <Route path="/user-binding" element={<UserBinding />} />                   
                     <Route path="/ais" element={<AisIntegration />} />
                     <Route path="/image-recognition" element={<ShipImageRecognition />} />
                     <Route path="/owner-ship" element={<OwnerShipManage />} />
