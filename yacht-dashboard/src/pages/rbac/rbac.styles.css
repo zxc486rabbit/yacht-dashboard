@@ -172,7 +172,7 @@
 /* -------------------------
    Role / Ops column
 -------------------------- */
-.rbac-card .role-name{ font-weight: 800; }
+.rbac-card .role-name{ font-weight: normal; }
 
 .rbac-card .op-col{
   display: flex;
@@ -767,7 +767,7 @@
   padding-left: 18px;
   color: var(--muted);
   line-height: 1.7;
-  font-weight: 800;
+  font-size: 0.8rem;
 }
 
 .rbac-card .pwd-rules-list li{

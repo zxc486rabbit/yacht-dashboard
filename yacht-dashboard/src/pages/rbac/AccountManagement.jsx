@@ -703,8 +703,8 @@ export default function AccountManagement() {
                     {r.locked ? <span className="lock-badge">鎖</span> : null}
                   </div>
                 </td>
-                <td style={{ fontWeight: 900, fontSize: 18 }}>{r.username}</td>
-                <td style={{ fontWeight: 900, fontSize: 18 }}>{r.role}</td>
+                <td style={{ fontSize: 18 }}>{r.username}</td>
+                <td style={{ fontSize: 18 }}>{r.role}</td>
                 <td>
                   <div className="op-col" onClick={stopRowClick}>
                     <button

@@ -489,6 +489,7 @@ export default function RolePermissions() {
       {showAddRole && rbac.isAdmin && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
+        const sectionRef = React.createRef();
         
         return (
           <Modal
@@ -505,12 +506,14 @@ export default function RolePermissions() {
                   onClick={() => {
                     const roleName = nameRef.current?.value || '新角色';
                     const roleLevel = levelRef.current?.value || '一般使用';
+                    const roleSection = sectionRef.current?.value || '';
                     
                     const newRoleId = `role_${Date.now()}`;
                     const newRole = {
                       id: newRoleId,
                       name: roleName,
-                      level: roleLevel
+                      level: roleLevel,
+                      section: roleSection
                     };
                     
                     // 新增角色
@@ -545,7 +548,7 @@ export default function RolePermissions() {
                 />
               </div>
 
-              <div>
+              <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
                   權限等級
                 </label>
@@ -564,6 +567,25 @@ export default function RolePermissions() {
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
                   💡 系統會根據所選權限等級自動配置對應的預設權限
                 </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  工務段
+                </label>
+                <select 
+                  ref={sectionRef}
+                  className="select" 
+                  defaultValue=""
+                  style={{ width: '100%' }}
+                >
+                  <option value="">工務段選擇</option>
+                  {SECTION_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </Modal>
