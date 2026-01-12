@@ -191,31 +191,43 @@ const NEW_PASSWORD_GUARD_PROPS = {
 };
 
 // ====== shared form fields ======
-const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd }) => (
-  <>
-    <div className="form-row">
-      <div className="label">姓名:</div>
-      <input
-        className="input"
-        placeholder="姓名"
-        value={form.name}
-        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-        name="acct_name"
-        {...AUTOFILL_GUARD_PROPS}
-      />
-    </div>
+const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd }) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailInvalid = form.email.trim() && !emailRegex.test(form.email.trim());
 
-    <div className="form-row">
-      <div className="label">電子郵箱:</div>
-      <input
-        className="input"
-        placeholder="電子郵箱"
-        value={form.email}
-        onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-        name="acct_email"
-        {...AUTOFILL_GUARD_PROPS}
-      />
-    </div>
+  return (
+    <>
+      <div className="form-row">
+        <div className="label">姓名:</div>
+        <input
+          className="input"
+          placeholder="姓名"
+          value={form.name}
+          onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+          name="acct_name"
+          {...AUTOFILL_GUARD_PROPS}
+        />
+      </div>
+
+      <div className="form-row">
+        <div className="label">電子郵箱:</div>
+        <div style={{ flex: 1 }}>
+          <input
+            className="input"
+            placeholder="電子郵箱"
+            value={form.email}
+            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+            name="acct_email"
+            {...AUTOFILL_GUARD_PROPS}
+            style={{ width: '100%' }}
+          />
+          {isEmailInvalid && (
+            <div style={{ marginTop: '6px', fontSize: '0.8rem', color: '#ef4444' }}>
+              ⚠️ 請輸入有效的電子郵箱格式（例：user@example.com）
+            </div>
+          )}
+        </div>
+      </div>
 
     <div className="form-row">
       <div className="label">帳號:</div>
@@ -287,7 +299,8 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd })
       </label>
     </div>
   </>
-);
+  );
+};
 
 // ====== 密碼規則與工具 ======
 const pwdRules = {
@@ -446,6 +459,12 @@ export default function AccountManagement() {
 
   const saveAdd = () => {
     if (!form.name.trim() || !form.username.trim() || !form.role.trim() || !form.password.trim()) return;
+
+    // Email 驗證
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (form.email.trim() && !emailRegex.test(form.email.trim())) {
+      return; // 阻止新增，錯誤提示已在表單中即時顯示
+    }
 
     const newRow = {
       id: Date.now(),
@@ -723,8 +742,6 @@ export default function AccountManagement() {
                       className="btn btn-red" 
                       onClick={() => openDel(r)} 
                       type="button"
-                      disabled={r.role === "管理者"}
-                      title={r.role === "管理者" ? "管理者帳號無法刪除" : "刪除"}
                     >
                       刪除
                     </button>
