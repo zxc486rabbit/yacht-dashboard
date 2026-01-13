@@ -8,15 +8,15 @@ const LS_KEY = "rbac.permissionManagement.activeTab";
 export default function PermissionManagement() {
   const tabs = useMemo(
     () => [
-      { key: "role", label: "角色權限" },
       { key: "account", label: "帳號權限" },
+      { key: "role", label: "角色權限" },
     ],
     []
   );
 
   const [active, setActive] = useState(() => {
     const saved = localStorage.getItem(LS_KEY);
-    return saved && tabs.some((t) => t.key === saved) ? saved : "role";
+    return saved && tabs.some((t) => t.key === saved) ? saved : "account";
   });
 
   useEffect(() => {
@@ -72,19 +72,6 @@ export default function PermissionManagement() {
       <div className="rbac-content">
         <section
           role="tabpanel"
-          id="rbac-panel-role"
-          aria-labelledby="rbac-tab-role"
-          hidden={active !== "role"}
-        >
-          {active === "role" ? (
-            <div className="rbac-card-wrap">
-              <RolePermissions />
-            </div>
-          ) : null}
-        </section>
-
-        <section
-          role="tabpanel"
           id="rbac-panel-account"
           aria-labelledby="rbac-tab-account"
           hidden={active !== "account"}
@@ -92,6 +79,19 @@ export default function PermissionManagement() {
           {active === "account" ? (
             <div className="rbac-card-wrap">
               <AccountManagement />
+            </div>
+          ) : null}
+        </section>
+
+        <section
+          role="tabpanel"
+          id="rbac-panel-role"
+          aria-labelledby="rbac-tab-role"
+          hidden={active !== "role"}
+        >
+          {active === "role" ? (
+            <div className="rbac-card-wrap">
+              <RolePermissions />
             </div>
           ) : null}
         </section>

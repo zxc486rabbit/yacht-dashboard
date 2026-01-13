@@ -7,9 +7,6 @@ import {
   OPS,
 } from "./rbac.data";
 
-// 工務段選項
-const SECTION_OPTIONS = ["工務段A", "工務段B", "工務段C", "所有工務段"];
-
 /* =========================================================
    RBAC Hook（UI 層自我約束 / self-dogfooding）
    ========================================================= */
@@ -356,7 +353,6 @@ export default function RolePermissions() {
       {editRole && rbac.canEditRole && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
-        const sectionRef = React.createRef();
         
         return (
           <Modal
@@ -373,12 +369,11 @@ export default function RolePermissions() {
                   onClick={() => {
                     const newName = nameRef.current?.value || editRole.name;
                     const newLevel = levelRef.current?.value || editRole.level;
-                    const newSection = sectionRef.current?.value || editRole.section || '';
                     
                     // 更新角色資訊
                     setRoles(prev => prev.map(r => 
                       r.id === editRole.id 
-                        ? { ...r, name: newName, level: newLevel, section: newSection }
+                        ? { ...r, name: newName, level: newLevel }
                         : r
                     ));
                     
@@ -431,28 +426,6 @@ export default function RolePermissions() {
                   💡 變更權限等級會自動套用該等級的預設權限配置
                 </div>
               </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  工務段
-                </label>
-                <select 
-                  ref={sectionRef}
-                  className="select" 
-                  defaultValue={editRole.section || ''}
-                  style={{ width: '100%' }}
-                >
-                  <option value="">工務段選擇</option>
-                  {SECTION_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                  💡 只對管理者/工程師角色適用
-                </div>
-              </div>
             </div>
           </Modal>
         );
@@ -489,7 +462,6 @@ export default function RolePermissions() {
       {showAddRole && rbac.isAdmin && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
-        const sectionRef = React.createRef();
         
         return (
           <Modal
@@ -506,14 +478,12 @@ export default function RolePermissions() {
                   onClick={() => {
                     const roleName = nameRef.current?.value || '新角色';
                     const roleLevel = levelRef.current?.value || '一般使用';
-                    const roleSection = sectionRef.current?.value || '';
                     
                     const newRoleId = `role_${Date.now()}`;
                     const newRole = {
                       id: newRoleId,
                       name: roleName,
-                      level: roleLevel,
-                      section: roleSection
+                      level: roleLevel
                     };
                     
                     // 新增角色
@@ -567,25 +537,6 @@ export default function RolePermissions() {
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
                   💡 系統會根據所選權限等級自動配置對應的預設權限
                 </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  工務段
-                </label>
-                <select 
-                  ref={sectionRef}
-                  className="select" 
-                  defaultValue=""
-                  style={{ width: '100%' }}
-                >
-                  <option value="">工務段選擇</option>
-                  {SECTION_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </Modal>

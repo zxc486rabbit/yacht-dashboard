@@ -6,9 +6,6 @@ import EyeIcon from "../../components/EyeIcon";
 // 角色改為：管理者 / 工程師 / 船長 / 船員
 const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
 
-// 工務段：只在「管理者 / 工程師」顯示
-const SECTION_OPTIONS = ["工務段A", "工務段B", "工務段C", "所有工務段"];
-
 const seed = [
   {
     id: 1,
@@ -16,7 +13,6 @@ const seed = [
     email: "132456@abc.com.tw",
     username: "admin",
     role: "管理者",
-    section: "所有工務段",
     locked: false,
   },
   {
@@ -25,7 +21,6 @@ const seed = [
     email: "engineerA@abc.com.tw",
     username: "engineerA",
     role: "工程師",
-    section: "工務段A",
     locked: false,
   },
   {
@@ -34,7 +29,6 @@ const seed = [
     email: "linyiguei@abc.com.tw",
     username: "linyiguei",
     role: "管理者",
-    section: "所有工務段",
     locked: false,
   },
   {
@@ -43,7 +37,6 @@ const seed = [
     email: "tanya@abc.com.tw",
     username: "tanya",
     role: "管理者",
-    section: "所有工務段",
     locked: false,
   },
   {
@@ -52,7 +45,6 @@ const seed = [
     email: "section_xy@abc.com.tw",
     username: "section_XY",
     role: "工程師",
-    section: "工務段B",
     locked: false,
   },
   {
@@ -61,7 +53,6 @@ const seed = [
     email: "asia349@abc.com.tw",
     username: "asia349",
     role: "工程師",
-    section: "工務段C",
     locked: false,
   },
   {
@@ -70,7 +61,6 @@ const seed = [
     email: "section_bh@abc.com.tw",
     username: "section_BH",
     role: "工程師",
-    section: "工務段B",
     locked: false,
   },
   {
@@ -79,18 +69,14 @@ const seed = [
     email: "section_pt@abc.com.tw",
     username: "section_PT",
     role: "工程師",
-    section: "工務段A",
     locked: true,
   },
-
-  // 船長 / 船員（不綁工務段）
   {
     id: 9,
     name: "船長A",
     email: "captainA@abc.com.tw",
     username: "captainA",
     role: "船長",
-    section: "",
     locked: false,
   },
   {
@@ -99,7 +85,6 @@ const seed = [
     email: "crewA1@abc.com.tw",
     username: "crewA1",
     role: "船員",
-    section: "",
     locked: false,
   },
 ];
@@ -147,7 +132,6 @@ function mkEmptyAccount() {
     username: "",
     password: "",
     role: "",
-    section: "",
     locked: false,
   };
 }
@@ -363,6 +347,10 @@ export default function AccountManagement() {
   const [searchUsername, setSearchUsername] = useState("");
   const [searchRole, setSearchRole] = useState("");
 
+  // 排序
+  const [sortField, setSortField] = useState(null); // 'name' | 'username' | 'role' | null
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' | 'desc'
+
   // 分頁
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -391,7 +379,7 @@ export default function AccountManagement() {
   const delRowObj = useMemo(() => rows.find((r) => r.id === delTargetId) || null, [rows, delTargetId]);
 
   const filtered = useMemo(() => {
-    return rows.filter((r) => {
+    let result = rows.filter((r) => {
       const nameMatch = searchName.trim() === "" || r.name.toLowerCase().includes(searchName.trim().toLowerCase());
       const usernameMatch =
         searchUsername.trim() === "" || r.username.toLowerCase().includes(searchUsername.trim().toLowerCase());
@@ -399,7 +387,21 @@ export default function AccountManagement() {
 
       return nameMatch && usernameMatch && roleMatch;
     });
-  }, [rows, searchName, searchUsername, searchRole]);
+
+    // 排序
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        const aVal = a[sortField]?.toLowerCase() || '';
+        const bVal = b[sortField]?.toLowerCase() || '';
+        
+        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [rows, searchName, searchUsername, searchRole, sortField, sortOrder]);
 
   const totalPages = useMemo(() => {
     const n = Math.ceil(filtered.length / pageSize);
@@ -442,6 +444,17 @@ export default function AccountManagement() {
   }, [page, totalPages]);
 
   // ====== handlers ======
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // 同一欄位：切換排序方向
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      // 不同欄位：設為新欄位，預設升序
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
   const toggleSelectRow = (rowId) => {
     setSelectedRowId((prev) => (prev === rowId ? null : rowId));
   };
@@ -472,7 +485,6 @@ export default function AccountManagement() {
       email: form.email.trim(),
       username: form.username.trim(),
       role: form.role,
-      section: "",
       locked: !!form.locked,
     };
 
@@ -487,7 +499,6 @@ export default function AccountManagement() {
       username: row.username,
       password: "",
       role: row.role,
-      section: "",
       locked: !!row.locked,
     });
     setEditId(row.id);
@@ -505,7 +516,6 @@ export default function AccountManagement() {
               email: form.email.trim(),
               username: form.username.trim(),
               role: form.role,
-              section: "",
               locked: !!form.locked,
             }
           : r
@@ -690,13 +700,24 @@ export default function AccountManagement() {
       <table className="table">
         <thead>
           <tr>
-            <th className="th-sort" style={{ width: "30%" }}>
+            <th className="th-sort" style={{ width: "30%", cursor: "pointer" }} onClick={() => handleSort('name')}>
               姓名
+              <span style={{ marginLeft: '8px', color: sortField === 'name' ? '#3b82f6' : '#9ca3af' }}>
+                {sortField === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
             </th>
-            <th className="th-sort" style={{ width: "25%" }}>
+            <th className="th-sort" style={{ width: "25%", cursor: "pointer" }} onClick={() => handleSort('username')}>
               帳號
+              <span style={{ marginLeft: '8px', color: sortField === 'username' ? '#3b82f6' : '#9ca3af' }}>
+                {sortField === 'username' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
             </th>
-            <th style={{ width: "20%" }}>角色</th>
+            <th style={{ width: "20%", cursor: "pointer" }} onClick={() => handleSort('role')}>
+              角色
+              <span style={{ marginLeft: '8px', color: sortField === 'role' ? '#3b82f6' : '#9ca3af' }}>
+                {sortField === 'role' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </th>
             <th style={{ width: "25%" }}>操作</th>
           </tr>
         </thead>
