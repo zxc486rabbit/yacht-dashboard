@@ -270,17 +270,29 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd })
       </select>
     </div>
 
-    <div className="form-row" style={{ gridTemplateColumns: "120px 1fr" }}>
-      <div className="label">鎖定:</div>
-      <label className="lock-row">
-        <input
-          type="checkbox"
-          checked={!!form.locked}
-          onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
-          name="acct_locked"
-        />
-        <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
-      </label>
+    <div className="form-row" style={{ gridTemplateColumns: "120px 1fr", alignItems: "flex-start" }}>
+      <div className="label" style={{ paddingTop: "2px" }}>鎖定密碼:</div>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "50px" }}>
+        <label className="lock-row" style={{ marginBottom: 0 }}>
+          <input
+            type="checkbox"
+            checked={!!form.locked}
+            onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
+            name="acct_locked"
+          />
+          <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
+        </label>
+        <div style={{ 
+          marginTop: '6px', 
+          fontSize: '0.8rem', 
+          color: '#ef4444', 
+          lineHeight: '1.4',
+          visibility: form.locked ? 'visible' : 'hidden',
+          height: form.locked ? 'auto' : '0'
+        }}>
+          ⚠️ 鎖定後不得修改密碼
+        </div>
+      </div>
     </div>
   </>
   );

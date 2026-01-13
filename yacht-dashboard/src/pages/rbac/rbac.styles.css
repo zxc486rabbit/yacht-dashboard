@@ -482,7 +482,7 @@
 .rbac-card .form-row{
   display: grid;
   grid-template-columns: 120px 1fr;
-  gap: 10px;
+  gap: 0px;
   align-items: center;
   margin-bottom: 12px;
 }
@@ -490,6 +490,7 @@
 .rbac-card .label{
   font-weight: 800;
   margin-bottom: 0;
+  padding-right: 8px;
   color: #111827;
   line-height: 1.2;
 }
