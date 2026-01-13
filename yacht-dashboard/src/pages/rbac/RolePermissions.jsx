@@ -6,6 +6,14 @@ import {
   DEFAULT_ROLES,
   OPS,
 } from "./rbac.data";
+import {
+  loadRoles,
+  saveRoles,
+  loadRolePermMap,
+  saveRolePermMap,
+  serializeRolePermMap,
+  hydrateRolePermMap,
+} from "./roleStorage";
 
 /* =========================================================
    RBAC Hook（UI 層自我約束 / self-dogfooding）
@@ -90,7 +98,11 @@ function MultiSelectOps({ valueSet, onChange }) {
       {open && (
         <div className="ms-menu">
           {OPS.map((o) => (
-            <div key={o.key} className="ms-item" onClick={() => toggle(o.key)}>
+            <div
+              key={o.key}
+              className="ms-item"
+              onClick={() => toggle(o.key)}
+            >
               <input type="checkbox" checked={valueSet.has(o.key)} readOnly />
               <span>{o.label}</span>
             </div>
@@ -118,41 +130,25 @@ function buildGroups(rows) {
    ========================================================= */
 function buildPermissionsByLevel(level, permissionRows) {
   const permissions = {};
-  
+
   permissionRows.forEach((row) => {
     const { key, group } = row;
-    
+
     switch (level) {
       case "最高權限":
-        // 管理者：所有模組的完整權限（檢視、編輯、刪除）
         permissions[key] = new Set(["view", "edit", "delete"]);
         break;
-        
+
       case "工程維運":
-        // 工程師：技術維運相關權限
-        if (group === "岸電控制系統") {
-          permissions[key] = new Set(["view", "edit"]); // 可檢視編輯，刪除受限
-        } else if (group === "船舶識別系統") {
-          permissions[key] = new Set(["view", "edit"]);
-        } else if (group === "門禁管制系統") {
-          permissions[key] = new Set(["view", "edit"]);
-        } else if (group === "影像監控系統") {
-          permissions[key] = new Set(["view", "edit"]);
-        } else if (group === "通訊傳輸系統") {
-          permissions[key] = new Set(["view", "edit"]);
-        } else if (group === "支付計費系統") {
-          permissions[key] = new Set(["view"]); // 計費系統僅可檢視
-        } else if (group === "使用者專區") {
+        if (group === "支付計費系統") {
           permissions[key] = new Set(["view"]);
         } else {
-          permissions[key] = new Set(["view"]);
+          permissions[key] = new Set(["view", "edit"]);
         }
         break;
-        
+
       case "一般使用":
-        // 一般用戶（船長及船員）：主要使用自己相關的功能
         if (group === "岸電控制系統") {
-          // 僅開放即時監控、歷史紀錄等檢視功能
           if (row.name.includes("即時監控") || row.name.includes("歷史紀錄")) {
             permissions[key] = new Set(["view"]);
           } else {
@@ -161,35 +157,75 @@ function buildPermissionsByLevel(level, permissionRows) {
         } else if (group === "船舶識別系統") {
           permissions[key] = new Set(["view"]);
         } else if (group === "使用者專區") {
-          permissions[key] = new Set(["view", "edit"]); // 可管理自己的預約和資料
+          permissions[key] = new Set(["view", "edit"]);
         } else {
-          permissions[key] = new Set([]); // 其他系統無權限
+          permissions[key] = new Set([]);
         }
         break;
-        
+
       case "訪客":
-        // 訪客：最低權限，僅能查看使用者專區
         if (group === "使用者專區") {
           permissions[key] = new Set(["view"]);
         } else {
           permissions[key] = new Set([]);
         }
         break;
-        
+
       default:
         permissions[key] = new Set([]);
     }
   });
-  
+
   return permissions;
 }
+
+/* =========================================================
+   Normalize / Validate RolePermMap
+   - 確保：
+     1) 只保留現存 roles
+     2) 每個 role 都有 permissionRows 的每個 key
+     3) 每個 permKey 都是 Set
+     4) 權限值只允許 OPS 內的 key
+   ========================================================= */
+function normalizeRolePermMap({ roles, permissionRows, rolePermMap }) {
+  const allowedOps = new Set(OPS.map((o) => o.key));
+
+  const next = {};
+
+  roles.forEach((role) => {
+    const roleId = role.id;
+    const base = rolePermMap?.[roleId] || {};
+    next[roleId] = {};
+
+    permissionRows.forEach((row) => {
+      const permKey = row.key;
+      const raw = base[permKey];
+
+      const setVal =
+        raw instanceof Set
+          ? raw
+          : Array.isArray(raw)
+          ? new Set(raw)
+          : new Set();
+
+      const cleaned = new Set(
+        Array.from(setVal).filter((op) => allowedOps.has(op))
+      );
+
+      next[roleId][permKey] = cleaned;
+    });
+  });
+
+  return next;
+}
+
 
 /* =========================================================
    Main Component
    ========================================================= */
 export default function RolePermissions() {
   /* ====== 模擬登入者（之後接 JWT / AuthContext） ====== */
-  const currentUser = { role: "管理者" }; // 改成「工程師 / 一般用戶」即可驗證
+  const currentUser = { role: "管理者" }; // 改成「工程師 / 船長 / 船員」即可驗證
 
   /* ====== RBAC ====== */
   const rbac = useRBAC(currentUser);
@@ -205,10 +241,66 @@ export default function RolePermissions() {
   const permissionRows = useMemo(() => buildPermissionRows(), []);
   const permGroups = useMemo(() => buildGroups(permissionRows), [permissionRows]);
 
-  const [roles, setRoles] = useState(DEFAULT_ROLES);
-  const [rolePermMap, setRolePermMap] = useState(() =>
-    buildDefaultRolePermissions()
-  );
+  /**
+   *  roles：從 localStorage 讀回來
+   */
+  const [roles, setRoles] = useState(() => loadRoles(DEFAULT_ROLES));
+
+  /**
+   *  roles 變動即持久化
+   */
+  useEffect(() => {
+    saveRoles(roles);
+  }, [roles]);
+
+  /**
+   *  rolePermMap：優先從 localStorage 讀回來，沒有才用預設
+   * - localStorage 存的是「陣列」，載入時轉回 Set
+   */
+  const [rolePermMap, setRolePermMap] = useState(() => {
+    const stored = loadRolePermMap(); // serialized object or null
+    if (stored) {
+      const hydrated = hydrateRolePermMap(stored);
+      return hydrated;
+    }
+    return buildDefaultRolePermissions();
+  });
+
+  /**
+   *  normalize：確保 rolePermMap 與 roles / permissionRows 一致
+   * - 角色新增/刪除/權限列變動，都會自動補齊/修剪
+   */
+  useEffect(() => {
+    setRolePermMap((prev) => {
+      // 若某角色完全沒有 permMap，依 level 建一份預設，再一起 normalize
+      const withMissingFilled = { ...(prev || {}) };
+
+      roles.forEach((role) => {
+        if (!withMissingFilled[role.id]) {
+          withMissingFilled[role.id] = buildPermissionsByLevel(
+            role.level,
+            permissionRows
+          );
+        }
+      });
+
+      const normalized = normalizeRolePermMap({
+        roles,
+        permissionRows,
+        rolePermMap: withMissingFilled,
+      });
+
+      return normalized;
+    });
+  }, [roles, permissionRows]);
+
+  /**
+   * rolePermMap 變動即持久化（Set 轉陣列）
+   */
+  useEffect(() => {
+    const serializable = serializeRolePermMap(rolePermMap);
+    saveRolePermMap(serializable);
+  }, [rolePermMap]);
 
   const [permRoleId, setPermRoleId] = useState(null);
   const permRole = roles.find((r) => r.id === permRoleId) || null;
@@ -240,16 +332,16 @@ export default function RolePermissions() {
       <div className="rbac-actions" style={{ justifyContent: "space-between" }}>
         <div>
           {rbac.isAdmin && (
-            <button 
+            <button
               className="btn btn-yellow"
               onClick={() => setShowAddRole(true)}
+              type="button"
             >
               新增角色
             </button>
           )}
         </div>
 
-        {/* 目前登入角色顯示 */}
         <div className="small-muted">
           目前登入角色：
           <strong style={{ marginLeft: 6 }}>{currentUser.role}</strong>
@@ -268,7 +360,12 @@ export default function RolePermissions() {
           {roles.map((r) => (
             <tr key={r.id}>
               <td>
-                <div className="role-name">{r.name}</div>
+                <div className="role-name">
+                  {r.name}
+                  <span className="small-muted" style={{ marginLeft: 10 }}>
+                    ({r.level})
+                  </span>
+                </div>
               </td>
               <td>
                 <div className="op-col">
@@ -276,6 +373,7 @@ export default function RolePermissions() {
                     <button
                       className="btn btn-purple"
                       onClick={() => setPermRoleId(r.id)}
+                      type="button"
                     >
                       編輯權限
                     </button>
@@ -285,15 +383,17 @@ export default function RolePermissions() {
                     <button
                       className="btn btn-green"
                       onClick={() => setEditRoleId(r.id)}
+                      type="button"
                     >
                       修改
                     </button>
                   )}
 
                   {rbac.canDeleteRole && r.id !== "role_admin" && (
-                    <button 
+                    <button
                       className="btn btn-red"
                       onClick={() => setDeleteRoleId(r.id)}
+                      type="button"
                     >
                       刪除
                     </button>
@@ -328,22 +428,19 @@ export default function RolePermissions() {
             </aside>
 
             <section className="perm-right">
-              {(permGroups
-                .find((g) => g.key === activeSystemKey)
-                ?.items || []
-              ).map((row) => (
-                <div className="perm-row" key={row.key}>
-                  <div>{row.name}</div>
-                  <MultiSelectOps
-                    valueSet={
-                      rolePermMap?.[permRole.id]?.[row.key] ?? new Set()
-                    }
-                    onChange={(s) =>
-                      updateRolePermissionRow(permRole.id, row.key, s)
-                    }
-                  />
-                </div>
-              ))}
+              {(permGroups.find((g) => g.key === activeSystemKey)?.items || []).map(
+                (row) => (
+                  <div className="perm-row" key={row.key}>
+                    <div>{row.name}</div>
+                    <MultiSelectOps
+                      valueSet={rolePermMap?.[permRole.id]?.[row.key] ?? new Set()}
+                      onChange={(s) =>
+                        updateRolePermissionRow(permRole.id, row.key, s)
+                      }
+                    />
+                  </div>
+                )
+              )}
             </section>
           </div>
         </Modal>
@@ -353,37 +450,44 @@ export default function RolePermissions() {
       {editRole && rbac.canEditRole && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
-        
+
         return (
           <Modal
             title={`修改角色：${editRole.name}`}
             size="md"
             onClose={() => setEditRoleId(null)}
             footer={
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" onClick={() => setEditRoleId(null)}>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setEditRoleId(null)}
+                  type="button"
+                >
                   取消
                 </button>
-                <button 
+                <button
                   className="btn btn-green"
+                  type="button"
                   onClick={() => {
-                    const newName = nameRef.current?.value || editRole.name;
+                    const newName = (nameRef.current?.value || editRole.name).trim();
                     const newLevel = levelRef.current?.value || editRole.level;
-                    
-                    // 更新角色資訊
-                    setRoles(prev => prev.map(r => 
-                      r.id === editRole.id 
-                        ? { ...r, name: newName, level: newLevel }
-                        : r
-                    ));
-                    
-                    // 根據新的權限等級更新權限配置
+
+                    // 更新角色資訊（roles 變動會自動寫入 localStorage）
+                    setRoles((prev) =>
+                      prev.map((r) =>
+                        r.id === editRole.id
+                          ? { ...r, name: newName, level: newLevel }
+                          : r
+                      )
+                    );
+
+                    // 依新的權限等級更新該角色權限（rolePermMap 變動會自動持久化）
                     const newPermissions = buildPermissionsByLevel(newLevel, permissionRows);
-                    setRolePermMap(prev => ({
+                    setRolePermMap((prev) => ({
                       ...prev,
-                      [editRole.id]: newPermissions
+                      [editRole.id]: newPermissions,
                     }));
-                    
+
                     setEditRoleId(null);
                   }}
                 >
@@ -392,29 +496,29 @@ export default function RolePermissions() {
               </div>
             }
           >
-            <div style={{ padding: '16px 0' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+            <div style={{ padding: "16px 0" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                   角色名稱
                 </label>
-                <input 
+                <input
                   ref={nameRef}
-                  type="text" 
-                  className="input" 
+                  type="text"
+                  className="input"
                   defaultValue={editRole.name}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                   權限等級
                 </label>
-                <select 
+                <select
                   ref={levelRef}
-                  className="select" 
+                  className="select"
                   defaultValue={editRole.level}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 >
                   {PERMISSION_LEVELS.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -422,7 +526,7 @@ export default function RolePermissions() {
                     </option>
                   ))}
                 </select>
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
                   💡 變更權限等級會自動套用該等級的預設權限配置
                 </div>
               </div>
@@ -438,14 +542,28 @@ export default function RolePermissions() {
           size="sm"
           onClose={() => setDeleteRoleId(null)}
           footer={
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost" onClick={() => setDeleteRoleId(null)}>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <button
+                className="btn btn-ghost"
+                onClick={() => setDeleteRoleId(null)}
+                type="button"
+              >
                 取消
               </button>
-              <button 
+              <button
                 className="btn btn-red"
+                type="button"
                 onClick={() => {
-                  setRoles(prev => prev.filter(r => r.id !== deleteRole.id));
+                  // 刪除角色（roles 會持久化）
+                  setRoles((prev) => prev.filter((r) => r.id !== deleteRole.id));
+
+                  // 同步移除該角色權限（rolePermMap 會持久化）
+                  setRolePermMap((prev) => {
+                    const next = { ...(prev || {}) };
+                    delete next[deleteRole.id];
+                    return next;
+                  });
+
                   setDeleteRoleId(null);
                 }}
               >
@@ -454,7 +572,9 @@ export default function RolePermissions() {
             </div>
           }
         >
-          <p>確定要刪除角色 <strong>{deleteRole.name}</strong> 嗎？此操作無法復原。</p>
+          <p>
+            確定要刪除角色 <strong>{deleteRole.name}</strong> 嗎？此操作無法復原。
+          </p>
         </Modal>
       )}
 
@@ -462,40 +582,45 @@ export default function RolePermissions() {
       {showAddRole && rbac.isAdmin && (() => {
         const nameRef = React.createRef();
         const levelRef = React.createRef();
-        
+
         return (
           <Modal
             title="新增角色"
             size="md"
             onClose={() => setShowAddRole(false)}
             footer={
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" onClick={() => setShowAddRole(false)}>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setShowAddRole(false)}
+                  type="button"
+                >
                   取消
                 </button>
-                <button 
+                <button
                   className="btn btn-yellow"
+                  type="button"
                   onClick={() => {
-                    const roleName = nameRef.current?.value || '新角色';
-                    const roleLevel = levelRef.current?.value || '一般使用';
-                    
+                    const roleName = (nameRef.current?.value || "新角色").trim();
+                    const roleLevel = levelRef.current?.value || "一般使用";
+
                     const newRoleId = `role_${Date.now()}`;
                     const newRole = {
                       id: newRoleId,
                       name: roleName,
-                      level: roleLevel
+                      level: roleLevel,
                     };
-                    
-                    // 新增角色
-                    setRoles(prev => [...prev, newRole]);
-                    
-                    // 根據權限等級自動分配預設權限
+
+                    // 新增角色（roles 會持久化）
+                    setRoles((prev) => [...prev, newRole]);
+
+                    // 新角色預設權限（rolePermMap 會持久化）
                     const newPermissions = buildPermissionsByLevel(roleLevel, permissionRows);
-                    setRolePermMap(prev => ({
+                    setRolePermMap((prev) => ({
                       ...prev,
-                      [newRoleId]: newPermissions
+                      [newRoleId]: newPermissions,
                     }));
-                    
+
                     setShowAddRole(false);
                   }}
                 >
@@ -504,29 +629,29 @@ export default function RolePermissions() {
               </div>
             }
           >
-            <div style={{ padding: '16px 0' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+            <div style={{ padding: "16px 0" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                   角色名稱
                 </label>
-                <input 
+                <input
                   ref={nameRef}
-                  type="text" 
-                  className="input" 
+                  type="text"
+                  className="input"
                   placeholder="請輸入角色名稱"
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
                   權限等級
                 </label>
-                <select 
+                <select
                   ref={levelRef}
-                  className="select" 
+                  className="select"
                   defaultValue="一般使用"
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 >
                   {PERMISSION_LEVELS.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -534,7 +659,7 @@ export default function RolePermissions() {
                     </option>
                   ))}
                 </select>
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
                   💡 系統會根據所選權限等級自動配置對應的預設權限
                 </div>
               </div>
