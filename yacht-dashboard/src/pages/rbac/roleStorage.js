@@ -68,6 +68,7 @@ export function clearRolePermMap() {
    Helpers: Set <-> Array
 ========================= */
 export function serializeRolePermMap(rolePermMap) {
+  // rolePermMap: { [roleId]: { [permKey]: Set<string> } }
   const out = {};
   if (!rolePermMap || typeof rolePermMap !== "object") return out;
 
@@ -88,6 +89,7 @@ export function serializeRolePermMap(rolePermMap) {
 }
 
 export function hydrateRolePermMap(serialized) {
+  // serialized: { [roleId]: { [permKey]: string[] } }
   const out = {};
   if (!serialized || typeof serialized !== "object") return out;
 
