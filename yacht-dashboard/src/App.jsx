@@ -51,6 +51,8 @@ import BerthBooking from "./pages/userCenter/BerthBooking"; //船位預約
 import MyBookings from "./pages/userCenter/MyBookings"; //我的預約 / 停泊費用
 import AccountSettings from "./pages/userProfile/AccountSettings";
 import PermissionManagement from "./pages/rbac/PermissionManagement"; // RBAC 權限管理頁面
+import AuditLogs from "./pages/rbac/AuditLogs"; // 稽核紀錄（畫面頁）
+
 
 
 // 新增：Account 子分頁
@@ -93,6 +95,7 @@ export default function App() {
                     
                     {/* RBAC 權限管理 */}
                     <Route path="/rbac/permissions" element={<PermissionManagement />} />
+                    <Route path="/rbac/audit-logs" element={<AuditLogs />} />
                   
 
                     {/* Account 主頁與子頁 */}

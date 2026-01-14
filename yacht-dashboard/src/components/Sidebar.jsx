@@ -143,6 +143,7 @@ export default function Sidebar() {
       label: "權限管理",
       children: [
         { label: "權限管理", path: "/rbac/permissions" },
+        { label: "稽核紀錄", path: "/rbac/audit-logs" },
       ],
     },
   ];
