@@ -812,7 +812,6 @@
 
 /* =========================================================
    Audit Logs – Detail Modal / Diff UI
-   (For AuditLogs.jsx UI; safe scoped under .rbac-card)
    ========================================================= */
 
 .rbac-card .rbac-audit-link{
@@ -862,4 +861,87 @@
   padding: 12px;
   overflow: auto;
   max-height: 260px;
+}
+
+.rbac-card .rbac-table.rbac-table-fixed{
+  table-layout: fixed; /* 讓 td ellipsis 生效 */
+}
+
+.rbac-card .rbac-td-ellipsis{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px; /* 配合 table-layout: fixed，強制可截斷 */
+}
+
+/* mono text for ids */
+.rbac-card .rbac-mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* filter layout */
+.rbac-card .rbac-audit-filters{
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.rbac-card .rbac-audit-filter{
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.rbac-card .rbac-audit-filter-label{
+  font-weight: 900;
+  color: #111827;
+  font-size: 12px;
+}
+
+.rbac-card .rbac-audit-filter-actions{
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* badges */
+.rbac-card .rbac-badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.08);
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1;
+  background: #f3f4f6;
+  color: #111827;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+/* target tones */
+.rbac-card .rbac-badge.tone-blue{ background: rgba(37, 99, 235, .10); color: #1d4ed8; border-color: rgba(37, 99, 235, .18); }
+.rbac-card .rbac-badge.tone-purple{ background: rgba(109, 40, 217, .10); color: #6d28d9; border-color: rgba(109, 40, 217, .18); }
+.rbac-card .rbac-badge.tone-teal{ background: rgba(5, 153, 187, .12); color: #047a96; border-color: rgba(5, 153, 187, .22); }
+.rbac-card .rbac-badge.tone-gray{ background: rgba(107, 114, 128, .10); color: #374151; border-color: rgba(107, 114, 128, .18); }
+
+/* action tones */
+.rbac-card .rbac-badge.tone-green{ background: rgba(16, 185, 129, .12); color: #047857; border-color: rgba(16, 185, 129, .22); }
+.rbac-card .rbac-badge.tone-yellow{ background: rgba(245, 158, 11, .14); color: #92400e; border-color: rgba(245, 158, 11, .24); }
+.rbac-card .rbac-badge.tone-red{ background: rgba(239, 68, 68, .12); color: #b91c1c; border-color: rgba(239, 68, 68, .22); }
+
+/* RWD: filter actions wrap nicely */
+@media (max-width: 900px){
+  .rbac-card .rbac-audit-filter-actions{
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

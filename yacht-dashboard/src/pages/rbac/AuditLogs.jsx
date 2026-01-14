@@ -1,9 +1,7 @@
-// src/pages/rbac/AuditLogs.jsx
 import React, { useMemo, useState } from "react";
 import "./rbac.styles.css";
 
 export default function AuditLogs() {
-  // UI tabs (no persistence)
   const tabs = useMemo(
     () => [
       { key: "login", label: "登入紀錄" },
@@ -14,25 +12,29 @@ export default function AuditLogs() {
 
   const [active, setActive] = useState("login");
 
-  // UI form states (no query behavior)
-  const [startDate, setStartDate] = useState("2026-01-12");
-  const [endDate, setEndDate] = useState("2026-01-16");
+  // filters (UI only)
+  const DEFAULT_START = "2026-01-12";
+  const DEFAULT_END = "2026-01-16";
+  const [startDate, setStartDate] = useState(DEFAULT_START);
+  const [endDate, setEndDate] = useState(DEFAULT_END);
 
-  // - 這裡的「時間」先做成時間區段的 dropdown（純 UI）
+  // 時間/帳號/角色
   const [timeSlot, setTimeSlot] = useState("");
   const [account, setAccount] = useState("");
   const [role, setRole] = useState("");
 
-  // Detail modal (permission tab) — UI only
+  // permission detail modal (UI only)
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailRow, setDetailRow] = useState(null);
 
-  // mock dropdown options (UI only)
-  const timeOptions = useMemo(() => ["時間", "全部", "上午(06-12)", "下午(12-18)", "晚間(18-24)", "凌晨(00-06)"], []);
-  const accountOptions = useMemo(() => ["帳號", "admin", "engineerA", "captain01", "crew02"], []);
+  const timeOptions = useMemo(
+    () => ["時間", "全部", "上午(06-12)", "下午(12-18)", "晚間(18-24)", "凌晨(00-06)"],
+    []
+  );
+  const accountOptions = useMemo(() => ["帳號", "admin", "engineerA", "engineerB", "captain01", "crew02"], []);
   const roleOptions = useMemo(() => ["角色", "管理者", "工程師", "船長", "船員"], []);
 
-  // Login rows (UI only) — 時間(日期+時間)、帳號、角色、IP
+  // mock login rows (UI only)
   const loginRows = useMemo(
     () => [
       { id: "l1", occurredAt: "2026/01/16 11:22:33", username: "admin", roleName: "管理者", ip: "203.66.12.34" },
@@ -49,7 +51,7 @@ export default function AuditLogs() {
     []
   );
 
-  // Permission rows (UI only) 
+  // mock permission rows (UI only)
   const permissionRows = useMemo(
     () => [
       {
@@ -62,7 +64,6 @@ export default function AuditLogs() {
         action: "新增",
         dataIndex: "ROLE_ENGINEER",
         remark: "新增工程師角色，預設無刪除權限",
-        // 明細視窗有 before/after 可以展示（不影響列表欄位）
         before: { rolesCount: 3 },
         after: { rolesCount: 4 },
       },
@@ -72,7 +73,7 @@ export default function AuditLogs() {
         username: "engineerA",
         roleName: "工程師",
         ip: "203.66.12.35",
-        target: "帳號",
+        target: "帳號權限",
         action: "修改",
         dataIndex: "user_1024",
         remark: "調整角色：船員 → 船長",
@@ -98,7 +99,7 @@ export default function AuditLogs() {
         username: "admin",
         roleName: "管理者",
         ip: "61.230.88.10",
-        target: "帳號",
+        target: "帳號權限",
         action: "鎖定",
         dataIndex: "user_1008",
         remark: "連續登入失敗，系統鎖定",
@@ -124,7 +125,7 @@ export default function AuditLogs() {
         username: "admin",
         roleName: "管理者",
         ip: "203.66.12.34",
-        target: "帳號",
+        target: "帳號權限",
         action: "刪除",
         dataIndex: "user_0999",
         remark: "移除離職帳號",
@@ -150,7 +151,7 @@ export default function AuditLogs() {
         username: "engineerB",
         roleName: "工程師",
         ip: "61.230.88.10",
-        target: "帳號",
+        target: "帳號權限",
         action: "修改",
         dataIndex: "user_1012",
         remark: "更新 Email（UI 示範）",
@@ -187,9 +188,39 @@ export default function AuditLogs() {
     []
   );
 
+  const closeDetail = () => {
+    setDetailOpen(false);
+    setDetailRow(null);
+  };
+
   const openDetail = (row) => {
     setDetailRow(row);
     setDetailOpen(true);
+  };
+
+  // Badge class mapping (UI only)
+  const getTargetBadgeTone = (target) => {
+    if (target === "帳號") return "tone-blue";
+    if (target === "角色權限") return "tone-purple";
+    if (target === "權限設定") return "tone-teal";
+    return "tone-gray";
+  };
+
+  const getActionBadgeTone = (action) => {
+    if (action === "新增") return "tone-green";
+    if (action === "修改") return "tone-yellow";
+    if (action === "刪除") return "tone-red";
+    if (action === "鎖定") return "tone-red";
+    if (action === "檢視") return "tone-gray";
+    return "tone-gray";
+  };
+
+  const onClearFilters = () => {
+    setStartDate(DEFAULT_START);
+    setEndDate(DEFAULT_END);
+    setTimeSlot("");
+    setAccount("");
+    setRole("");
   };
 
   return (
@@ -220,20 +251,20 @@ export default function AuditLogs() {
       <div className="rbac-content">
         <div className="rbac-card">
           {/* Filters (UI only) */}
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontWeight: 800 }}>開始日期</span>
+          <div className="rbac-audit-filters">
+            <div className="rbac-audit-filter">
+              <span className="rbac-audit-filter-label">開始日期</span>
               <input className="input" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
 
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontWeight: 800 }}>結束日期</span>
+            <div className="rbac-audit-filter">
+              <span className="rbac-audit-filter-label">結束日期</span>
               <input className="input" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
 
             {/* 時間 / 帳號 / 角色 */}
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontWeight: 800 }}>時間</span>
+            <div className="rbac-audit-filter">
+              <span className="rbac-audit-filter-label">時間</span>
               <select className="select" value={timeSlot} onChange={(e) => setTimeSlot(e.target.value)}>
                 {timeOptions.map((x) => (
                   <option key={x} value={x === "時間" || x === "全部" ? "" : x}>
@@ -243,8 +274,8 @@ export default function AuditLogs() {
               </select>
             </div>
 
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontWeight: 800 }}>帳號</span>
+            <div className="rbac-audit-filter">
+              <span className="rbac-audit-filter-label">帳號</span>
               <select className="select" value={account} onChange={(e) => setAccount(e.target.value)}>
                 {accountOptions.map((x) => (
                   <option key={x} value={x === "帳號" ? "" : x}>
@@ -254,8 +285,8 @@ export default function AuditLogs() {
               </select>
             </div>
 
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontWeight: 800 }}>角色</span>
+            <div className="rbac-audit-filter">
+              <span className="rbac-audit-filter-label">角色</span>
               <select className="select" value={role} onChange={(e) => setRole(e.target.value)}>
                 {roleOptions.map((x) => (
                   <option key={x} value={x === "角色" ? "" : x}>
@@ -265,12 +296,15 @@ export default function AuditLogs() {
               </select>
             </div>
 
-            <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+            <div className="rbac-audit-filter-actions">
               <button className="btn btn-purple" type="button" onClick={() => {}}>
                 查詢
               </button>
               <button className="btn btn-ghost" type="button" onClick={() => {}}>
                 匯出
+              </button>
+              <button className="btn btn-ghost" type="button" onClick={onClearFilters}>
+                清空
               </button>
             </div>
           </div>
@@ -281,7 +315,7 @@ export default function AuditLogs() {
 
           {/* Table */}
           <div style={{ marginTop: 14 }}>
-            <table className="rbac-table">
+            <table className="rbac-table rbac-table-fixed">
               <thead>
                 {active === "login" ? (
                   <tr>
@@ -308,22 +342,44 @@ export default function AuditLogs() {
                 {active === "login"
                   ? loginRows.map((r) => (
                       <tr key={r.id}>
-                        <td>{r.occurredAt}</td>
-                        <td>{r.username}</td>
-                        <td>{r.roleName}</td>
-                        <td>{r.ip}</td>
+                        <td className="rbac-td-ellipsis" title={r.occurredAt}>
+                          {r.occurredAt}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.username}>
+                          {r.username}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.roleName}>
+                          {r.roleName}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.ip}>
+                          {r.ip}
+                        </td>
                       </tr>
                     ))
                   : permissionRows.map((r) => (
                       <tr key={r.id}>
-                        <td>{r.occurredAt}</td>
-                        <td>{r.username}</td>
-                        <td>{r.roleName}</td>
-                        <td>{r.ip}</td>
-                        <td>{r.target}</td>
-                        <td>{r.action}</td>
-                        <td>{r.dataIndex}</td>
-                        <td>
+                        <td className="rbac-td-ellipsis" title={r.occurredAt}>
+                          {r.occurredAt}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.username}>
+                          {r.username}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.roleName}>
+                          {r.roleName}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.ip}>
+                          {r.ip}
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.target}>
+                          <span className={`rbac-badge ${getTargetBadgeTone(r.target)}`}>{r.target}</span>
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.action}>
+                          <span className={`rbac-badge ${getActionBadgeTone(r.action)}`}>{r.action}</span>
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.dataIndex}>
+                          <span className="rbac-mono">{r.dataIndex}</span>
+                        </td>
+                        <td className="rbac-td-ellipsis" title={r.remark}>
                           <button type="button" className="rbac-audit-link" onClick={() => openDetail(r)}>
                             {r.remark}
                           </button>
@@ -336,11 +392,11 @@ export default function AuditLogs() {
 
           {/* Detail Modal (UI only) */}
           {detailOpen && detailRow ? (
-            <div className="rbac-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setDetailOpen(false)}>
+            <div className="rbac-backdrop" onMouseDown={(e) => e.target === e.currentTarget && closeDetail()}>
               <div className="rbac-modal lg">
                 <div className="rbac-modal-head">
                   <h3 className="rbac-modal-title">權限操作明細</h3>
-                  <button className="rbac-icon-x" type="button" onClick={() => setDetailOpen(false)}>
+                  <button className="rbac-icon-x" type="button" onClick={closeDetail}>
                     ×
                   </button>
                 </div>
@@ -365,15 +421,21 @@ export default function AuditLogs() {
 
                   <div className="rbac-audit-detail-row">
                     <div className="rbac-audit-detail-k">目標</div>
-                    <div className="rbac-audit-detail-v">{detailRow.target}</div>
+                    <div className="rbac-audit-detail-v">
+                      <span className={`rbac-badge ${getTargetBadgeTone(detailRow.target)}`}>{detailRow.target}</span>
+                    </div>
                   </div>
                   <div className="rbac-audit-detail-row">
                     <div className="rbac-audit-detail-k">動作</div>
-                    <div className="rbac-audit-detail-v">{detailRow.action}</div>
+                    <div className="rbac-audit-detail-v">
+                      <span className={`rbac-badge ${getActionBadgeTone(detailRow.action)}`}>{detailRow.action}</span>
+                    </div>
                   </div>
                   <div className="rbac-audit-detail-row">
                     <div className="rbac-audit-detail-k">資料索引</div>
-                    <div className="rbac-audit-detail-v">{detailRow.dataIndex}</div>
+                    <div className="rbac-audit-detail-v">
+                      <span className="rbac-mono">{detailRow.dataIndex}</span>
+                    </div>
                   </div>
                   <div className="rbac-audit-detail-row">
                     <div className="rbac-audit-detail-k">備註</div>
@@ -393,7 +455,7 @@ export default function AuditLogs() {
                 </div>
 
                 <div className="rbac-modal-foot">
-                  <button className="btn btn-ghost" type="button" onClick={() => setDetailOpen(false)}>
+                  <button className="btn btn-ghost" type="button" onClick={closeDetail}>
                     關閉
                   </button>
                 </div>
