@@ -809,3 +809,57 @@
     margin-left: 0;
   }
 }
+
+/* =========================================================
+   Audit Logs – Detail Modal / Diff UI
+   (For AuditLogs.jsx UI; safe scoped under .rbac-card)
+   ========================================================= */
+
+.rbac-card .rbac-audit-link{
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 800;
+  text-align: left;
+}
+
+.rbac-card .rbac-audit-link:hover{
+  text-decoration: underline;
+}
+
+.rbac-card .rbac-audit-detail-row{
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.rbac-card .rbac-audit-detail-k{
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.rbac-card .rbac-audit-detail-v{
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.rbac-card .rbac-audit-code{
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #0b1220;
+  color: #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  overflow: auto;
+  max-height: 260px;
+}

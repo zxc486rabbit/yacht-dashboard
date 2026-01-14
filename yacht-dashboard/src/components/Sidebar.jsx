@@ -142,7 +142,7 @@ export default function Sidebar() {
       icon: <FaClipboardList />,
       label: "權限管理",
       children: [
-        { label: "權限管理", path: "/rbac/permissions" },
+        { label: "權限設定", path: "/rbac/permissions" },
         { label: "稽核紀錄", path: "/rbac/audit-logs" },
       ],
     },

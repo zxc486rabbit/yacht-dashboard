@@ -50,7 +50,7 @@ import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功�
 import BerthBooking from "./pages/userCenter/BerthBooking"; //船位預約
 import MyBookings from "./pages/userCenter/MyBookings"; //我的預約 / 停泊費用
 import AccountSettings from "./pages/userProfile/AccountSettings";
-import PermissionManagement from "./pages/rbac/PermissionManagement"; // RBAC 權限管理頁面
+import PermissionManagement from "./pages/rbac/PermissionManagement"; // RBAC 權限設定頁面
 import AuditLogs from "./pages/rbac/AuditLogs"; // 稽核紀錄（畫面頁）
 
 
@@ -93,7 +93,7 @@ export default function App() {
                     <Route path="/user/my-bookings" element={<MyBookings />} />
                     <Route path="/account" element={<AccountSettings />} />
                     
-                    {/* RBAC 權限管理 */}
+                    {/* RBAC 權限設定 */}
                     <Route path="/rbac/permissions" element={<PermissionManagement />} />
                     <Route path="/rbac/audit-logs" element={<AuditLogs />} />
                   

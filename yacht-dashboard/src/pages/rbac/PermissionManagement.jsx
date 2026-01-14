@@ -40,13 +40,13 @@ export default function PermissionManagement() {
   return (
     <div className="rbac-page">
       <div className="rbac-top">
-        <h1 className="rbac-title">權限管理</h1>
+        <h1 className="rbac-title">權限設定</h1>
       </div>
 
       <div
         className="rbac-tabs"
         role="tablist"
-        aria-label="權限管理分頁"
+        aria-label="權限設定分頁"
         onKeyDown={handleKeyDown}
       >
         {tabs.map((t) => {
