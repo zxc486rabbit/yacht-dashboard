@@ -370,10 +370,6 @@ export default function RealtimeMonitor() {
               只看異常
             </label>
           </div>
-
-          <Link to="/alarm-center" className="btn btn-sm btn-outline-danger">
-            告警中心
-          </Link>
         </div>
       </div>
 

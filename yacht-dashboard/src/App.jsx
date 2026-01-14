@@ -18,6 +18,7 @@ import BillingModule from "./pages/power-water/BillingModule"; //計費收費模
 import UserBinding from "./pages/power-water/UserBinding"; //用戶資訊綁定
 import RemoteControl from "./pages/power-water/RemoteControl"; //遠端控管功能
 import AlarmCenter from "./pages/power-water/AlarmCenter"; //告警中心
+import Test from "./pages/power-water/Test"; //告警中心
 
 import AisIntegration from "./pages/ship-identification/AisIntegration"; //AIS整合模組
 import ShipImageRecognition from "./pages/ship-identification/ShipImageRecognition"; //船舶影像辨識
@@ -84,6 +85,7 @@ export default function App() {
                     <Route path="/remote-control" element={<RemoteControl />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/alarm-center" element={<AlarmCenter />} />
+                    <Route path="/test" element={<Test />} />
                     {/* 使用者專區 */}
                     <Route path="/user/berth-booking" element={<BerthBooking />} />
                     <Route path="/user/my-bookings" element={<MyBookings />} />

@@ -77,6 +77,7 @@ export default function Sidebar() {
         // { label: "用戶資訊綁定 ?", path: "/user-binding" },
         { label: "歷史報表", path: "/history" },
         { label: "告警中心", path: "/alarm-center" },
+        { label: "測試", path: "/test" },
       ],
     },
     {

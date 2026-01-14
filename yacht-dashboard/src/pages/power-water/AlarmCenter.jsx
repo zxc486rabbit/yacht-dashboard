@@ -509,8 +509,6 @@ export default function AlarmCenter() {
                 <th style={{ width: 140 }}>類型</th>
                 <th style={{ width: 90 }}>嚴重度</th>
                 <th style={{ width: 90 }}>狀態</th>
-                <th>摘要</th>
-                <th style={{ width: 240 }}>監看數據</th>
                 <th style={{ width: 220 }}>操作</th>
               </tr>
             </thead>
@@ -555,25 +553,6 @@ export default function AlarmCenter() {
 
                       <td className="text-center">
                         <span className={`badge ${st.badge}`}>{st.text}</span>
-                      </td>
-
-                      <td className="text-start">
-                        <div className="fw-bold">{row.title}</div>
-                        <div className="text-muted small">{row.detail}</div>
-                        {row.ackAt && (
-                          <div className="text-muted small">
-                            確認：{row.ackBy || "-"}（{fmtDT(row.ackAt)}）
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="text-start">
-                        <div className="small">
-                          V：<b>{row.metrics.voltageV.toFixed(1)}</b>　
-                          A：<b>{row.metrics.currentA.toFixed(2)}</b>　
-                          kW：<b>{row.metrics.powerKW.toFixed(2)}</b>　
-                          Hz：<b>{row.metrics.freqHz.toFixed(2)}</b>
-                        </div>
                       </td>
 
                       <td className="text-center text-nowrap">
