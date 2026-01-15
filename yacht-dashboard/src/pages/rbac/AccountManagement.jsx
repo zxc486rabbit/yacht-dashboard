@@ -606,11 +606,15 @@ export default function AccountManagement() {
 
   return (
     <div className="rbac-card">
-      <div className="acct-head">
-        <div className="acct-right" style={{ marginLeft: "auto" }}>
+      <div className="rbac-actions" style={{ justifyContent: "space-between" }}>
+        <div>
           <button className="btn btn-yellow" onClick={openAdd} type="button">
             新增帳號
           </button>
+        </div>
+
+        <div className="small-muted">
+          目前登入角色：<strong style={{ marginLeft: 6 }}>管理者</strong>
         </div>
       </div>
 
