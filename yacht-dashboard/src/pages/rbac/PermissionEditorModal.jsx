@@ -60,8 +60,7 @@ const DEFAULT_GROUPS = [
 // 權限動作（可依後端調整）
 const ACTIONS = [
   { key: "view", label: "檢視" },
-  { key: "create", label: "新增" },
-  { key: "update", label: "修改" },
+  { key: "edit", label: "編輯" },
   { key: "delete", label: "刪除" },
 ];
 
@@ -74,6 +73,14 @@ export default function PermissionEditorModal({
   onSave,
 }) {
   const [openGroup, setOpenGroup] = useState(groups[0]?.key ?? null);
+  const [groupVisibility, setGroupVisibility] = useState(() => {
+    // 初始化大項目可見性
+    const vis = {};
+    groups.forEach((g) => {
+      vis[g.key] = true;
+    });
+    return vis;
+  });
 
   const [perm, setPerm] = useState(() => structuredClone(initial || {}));
 
@@ -82,11 +89,40 @@ export default function PermissionEditorModal({
     if (!open) return;
     setPerm(structuredClone(initial || {}));
     setOpenGroup(groups[0]?.key ?? null);
+    // 重置大項目可見性
+    const vis = {};
+    groups.forEach((g) => {
+      vis[g.key] = true;
+    });
+    setGroupVisibility(vis);
   }, [open, initial, groups]);
 
   const flatItems = useMemo(() => {
     return groups.flatMap((g) => g.items.map((it) => ({ ...it, groupKey: g.key })));
   }, [groups]);
+
+  const toggleGroupVisibility = (groupKey) => {
+    setGroupVisibility((prev) => {
+      const next = { ...prev };
+      next[groupKey] = !prev[groupKey];
+      
+      // 如果設為不可見，清除該組所有子項目的權限
+      if (!next[groupKey]) {
+        const group = groups.find((g) => g.key === groupKey);
+        if (group) {
+          setPerm((prevPerm) => {
+            const nextPerm = structuredClone(prevPerm || {});
+            group.items.forEach((it) => {
+              nextPerm[it.key] = {};
+            });
+            return nextPerm;
+          });
+        }
+      }
+      
+      return next;
+    });
+  };
 
   const toggle = (itemKey, actionKey) => {
     setPerm((prev) => {
@@ -106,19 +142,6 @@ export default function PermissionEditorModal({
     });
   };
 
-  const setGroupAll = (groupKey, value) => {
-    const group = groups.find((g) => g.key === groupKey);
-    if (!group) return;
-    setPerm((prev) => {
-      const next = structuredClone(prev || {});
-      group.items.forEach((it) => {
-        if (!next[it.key]) next[it.key] = {};
-        ACTIONS.forEach((a) => (next[it.key][a.key] = value));
-      });
-      return next;
-    });
-  };
-
   if (!open) return null;
 
   return (
@@ -132,53 +155,30 @@ export default function PermissionEditorModal({
         </div>
 
         <div className="rbac-modal-body rbac-perm-layout">
-          {/* 左側：系統大項（點擊展開細項） */}
+          {/* 左側：系統大項 */}
           <aside className="rbac-perm-left">
             {groups.map((g) => {
               const isOpen = openGroup === g.key;
+              const isVisible = groupVisibility[g.key];
               return (
                 <div key={g.key} className="rbac-perm-group">
                   <button
                     type="button"
-                    className={`rbac-perm-group-header ${isOpen ? "open" : ""}`}
+                    className={`rbac-perm-group-header ${isOpen ? "open" : ""} ${!isVisible ? "disabled" : ""}`}
                     onClick={() => setOpenGroup(isOpen ? null : g.key)}
                   >
                     <span>{g.title}</span>
-                    <span className="rbac-perm-arrow">{isOpen ? "▾" : "▸"}</span>
                   </button>
-
+                  
                   <div className={`rbac-perm-group-body ${isOpen ? "open" : ""}`}>
-                    <div className="rbac-perm-group-actions">
-                      <button
-                        type="button"
-                        className="rbac-btn rbac-btn-sm"
-                        onClick={() => setGroupAll(g.key, true)}
-                      >
-                        此系統全選
-                      </button>
-                      <button
-                        type="button"
-                        className="rbac-btn rbac-btn-sm rbac-btn-ghost"
-                        onClick={() => setGroupAll(g.key, false)}
-                      >
-                        此系統全清
-                      </button>
-                    </div>
-
-                    {g.items.map((it) => (
-                      <button
-                        key={it.key}
-                        type="button"
-                        className="rbac-perm-item-link"
-                        onClick={() => {
-                          // 右側捲到該項
-                          const el = document.getElementById(`perm-row-${it.key}`);
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }}
-                      >
-                        {it.name}
-                      </button>
-                    ))}
+                    <label className="rbac-perm-check" style={{ marginTop: '8px', marginLeft: '8px' }}>
+                      <input
+                        type="checkbox"
+                        checked={isVisible}
+                        onChange={() => toggleGroupVisibility(g.key)}
+                      />
+                      <span style={{ fontWeight: 'bold' }}>可檢視此系統</span>
+                    </label>
                   </div>
                 </div>
               );
@@ -194,41 +194,40 @@ export default function PermissionEditorModal({
               </div>
 
               <div className="rbac-perm-rows">
-                {flatItems.map((it) => {
-                  const row = perm[it.key] || {};
-                  const allOn = ACTIONS.every((a) => !!row[a.key]);
-                  return (
-                    <div className="rbac-perm-row" key={it.key} id={`perm-row-${it.key}`}>
-                      <div className="col-name">
-                        <div className="rbac-perm-item-title">{it.name}</div>
-                        <div className="rbac-perm-item-sub">
-                          {groups.find((g) => g.key === it.groupKey)?.title || ""}
+                {flatItems
+                  .filter((it) => it.groupKey === openGroup && groupVisibility[it.groupKey])
+                  .map((it) => {
+                    const row = perm[it.key] || {};
+                    const allOn = ACTIONS.every((a) => !!row[a.key]);
+                    return (
+                      <div className="rbac-perm-row" key={it.key} id={`perm-row-${it.key}`}>
+                        <div className="col-name">
+                          <div className="rbac-perm-item-title">{it.name}</div>
+                        </div>
+
+                        <div className="col-actions">
+                          <button
+                            type="button"
+                            className="rbac-btn rbac-btn-xs rbac-btn-ghost"
+                            onClick={() => setRowAll(it.key, !allOn)}
+                          >
+                            {allOn ? "全清" : "全選"}
+                          </button>
+
+                          {ACTIONS.map((a) => (
+                            <label key={a.key} className="rbac-perm-check">
+                              <input
+                                type="checkbox"
+                                checked={!!row[a.key]}
+                                onChange={() => toggle(it.key, a.key)}
+                              />
+                              <span>{a.label}</span>
+                            </label>
+                          ))}
                         </div>
                       </div>
-
-                      <div className="col-actions">
-                        <button
-                          type="button"
-                          className="rbac-btn rbac-btn-xs rbac-btn-ghost"
-                          onClick={() => setRowAll(it.key, !allOn)}
-                        >
-                          {allOn ? "全清" : "全選"}
-                        </button>
-
-                        {ACTIONS.map((a) => (
-                          <label key={a.key} className="rbac-perm-check">
-                            <input
-                              type="checkbox"
-                              checked={!!row[a.key]}
-                              onChange={() => toggle(it.key, a.key)}
-                            />
-                            <span>{a.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </section>

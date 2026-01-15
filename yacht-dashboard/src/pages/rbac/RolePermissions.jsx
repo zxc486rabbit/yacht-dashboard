@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildDefaultRolePermissions,
@@ -9,6 +10,7 @@ import {
   rbacStoreGetRolePermMap,
   rbacStoreSetRolePermMap,
 } from "./rbac.data";
+import PermissionEditorModal from "./PermissionEditorModal";
 import "./rbac.styles.css";
 
 /* =========================================================
@@ -242,15 +244,54 @@ export default function RolePermissions() {
   const deleteRole = roles.find((r) => r.id === deleteRoleId) || null;
 
   const [showAddRole, setShowAddRole] = useState(false);
-  const [activeSystemKey, setActiveSystemKey] = useState(permGroups?.[0]?.key ?? "");
 
-  const updateRolePermissionRow = (roleId, permKey, nextSet) => {
+  // 轉換數據格式：Set 格式轉為 PermissionEditorModal 所需的 { view: true, create: false, ... } 格式
+  const convertSetToPermObject = (roleId) => {
+    const rolePerm = rolePermMap?.[roleId] || {};
+    const result = {};
+    
+    Object.keys(rolePerm).forEach((permKey) => {
+      const opsSet = rolePerm[permKey];
+      result[permKey] = {
+        view: opsSet.has("view"),
+        create: opsSet.has("create"),
+        update: opsSet.has("update") || opsSet.has("edit"),
+        delete: opsSet.has("delete"),
+      };
+    });
+    
+    return result;
+  };
+
+  // 轉換數據格式：PermissionEditorModal 返回的格式轉回 Set 格式
+  const convertPermObjectToSet = (permObject) => {
+    const result = {};
+    
+    Object.keys(permObject).forEach((permKey) => {
+      const ops = permObject[permKey];
+      const opsSet = new Set();
+      
+      if (ops.view) opsSet.add("view");
+      if (ops.create) opsSet.add("create");
+      if (ops.update) opsSet.add("edit");
+      if (ops.delete) opsSet.add("delete");
+      
+      result[permKey] = opsSet;
+    });
+    
+    return result;
+  };
+
+  const handleSavePermissions = (roleId, permData) => {
     if (!rbac.canEditPermission) return;
-
+    
+    const convertedData = convertPermObjectToSet(permData);
     setRolePermMap((prev) => ({
       ...prev,
-      [roleId]: { ...prev[roleId], [permKey]: new Set(nextSet) },
+      [roleId]: convertedData,
     }));
+    
+    setPermRoleId(null);
   };
 
   return (
@@ -314,31 +355,14 @@ export default function RolePermissions() {
       </table>
 
       {permRole && rbac.canEditPermission && (
-        <Modal title={`編輯 ${permRole.name} 權限`} size="lg" onClose={() => setPermRoleId(null)}>
-          <div className="perm-layout">
-            <aside className="perm-left">
-              <select className="select" value={activeSystemKey} onChange={(e) => setActiveSystemKey(e.target.value)}>
-                {permGroups.map((g) => (
-                  <option key={g.key} value={g.key}>
-                    {g.title}
-                  </option>
-                ))}
-              </select>
-            </aside>
-
-            <section className="perm-right">
-              {(permGroups.find((g) => g.key === activeSystemKey)?.items || []).map((row) => (
-                <div className="perm-row" key={row.key}>
-                  <div>{row.name}</div>
-                  <MultiSelectOps
-                    valueSet={rolePermMap?.[permRole.id]?.[row.key] ?? new Set()}
-                    onChange={(s) => updateRolePermissionRow(permRole.id, row.key, s)}
-                  />
-                </div>
-              ))}
-            </section>
-          </div>
-        </Modal>
+        <PermissionEditorModal
+          open={!!permRole}
+          title={`編輯 ${permRole.name} 權限`}
+          groups={permGroups}
+          initial={convertSetToPermObject(permRole.id)}
+          onClose={() => setPermRoleId(null)}
+          onSave={(permData) => handleSavePermissions(permRole.id, permData)}
+        />
       )}
 
       {editRole &&

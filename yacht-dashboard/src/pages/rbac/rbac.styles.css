@@ -128,23 +128,95 @@
 /* -------------------------
    Buttons (RBAC only)
 -------------------------- */
-.rbac-card .btn{
+.rbac-card .btn,
+.rbac-btn{
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
   font-weight: 700;
   cursor: pointer;
+  background: #0599BB;
+  color: #fff;
+  transition: all 0.2s ease;
 }
 
-.rbac-card .btn:disabled{
+.rbac-card .btn:disabled,
+.rbac-btn:disabled{
   opacity: .45;
   cursor: not-allowed;
 }
 
-.rbac-card .btn-green{ background: var(--green); color: #fff; }
-.rbac-card .btn-yellow{ background: var(--yellow); color: #fff; }
-.rbac-card .btn-purple{ background: var(--purple); color: #fff; }
-.rbac-card .btn-red{ background: var(--red); color: #fff; }
+.rbac-card .btn:hover:not(:disabled),
+.rbac-btn:hover:not(:disabled){
+  background: #047a96;
+}
+
+.rbac-card .btn-green,
+.rbac-btn-green{ 
+  background: #10b981; 
+  color: #fff; 
+}
+
+.rbac-card .btn-green:hover:not(:disabled),
+.rbac-btn-green:hover:not(:disabled){ 
+  background: #059669; 
+}
+
+.rbac-card .btn-yellow,
+.rbac-btn-yellow{ 
+  background: #f59e0b; 
+  color: #fff; 
+}
+
+.rbac-card .btn-yellow:hover:not(:disabled),
+.rbac-btn-yellow:hover:not(:disabled){ 
+  background: #d97706; 
+}
+
+.rbac-card .btn-purple,
+.rbac-btn-purple{ 
+  background: #6d28d9; 
+  color: #fff; 
+}
+
+.rbac-card .btn-purple:hover:not(:disabled),
+.rbac-btn-purple:hover:not(:disabled){ 
+  background: #5b21b6; 
+}
+
+.rbac-card .btn-red,
+.rbac-btn-red{ 
+  background: #ef4444; 
+  color: #fff; 
+}
+
+.rbac-card .btn-red:hover:not(:disabled),
+.rbac-btn-red:hover:not(:disabled){ 
+  background: #dc2626; 
+}
+
+.rbac-card .btn-ghost,
+.rbac-btn-ghost{
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.rbac-card .btn-ghost:hover:not(:disabled),
+.rbac-btn-ghost:hover:not(:disabled){
+  background: #f3f4f6;
+  border-color: #0599BB;
+}
+
+.rbac-btn-sm{
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.rbac-btn-xs{
+  padding: 4px 8px;
+  font-size: 12px;
+}
 
 /* -------------------------
    Table (RBAC list table)
@@ -184,7 +256,8 @@
    Modal
    ========================================================= */
 
-.rbac-card .rbac-backdrop{
+.rbac-card .rbac-backdrop,
+.rbac-modal-backdrop{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.45);
@@ -194,46 +267,53 @@
   z-index: 9999;
 }
 
-.rbac-card .rbac-modal{
-  width: min(680px, calc(100vw - 24px));
+.rbac-card .rbac-modal,
+.rbac-modal{
+  width: min(900px, calc(100vw - 24px));
   background: #fff;
   border-radius: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 14px 30px rgba(0,0,0,.18);
   overflow: hidden;
 }
 
-.rbac-card .rbac-modal.sm{
+.rbac-card .rbac-modal.sm,
+.rbac-modal.sm{
   width: min(420px, calc(100vw - 24px));
 }
 
-.rbac-card .rbac-modal.lg{
+.rbac-card .rbac-modal.lg,
+.rbac-modal.lg{
   width: min(1100px, calc(100vw - 24px));
 }
 
-.rbac-card .rbac-modal-head{
+.rbac-card .rbac-modal-head,
+.rbac-modal-header{
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.rbac-card .rbac-modal-title{
+.rbac-card .rbac-modal-title,
+.rbac-modal-title{
   font-size: 18px;
   font-weight: 900;
   margin: 0;
 }
 
-.rbac-card .rbac-modal-body{
+.rbac-card .rbac-modal-body,
+.rbac-modal-body{
   padding: 20px;
 }
 
-.rbac-card .rbac-modal-foot{
+.rbac-card .rbac-modal-foot,
+.rbac-modal-footer{
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 20px;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #e5e7eb;
 }
 
 .rbac-card .rbac-icon-x{
@@ -270,7 +350,8 @@
    Permission Editor Layout
    ========================================================= */
 
-.rbac-card .perm-layout{
+.rbac-card .perm-layout,
+.rbac-perm-layout{
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 14px;
@@ -280,16 +361,18 @@
   max-height: 70vh;
 }
 
-.rbac-card .perm-left{
-  border: 1px solid var(--line);
+.rbac-card .perm-left,
+.rbac-perm-left{
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #fafafa;
   padding: 10px;
   overflow: auto;
 }
 
-.rbac-card .perm-right{
-  border: 1px solid var(--line);
+.rbac-card .perm-right,
+.rbac-perm-right{
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #fff;
   overflow: hidden;
@@ -297,22 +380,25 @@
   flex-direction: column;
 }
 
-.rbac-card .perm-right-head{
+.rbac-card .perm-right-head,
+.rbac-perm-right-head{
   display: grid;
   grid-template-columns: 55% 45%;
   gap: 10px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #e5e7eb;
   background: #fafafa;
   font-weight: 900;
 }
 
-.rbac-card .perm-right-body{
+.rbac-card .perm-right-body,
+.rbac-perm-right-body{
   padding: 10px 12px;
   overflow: auto;
 }
 
-.rbac-card .perm-row{
+.rbac-card .perm-row,
+.rbac-perm-row{
   display: grid;
   grid-template-columns: 55% 45%;
   gap: 10px;
@@ -321,18 +407,23 @@
   align-items: center;
 }
 
-.rbac-card .perm-group-hint{
+.rbac-card .perm-group-hint,
+.rbac-perm-group-hint{
   font-size: 12px;
-  color: var(--muted);
+  color: #6b7280;
   margin-top: 3px;
 }
 
 /* Left accordion */
-.rbac-card .perm-group{ margin-bottom: 10px; }
+.rbac-card .perm-group,
+.rbac-perm-group{ 
+  margin-bottom: 10px; 
+}
 
-.rbac-card .perm-group-head{
+.rbac-card .perm-group-head,
+.rbac-perm-group-header{
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid #e5e7eb;
   background: #f3f4f6;
   padding: 10px 12px;
   border-radius: 10px;
@@ -341,23 +432,55 @@
   justify-content: space-between;
   cursor: pointer;
   font-weight: 900;
+  transition: all 0.2s ease;
 }
 
-.rbac-card .perm-group-title{ font-weight: 900; }
+.rbac-card .perm-group-head:hover,
+.rbac-perm-group-header:hover{
+  background: #e5e7eb;
+}
 
-.rbac-card .perm-group-body{
+.rbac-card .perm-group-head.open,
+.rbac-perm-group-header.open{
+  background: #0599BB;
+  color: #fff;
+  border-color: #047a96;
+}
+
+.rbac-perm-group-header.disabled{
+  opacity: 0.5;
+  background: #f9fafb;
+}
+
+.rbac-card .perm-group-title,
+.rbac-perm-group-title{ 
+  font-weight: 900; 
+}
+
+.rbac-card .perm-group-body,
+.rbac-perm-group-body{
   max-height: 0;
   overflow: hidden;
   transition: max-height .25s ease;
   padding: 0 6px;
 }
 
-.rbac-card .perm-group-body.open{
+.rbac-card .perm-group-body.open,
+.rbac-perm-group-body.open{
   max-height: 900px;
   padding: 10px 6px;
 }
 
-.rbac-card .perm-subitem{
+.rbac-perm-group-actions{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 6px;
+  margin-bottom: 8px;
+}
+
+.rbac-card .perm-subitem,
+.rbac-perm-item-link{
   width: 100%;
   text-align: left;
   border: none;
@@ -365,10 +488,107 @@
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-.rbac-card .perm-subitem:hover{
+.rbac-card .perm-subitem:hover,
+.rbac-perm-item-link:hover{
   background: #e5e7eb;
+}
+
+.rbac-perm-arrow{
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+/* Permission table styling */
+.rbac-perm-table{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.rbac-perm-head{
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+  font-weight: 800;
+  font-size: 13px;
+  color: #374151;
+}
+
+.rbac-perm-head .col-name{
+  flex: 1;
+  padding: 12px 16px;
+}
+
+.rbac-perm-head .col-actions{
+  flex: 1;
+  padding: 12px 16px;
+}
+
+.rbac-perm-rows{
+  flex: 1;
+  overflow-y: auto;
+}
+
+.rbac-perm-row{
+  display: flex;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+}
+
+.rbac-perm-row:hover{
+  background: #f9fafb;
+}
+
+.rbac-perm-row .col-name{
+  flex: 1;
+  padding: 12px 16px;
+}
+
+.rbac-perm-row .col-actions{
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.rbac-perm-item-title{
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.rbac-perm-item-sub{
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.rbac-perm-check{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rbac-perm-check input[type="checkbox"]{
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #0599BB;
+}
+
+.rbac-perm-check:hover{
+  color: #0599BB;
 }
 
 /* =========================================================
@@ -1011,4 +1231,6 @@
   font-weight: 800;
   color: #1f2a37;
 }
+
+
 
