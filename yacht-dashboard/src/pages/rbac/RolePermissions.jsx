@@ -245,7 +245,7 @@ export default function RolePermissions() {
 
   const [showAddRole, setShowAddRole] = useState(false);
 
-  // 轉換數據格式：Set 格式轉為 PermissionEditorModal 所需的 { view: true, create: false, ... } 格式
+  // 轉換數據格式：Set 格式轉為 PermissionEditorModal 所需的 { view: true, edit: false, ... } 格式
   const convertSetToPermObject = (roleId) => {
     const rolePerm = rolePermMap?.[roleId] || {};
     const result = {};
@@ -254,8 +254,7 @@ export default function RolePermissions() {
       const opsSet = rolePerm[permKey];
       result[permKey] = {
         view: opsSet.has("view"),
-        create: opsSet.has("create"),
-        update: opsSet.has("update") || opsSet.has("edit"),
+        edit: opsSet.has("edit"),
         delete: opsSet.has("delete"),
       };
     });
@@ -272,8 +271,7 @@ export default function RolePermissions() {
       const opsSet = new Set();
       
       if (ops.view) opsSet.add("view");
-      if (ops.create) opsSet.add("create");
-      if (ops.update) opsSet.add("edit");
+      if (ops.edit) opsSet.add("edit");
       if (ops.delete) opsSet.add("delete");
       
       result[permKey] = opsSet;
