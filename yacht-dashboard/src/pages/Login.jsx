@@ -42,7 +42,7 @@ export default function Login() {
     const mockUser = {
       id: "U0001",
       name: username.trim(),  // 先把帳號當作顯示名稱
-      role: "港務人員",       // 先固定給一個角色，讓 sidebar 有東西可展示
+      role: "管理者",         // 先固定給一個角色，讓 sidebar 有東西可展示
       avatar: null,           // 之後要接照片 url 再用
       remember,
       loginAt: new Date().toISOString(),
