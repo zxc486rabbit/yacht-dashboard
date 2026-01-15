@@ -1,15 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { loadRoles } from "./roleStorage";
-import { loadAccounts, saveAccounts } from "./accountStorage";
 import "./rbac.styles.css";
 import EyeIcon from "../../components/EyeIcon";
+import { rbacStoreGetRoles, rbacStoreOnRolesChanged, rbacStoreOffRolesChanged } from "./rbac.data";
 
 // ====== 假資料 ======
 // 角色改為：管理者 / 工程師 / 船長 / 船員
 const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
-
-// 角色清單（RolePermissions.jsx 會觸發事件，這裡以 ROLE_OPTIONS 當 fallback）
-const DEFAULT_ROLE_OBJECTS = ROLE_OPTIONS.map((name, idx) => ({ id: idx + 1, name }));
 
 const seed = [
   {
@@ -141,7 +137,6 @@ function mkEmptyAccount() {
   };
 }
 
-// ====== Password form state（與新增/編輯分離，避免互相污染） ======
 function mkEmptyPwdForm() {
   return {
     newPwd: "",
@@ -155,7 +150,6 @@ function mkEmptyPwdForm() {
   };
 }
 
-// ====== Pagination ======
 function PageButton({ active, children, onClick, disabled }) {
   return (
     <button className={`pg-btn ${active ? "active" : ""}`} onClick={onClick} disabled={disabled} type="button">
@@ -164,12 +158,11 @@ function PageButton({ active, children, onClick, disabled }) {
   );
 }
 
-// ====== 密碼管理員/瀏覽器自動填入防護屬性（集中管理） ======
 const AUTOFILL_GUARD_PROPS = {
   autoComplete: "off",
-  "data-lpignore": "true", // LastPass
-  "data-1p-ignore": "true", // 1Password
-  "data-bwignore": "true", // Bitwarden
+  "data-lpignore": "true",
+  "data-1p-ignore": "true",
+  "data-bwignore": "true",
 };
 
 const NEW_PASSWORD_GUARD_PROPS = {
@@ -179,7 +172,6 @@ const NEW_PASSWORD_GUARD_PROPS = {
   "data-bwignore": "true",
 };
 
-// ====== shared form fields ======
 const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, roleOptions }) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailInvalid = form.email.trim() && !emailRegex.test(form.email.trim());
@@ -306,7 +298,6 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, r
   );
 };
 
-// ====== 密碼規則與工具 ======
 const pwdRules = {
   minLen: 8,
   hasLower: (s) => /[a-z]/.test(s),
@@ -322,7 +313,7 @@ function evalPwd(pwd) {
   const okDigit = pwdRules.hasDigit(pwd);
   const okSymbol = pwdRules.hasSymbol(pwd);
 
-  const score = [okMin, okLower, okUpper, okDigit, okSymbol].filter(Boolean).length; // 0~5
+  const score = [okMin, okLower, okUpper, okDigit, okSymbol].filter(Boolean).length;
   const allOk = okMin && okLower && okUpper && okDigit && okSymbol;
 
   return { okMin, okLower, okUpper, okDigit, okSymbol, score, allOk };
@@ -354,67 +345,47 @@ function genStrongPassword(len = 12) {
   return base.join("");
 }
 
+function rolesToOptions(roles) {
+  if (!Array.isArray(roles) || roles.length === 0) return ROLE_OPTIONS;
+  return roles.map((r) => r.name).filter(Boolean);
+}
+
 export default function AccountManagement() {
-  // in-memory，不寫 localStorage
-  const [rows, setRows] = useState(() => loadAccounts(seed));
+  // 帳號資料只存在 component state（F5 不保留）
+  const [rows, setRows] = useState(seed);
 
-  // 角色選項：同頁面用 event 同步
-  const [roleOptions, setRoleOptions] = useState(() => {
-    const roles = loadRoles(DEFAULT_ROLE_OBJECTS);
-    const next = Array.isArray(roles) ? roles.map((r) => r.name) : ROLE_OPTIONS;
-    return next;
-  });
+  // 角色清單：來自 rbac.data.js 的 in-memory store（同一個 SPA 分頁可同步）
+  const [roleOptions, setRoleOptions] = useState(() => rolesToOptions(rbacStoreGetRoles()));
 
-  // 帳號列表：變更時寫入 in-memory cache（避免爆 localStorage quota）
   useEffect(() => {
-    saveAccounts(rows);
-  }, [rows]);
-
-  // 角色清單同步：同分頁自訂事件
-  useEffect(() => {
-    const refresh = () => {
-      const roles = loadRoles(DEFAULT_ROLE_OBJECTS);
-      const next = Array.isArray(roles) ? roles.map((r) => r.name) : ROLE_OPTIONS;
-      setRoleOptions(next);
-    };
-
-    window.addEventListener("rbac_roles_changed", refresh);
+    const refresh = () => setRoleOptions(rolesToOptions(rbacStoreGetRoles()));
+    rbacStoreOnRolesChanged(refresh);
     refresh();
-
-    return () => {
-      window.removeEventListener("rbac_roles_changed", refresh);
-    };
+    return () => rbacStoreOffRolesChanged(refresh);
   }, []);
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
-  // 搜尋
   const [searchName, setSearchName] = useState("");
   const [searchUsername, setSearchUsername] = useState("");
   const [searchRole, setSearchRole] = useState("");
 
-  // 排序
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // 分頁
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // modals
   const [addOpen, setAddOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [pwdId, setPwdId] = useState(null);
 
-  // 刪除確認 modal
   const [delOpen, setDelOpen] = useState(false);
   const [delTargetId, setDelTargetId] = useState(null);
 
-  // 表單（新增/編輯用）
   const [form, setForm] = useState(mkEmptyAccount());
   const [showPwd, setShowPwd] = useState(false);
 
-  // 修改密碼用表單（獨立）
   const [pwdForm, setPwdForm] = useState(mkEmptyPwdForm());
   const [pwdCopied, setPwdCopied] = useState(false);
 
@@ -428,15 +399,13 @@ export default function AccountManagement() {
       const usernameMatch =
         searchUsername.trim() === "" || r.username.toLowerCase().includes(searchUsername.trim().toLowerCase());
       const roleMatch = searchRole.trim() === "" || r.role.toLowerCase().includes(searchRole.trim().toLowerCase());
-
       return nameMatch && usernameMatch && roleMatch;
     });
 
     if (sortField) {
       result = [...result].sort((a, b) => {
-        const aVal = a[sortField]?.toLowerCase() || "";
-        const bVal = b[sortField]?.toLowerCase() || "";
-
+        const aVal = (a[sortField] || "").toString().toLowerCase();
+        const bVal = (b[sortField] || "").toString().toLowerCase();
         if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
         if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
         return 0;
@@ -446,10 +415,7 @@ export default function AccountManagement() {
     return result;
   }, [rows, searchName, searchUsername, searchRole, sortField, sortOrder]);
 
-  const totalPages = useMemo(() => {
-    const n = Math.ceil(filtered.length / pageSize);
-    return Math.max(1, n);
-  }, [filtered.length, pageSize]);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / pageSize)), [filtered.length, pageSize]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
@@ -463,43 +429,33 @@ export default function AccountManagement() {
 
   const pageButtons = useMemo(() => {
     const btns = [];
-
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) btns.push(i);
       return btns;
     }
-
     btns.push(1);
 
     const start = Math.max(2, page - 1);
     const end = Math.min(totalPages - 1, page + 1);
 
     if (start > 2) btns.push("...");
-
     for (let i = start; i <= end; i++) btns.push(i);
-
     if (end < totalPages - 1) btns.push("...");
-
     btns.push(totalPages);
+
     return btns;
   }, [page, totalPages]);
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
+    if (sortField === field) setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    else {
       setSortField(field);
       setSortOrder("asc");
     }
   };
 
-  const toggleSelectRow = (rowId) => {
-    setSelectedRowId((prev) => (prev === rowId ? null : rowId));
-  };
-
-  const stopRowClick = (e) => {
-    e.stopPropagation();
-  };
+  const toggleSelectRow = (rowId) => setSelectedRowId((prev) => (prev === rowId ? null : rowId));
+  const stopRowClick = (e) => e.stopPropagation();
 
   const openAdd = () => {
     setForm(mkEmptyAccount());
@@ -511,9 +467,7 @@ export default function AccountManagement() {
     if (!form.name.trim() || !form.username.trim() || !form.role.trim() || !form.password.trim()) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (form.email.trim() && !emailRegex.test(form.email.trim())) {
-      return;
-    }
+    if (form.email.trim() && !emailRegex.test(form.email.trim())) return;
 
     const newRow = {
       id: Date.now(),
@@ -589,9 +543,11 @@ export default function AccountManagement() {
     return "";
   }, [pwdForm.touched.confirmPwd, pwdForm.confirmPwd, pwdMatch]);
 
-  const canSavePwd = useMemo(() => {
-    return !!pwdRow && !pwdRow.locked && pwdEval.allOk && pwdMatch;
-  }, [pwdRow, pwdEval.allOk, pwdMatch]);
+  const canSavePwd = useMemo(() => !!pwdRow && !pwdRow.locked && pwdEval.allOk && pwdMatch, [
+    pwdRow,
+    pwdEval.allOk,
+    pwdMatch,
+  ]);
 
   const savePwd = () => {
     if (!canSavePwd) return;

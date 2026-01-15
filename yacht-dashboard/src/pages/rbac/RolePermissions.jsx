@@ -1,14 +1,15 @@
-// src/page/rbac/RolePermissions.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { buildDefaultRolePermissions, buildPermissionRows, DEFAULT_ROLES, OPS } from "./rbac.data";
 import {
-  loadRoles,
-  saveRoles,
-  loadRolePermMap,
-  saveRolePermMap,
-  serializeRolePermMap,
-  hydrateRolePermMap,
-} from "./roleStorage";
+  buildDefaultRolePermissions,
+  buildPermissionRows,
+  DEFAULT_ROLES,
+  OPS,
+  rbacStoreGetRoles,
+  rbacStoreSetRoles,
+  rbacStoreGetRolePermMap,
+  rbacStoreSetRolePermMap,
+} from "./rbac.data";
+import "./rbac.styles.css";
 
 /* =========================================================
    RBAC Hook（UI 層自我約束 / self-dogfooding）
@@ -124,20 +125,14 @@ function buildPermissionsByLevel(level, permissionRows) {
         break;
 
       case "工程維運":
-        if (group === "支付計費系統") {
-          permissions[key] = new Set(["view"]);
-        } else {
-          permissions[key] = new Set(["view", "edit"]);
-        }
+        if (group === "支付計費系統") permissions[key] = new Set(["view"]);
+        else permissions[key] = new Set(["view", "edit"]);
         break;
 
       case "一般使用":
         if (group === "岸電控制系統") {
-          if (row.name.includes("即時監控") || row.name.includes("歷史紀錄")) {
-            permissions[key] = new Set(["view"]);
-          } else {
-            permissions[key] = new Set([]);
-          }
+          if (row.name.includes("即時監控") || row.name.includes("歷史紀錄")) permissions[key] = new Set(["view"]);
+          else permissions[key] = new Set([]);
         } else if (group === "船舶識別系統") {
           permissions[key] = new Set(["view"]);
         } else if (group === "使用者專區") {
@@ -148,11 +143,8 @@ function buildPermissionsByLevel(level, permissionRows) {
         break;
 
       case "訪客":
-        if (group === "使用者專區") {
-          permissions[key] = new Set(["view"]);
-        } else {
-          permissions[key] = new Set([]);
-        }
+        if (group === "使用者專區") permissions[key] = new Set(["view"]);
+        else permissions[key] = new Set([]);
         break;
 
       default:
@@ -203,21 +195,25 @@ export default function RolePermissions() {
   const permissionRows = useMemo(() => buildPermissionRows(), []);
   const permGroups = useMemo(() => buildGroups(permissionRows), [permissionRows]);
 
-  const [roles, setRoles] = useState(() => loadRoles(DEFAULT_ROLES));
-
-  useEffect(() => {
-    saveRoles(roles);
-  }, [roles]);
+  // 從 rbac.data store 初始化（同 SPA 分頁共享）
+  const [roles, setRoles] = useState(() => rbacStoreGetRoles() || DEFAULT_ROLES);
 
   const [rolePermMap, setRolePermMap] = useState(() => {
-    const stored = loadRolePermMap();
-    if (stored) {
-      const hydrated = hydrateRolePermMap(stored);
-      return hydrated;
-    }
+    const stored = rbacStoreGetRolePermMap();
+    if (stored) return stored;
     return buildDefaultRolePermissions();
   });
 
+  // 任一變動 -> 回寫 store（讓 AccountManagement 下拉同步）
+  useEffect(() => {
+    rbacStoreSetRoles(roles);
+  }, [roles]);
+
+  useEffect(() => {
+    rbacStoreSetRolePermMap(rolePermMap);
+  }, [rolePermMap]);
+
+  // roles 變動時：補齊/正規化權限 map
   useEffect(() => {
     setRolePermMap((prev) => {
       const withMissingFilled = { ...(prev || {}) };
@@ -228,20 +224,13 @@ export default function RolePermissions() {
         }
       });
 
-      const normalized = normalizeRolePermMap({
+      return normalizeRolePermMap({
         roles,
         permissionRows,
         rolePermMap: withMissingFilled,
       });
-
-      return normalized;
     });
   }, [roles, permissionRows]);
-
-  useEffect(() => {
-    const serializable = serializeRolePermMap(rolePermMap);
-    saveRolePermMap(serializable);
-  }, [rolePermMap]);
 
   const [permRoleId, setPermRoleId] = useState(null);
   const permRole = roles.find((r) => r.id === permRoleId) || null;
@@ -253,7 +242,6 @@ export default function RolePermissions() {
   const deleteRole = roles.find((r) => r.id === deleteRoleId) || null;
 
   const [showAddRole, setShowAddRole] = useState(false);
-
   const [activeSystemKey, setActiveSystemKey] = useState(permGroups?.[0]?.key ?? "");
 
   const updateRolePermissionRow = (roleId, permKey, nextSet) => {

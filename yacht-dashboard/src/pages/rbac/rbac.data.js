@@ -3,14 +3,7 @@
 export const SIDEBAR_MODULES = [
   {
     group: "岸電控制系統",
-    items: [
-      "岸電儀表板",
-      "即時監控模組",
-      "船舶基本檔",
-      "遠端控管功能",
-      "用戶資訊綁定",
-      "歷史紀錄查詢",
-    ],
+    items: ["岸電儀表板", "即時監控模組", "船舶基本檔", "遠端控管功能", "用戶資訊綁定", "歷史紀錄查詢"],
   },
   {
     group: "船舶識別系統",
@@ -38,7 +31,6 @@ export const SIDEBAR_MODULES = [
   },
 ];
 
-// 將「側欄每個子項目」攤平成權限列（每列會呈現在「編輯權限」大 Modal 表格中）
 export function buildPermissionRows() {
   const rows = [];
   SIDEBAR_MODULES.forEach((m) => {
@@ -53,7 +45,6 @@ export function buildPermissionRows() {
   return rows;
 }
 
-// 操作權限定義（顯示：檢視/編輯/刪除）
 export const OPS = [
   { key: "view", label: "檢視" },
   { key: "edit", label: "編輯" },
@@ -67,19 +58,15 @@ export const DEFAULT_ROLES = [
   { id: "role_crew", name: "船員", level: "一般使用" },
 ];
 
-// 建立每個角色的預設權限（可依需求調整）
 export function buildDefaultRolePermissions() {
   const rows = buildPermissionRows();
 
-  // 管理者：全勾
   const admin = {};
   rows.forEach((r) => (admin[r.key] = new Set(["view", "edit", "delete"])));
 
-  // 工程師：多數可檢視/編輯，刪除保守（此處示範：全部 view+edit）
   const engineer = {};
   rows.forEach((r) => (engineer[r.key] = new Set(["view", "edit"])));
 
-  // 船長：主要使用者專區及部分檢視功能
   const captain = {};
   rows.forEach((r) => {
     const isUserArea = r.group === "使用者專區";
@@ -93,7 +80,6 @@ export function buildDefaultRolePermissions() {
     }
   });
 
-  // 船員：僅使用者專區檢視
   const crew = {};
   rows.forEach((r) => {
     const isUserArea = r.group === "使用者專區";
@@ -106,4 +92,58 @@ export function buildDefaultRolePermissions() {
     role_captain: captain,
     role_crew: crew,
   };
+}
+
+/* =========================================================
+   Pure UI In-Memory Store
+   - 不使用 localStorage
+   - 不跨刷新持久化
+   - 同一個 SPA 分頁內可同步（新增角色後，帳號頁下拉立即更新）
+   ========================================================= */
+
+const ROLES_CHANGED_EVENT = "rbac_roles_changed";
+const clone = (v) => {
+  // structuredClone 可直接複製 Set / Map（現代瀏覽器）
+  try {
+    return structuredClone(v);
+  } catch {
+    // fallback：足夠支援 roles（array/object），rolePermMap 若含 Set 會退化成淺拷貝，但純 UI 仍可用
+    if (Array.isArray(v)) return v.map((x) => ({ ...x }));
+    if (v && typeof v === "object") return { ...v };
+    return v;
+  }
+};
+
+const RBAC_STORE = {
+  roles: clone(DEFAULT_ROLES),
+  rolePermMap: buildDefaultRolePermissions(),
+};
+
+export function rbacStoreGetRoles() {
+  return clone(RBAC_STORE.roles);
+}
+
+export function rbacStoreSetRoles(nextRoles) {
+  RBAC_STORE.roles = clone(Array.isArray(nextRoles) ? nextRoles : []);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(ROLES_CHANGED_EVENT));
+  }
+}
+
+export function rbacStoreOnRolesChanged(handler) {
+  if (typeof window === "undefined" || typeof handler !== "function") return;
+  window.addEventListener(ROLES_CHANGED_EVENT, handler);
+}
+
+export function rbacStoreOffRolesChanged(handler) {
+  if (typeof window === "undefined" || typeof handler !== "function") return;
+  window.removeEventListener(ROLES_CHANGED_EVENT, handler);
+}
+
+export function rbacStoreGetRolePermMap() {
+  return clone(RBAC_STORE.rolePermMap);
+}
+
+export function rbacStoreSetRolePermMap(nextMap) {
+  RBAC_STORE.rolePermMap = clone(nextMap && typeof nextMap === "object" ? nextMap : {});
 }

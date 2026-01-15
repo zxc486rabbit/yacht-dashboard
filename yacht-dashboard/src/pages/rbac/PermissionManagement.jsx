@@ -12,7 +12,7 @@ export default function PermissionManagement() {
     []
   );
 
-  // 記住 tab
+  // 目前分頁
   const [active, setActive] = useState("account");
 
   const handleKeyDown = (e) => {
