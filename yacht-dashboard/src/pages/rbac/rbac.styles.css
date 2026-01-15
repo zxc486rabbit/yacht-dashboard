@@ -268,9 +268,6 @@
 
 /* =========================================================
    Permission Editor Layout
-   For "左側系統大項下拉 + 右側細項權限"
-   Classes used in RolePermissions.jsx:
-   .perm-layout .perm-left .perm-right .perm-group-head/body ...
    ========================================================= */
 
 .rbac-card .perm-layout{
@@ -476,7 +473,7 @@
 }
 
 /* =========================================================
-   Forms (UPDATED: 全部表單左右並排)
+   Forms
    ========================================================= */
 
 .rbac-card .form-row{
@@ -945,3 +942,73 @@
     justify-content: flex-end;
   }
 }
+
+/* =========================================================
+   Audit Logs: Row Expand (Permission tab)
+   ========================================================= */
+
+.rbac-clickable-row{
+  cursor: pointer;
+}
+
+.rbac-clickable-row td{
+  transition: background .12s ease;
+}
+
+.rbac-clickable-row:hover td{
+  background: #f7fbff;
+}
+
+.rbac-clickable-row.is-expanded td{
+  background: #eef9ff;
+}
+
+.rbac-audit-expand-row td{
+  padding: 0;
+  background: #fbfdff;
+}
+
+/* 外層保持不變，動畫放在內容容器 */
+.rbac-audit-expand{
+  border-top: 1px solid #e5e7eb;
+
+  /* collapsed state */
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  overflow: hidden;
+
+  /* 過渡 */
+  transition:
+    max-height .26s ease,
+    opacity .18s ease,
+    transform .22s ease;
+
+  /* 內層 padding 容器 */
+  padding: 0;
+}
+
+/* 內層用來承載 padding，避免 padding 動畫卡頓 */
+.rbac-audit-expand-inner{
+  padding: 14px 16px;
+}
+
+/* open state */
+.rbac-audit-expand-row.is-open .rbac-audit-expand{
+  max-height: 420px; /* 明細目前內容不大，夠用；要更高可調 */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rbac-audit-expand-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.rbac-audit-expand-title{
+  font-weight: 800;
+  color: #1f2a37;
+}
+
