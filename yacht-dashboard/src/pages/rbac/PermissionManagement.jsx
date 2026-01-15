@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./rbac.styles.css";
 import RolePermissions from "./RolePermissions";
 import AccountManagement from "./AccountManagement";
-
-const LS_KEY = "rbac.permissionManagement.activeTab";
 
 export default function PermissionManagement() {
   const tabs = useMemo(
@@ -14,25 +12,15 @@ export default function PermissionManagement() {
     []
   );
 
-  const [active, setActive] = useState(() => {
-    const saved = localStorage.getItem(LS_KEY);
-    return saved && tabs.some((t) => t.key === saved) ? saved : "account";
-  });
-
-  useEffect(() => {
-    localStorage.setItem(LS_KEY, active);
-  }, [active]);
+  // 記住 tab
+  const [active, setActive] = useState("account");
 
   const handleKeyDown = (e) => {
-    // Left/Right to switch tabs
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
 
     e.preventDefault();
     const idx = tabs.findIndex((t) => t.key === active);
-    const nextIdx =
-      e.key === "ArrowRight"
-        ? (idx + 1) % tabs.length
-        : (idx - 1 + tabs.length) % tabs.length;
+    const nextIdx = e.key === "ArrowRight" ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
 
     setActive(tabs[nextIdx].key);
   };
@@ -43,12 +31,7 @@ export default function PermissionManagement() {
         <h1 className="rbac-title">權限設定</h1>
       </div>
 
-      <div
-        className="rbac-tabs"
-        role="tablist"
-        aria-label="權限設定分頁"
-        onKeyDown={handleKeyDown}
-      >
+      <div className="rbac-tabs" role="tablist" aria-label="權限設定分頁" onKeyDown={handleKeyDown}>
         {tabs.map((t) => {
           const isActive = active === t.key;
           return (
@@ -70,12 +53,7 @@ export default function PermissionManagement() {
       </div>
 
       <div className="rbac-content">
-        <section
-          role="tabpanel"
-          id="rbac-panel-account"
-          aria-labelledby="rbac-tab-account"
-          hidden={active !== "account"}
-        >
+        <section role="tabpanel" id="rbac-panel-account" aria-labelledby="rbac-tab-account" hidden={active !== "account"}>
           {active === "account" ? (
             <div className="rbac-card-wrap">
               <AccountManagement />
@@ -83,12 +61,7 @@ export default function PermissionManagement() {
           ) : null}
         </section>
 
-        <section
-          role="tabpanel"
-          id="rbac-panel-role"
-          aria-labelledby="rbac-tab-role"
-          hidden={active !== "role"}
-        >
+        <section role="tabpanel" id="rbac-panel-role" aria-labelledby="rbac-tab-role" hidden={active !== "role"}>
           {active === "role" ? (
             <div className="rbac-card-wrap">
               <RolePermissions />

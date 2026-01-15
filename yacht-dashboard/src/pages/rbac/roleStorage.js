@@ -1,34 +1,26 @@
 // src/page/rbac/roleStorage.js
+// Pure UI mock store (in-memory). No localStorage, no persistence across refresh.
 
-const ROLES_KEY = "rbac.roles.v1";
-const PERM_KEY = "rbac.rolePermMap.v1";
+let rolesCache = null;
+let rolePermMapCache = null;
 
 /* =========================
    Roles
 ========================= */
 export function loadRoles(defaultRoles) {
-  const raw = localStorage.getItem(ROLES_KEY);
-  if (!raw) return defaultRoles;
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return defaultRoles;
-    return parsed;
-  } catch {
-    return defaultRoles;
-  }
+  return Array.isArray(rolesCache) ? rolesCache : defaultRoles;
 }
 
 export function saveRoles(roles) {
-  localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
-  // 同分頁通知：storage event 不會在同一個 tab 觸發
+  rolesCache = Array.isArray(roles) ? roles : [];
+  // 同分頁通知（AccountManagement 會聽）
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("rbac_roles_changed"));
   }
 }
 
 export function clearRoles() {
-  localStorage.removeItem(ROLES_KEY);
+  rolesCache = null;
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("rbac_roles_changed"));
   }
@@ -36,7 +28,7 @@ export function clearRoles() {
 
 /* =========================
    Role Permission Map
-   shape in storage:
+   shape:
    {
      [roleId]: {
        [permKey]: ["view","edit","delete"]
@@ -44,31 +36,21 @@ export function clearRoles() {
    }
 ========================= */
 export function loadRolePermMap() {
-  const raw = localStorage.getItem(PERM_KEY);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    return parsed;
-  } catch {
-    return null;
-  }
+  return rolePermMapCache && typeof rolePermMapCache === "object" ? rolePermMapCache : null;
 }
 
 export function saveRolePermMap(serializableMap) {
-  localStorage.setItem(PERM_KEY, JSON.stringify(serializableMap));
+  rolePermMapCache = serializableMap && typeof serializableMap === "object" ? serializableMap : {};
 }
 
 export function clearRolePermMap() {
-  localStorage.removeItem(PERM_KEY);
+  rolePermMapCache = null;
 }
 
 /* =========================
    Helpers: Set <-> Array
 ========================= */
 export function serializeRolePermMap(rolePermMap) {
-  // rolePermMap: { [roleId]: { [permKey]: Set<string> } }
   const out = {};
   if (!rolePermMap || typeof rolePermMap !== "object") return out;
 
@@ -77,11 +59,7 @@ export function serializeRolePermMap(rolePermMap) {
     const permObj = rolePermMap[roleId] || {};
     Object.keys(permObj).forEach((permKey) => {
       const setVal = permObj[permKey];
-      out[roleId][permKey] = Array.isArray(setVal)
-        ? setVal
-        : setVal instanceof Set
-        ? Array.from(setVal)
-        : [];
+      out[roleId][permKey] = Array.isArray(setVal) ? setVal : setVal instanceof Set ? Array.from(setVal) : [];
     });
   });
 
@@ -89,7 +67,6 @@ export function serializeRolePermMap(rolePermMap) {
 }
 
 export function hydrateRolePermMap(serialized) {
-  // serialized: { [roleId]: { [permKey]: string[] } }
   const out = {};
   if (!serialized || typeof serialized !== "object") return out;
 

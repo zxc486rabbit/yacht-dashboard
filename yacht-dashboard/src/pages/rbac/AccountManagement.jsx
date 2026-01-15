@@ -8,7 +8,7 @@ import EyeIcon from "../../components/EyeIcon";
 // 角色改為：管理者 / 工程師 / 船長 / 船員
 const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
 
-// 角色清單（RolePermissions.jsx 會寫入 localStorage，這裡以 ROLE_OPTIONS 當 fallback）
+// 角色清單（RolePermissions.jsx 會觸發事件，這裡以 ROLE_OPTIONS 當 fallback）
 const DEFAULT_ROLE_OBJECTS = ROLE_OPTIONS.map((name, idx) => ({ id: idx + 1, name }));
 
 const seed = [
@@ -208,98 +208,101 @@ const AccountFormFields = ({ withPassword, form, setForm, showPwd, setShowPwd, r
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
             name="acct_email"
             {...AUTOFILL_GUARD_PROPS}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           />
           {isEmailInvalid && (
-            <div style={{ marginTop: '6px', fontSize: '0.8rem', color: '#ef4444' }}>
+            <div style={{ marginTop: "6px", fontSize: "0.8rem", color: "#ef4444" }}>
               ⚠️ 請輸入有效的電子郵箱格式（例：user@example.com）
             </div>
           )}
         </div>
       </div>
 
-    <div className="form-row">
-      <div className="label">帳號:</div>
-      <input
-        className="input"
-        placeholder="帳號"
-        value={form.username}
-        onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
-        name="acct_username"
-        {...AUTOFILL_GUARD_PROPS}
-      />
-    </div>
-
-    {withPassword ? (
       <div className="form-row">
-        <div className="label">密碼:</div>
-        <div className="pwd-wrap">
-          <input
-            className="input"
-            placeholder="密碼"
-            type={showPwd ? "text" : "password"}
-            value={form.password}
-            onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-            name="acct_password"
-            // 新增帳號的密碼也避免被當成登入密碼自動帶入
-            {...NEW_PASSWORD_GUARD_PROPS}
-          />
-          <button
-            type="button"
-            className="pwd-eye"
-            onClick={() => setShowPwd((s) => !s)}
-            aria-label="toggle password"
-            title={showPwd ? "隱藏" : "顯示"}
+        <div className="label">帳號:</div>
+        <input
+          className="input"
+          placeholder="帳號"
+          value={form.username}
+          onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
+          name="acct_username"
+          {...AUTOFILL_GUARD_PROPS}
+        />
+      </div>
+
+      {withPassword ? (
+        <div className="form-row">
+          <div className="label">密碼:</div>
+          <div className="pwd-wrap">
+            <input
+              className="input"
+              placeholder="密碼"
+              type={showPwd ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+              name="acct_password"
+              {...NEW_PASSWORD_GUARD_PROPS}
+            />
+            <button
+              type="button"
+              className="pwd-eye"
+              onClick={() => setShowPwd((s) => !s)}
+              aria-label="toggle password"
+              title={showPwd ? "隱藏" : "顯示"}
+            >
+              <EyeIcon open={showPwd} />
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="form-row">
+        <div className="label">角色:</div>
+        <select
+          className="select"
+          value={form.role}
+          onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
+          name="acct_role"
+          {...AUTOFILL_GUARD_PROPS}
+        >
+          <option value="">角色選擇</option>
+          {(Array.isArray(roleOptions) && roleOptions.length ? roleOptions : ROLE_OPTIONS).map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-row" style={{ gridTemplateColumns: "120px 1fr", alignItems: "flex-start" }}>
+        <div className="label" style={{ paddingTop: "2px" }}>
+          鎖定密碼:
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "50px" }}>
+          <label className="lock-row" style={{ marginBottom: 0 }}>
+            <input
+              type="checkbox"
+              checked={!!form.locked}
+              onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
+              name="acct_locked"
+            />
+            <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
+          </label>
+          <div
+            style={{
+              marginTop: "6px",
+              fontSize: "0.8rem",
+              color: "#ef4444",
+              lineHeight: "1.4",
+              visibility: form.locked ? "visible" : "hidden",
+              height: form.locked ? "auto" : "0",
+            }}
           >
-            <EyeIcon open={showPwd} />
-          </button>
+            ⚠️ 鎖定後不得修改密碼
+          </div>
         </div>
       </div>
-    ) : null}
-
-    <div className="form-row">
-      <div className="label">角色:</div>
-      <select
-        className="select"
-        value={form.role}
-        onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
-        name="acct_role"
-        {...AUTOFILL_GUARD_PROPS}
-      >
-        <option value="">角色選擇</option>
-        {(Array.isArray(roleOptions) && roleOptions.length ? roleOptions : ROLE_OPTIONS).map((r) => (
-          <option key={r} value={r}>
-            {r}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    <div className="form-row" style={{ gridTemplateColumns: "120px 1fr", alignItems: "flex-start" }}>
-      <div className="label" style={{ paddingTop: "2px" }}>鎖定密碼:</div>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "50px" }}>
-        <label className="lock-row" style={{ marginBottom: 0 }}>
-          <input
-            type="checkbox"
-            checked={!!form.locked}
-            onChange={(e) => setForm((p) => ({ ...p, locked: e.target.checked }))}
-            name="acct_locked"
-          />
-          <span style={{ fontWeight: 900 }}>{form.locked ? "已鎖定" : "未鎖定"}</span>
-        </label>
-        <div style={{ 
-          marginTop: '6px', 
-          fontSize: '0.8rem', 
-          color: '#ef4444', 
-          lineHeight: '1.4',
-          visibility: form.locked ? 'visible' : 'hidden',
-          height: form.locked ? 'auto' : '0'
-        }}>
-          ⚠️ 鎖定後不得修改密碼
-        </div>
-      </div>
-    </div>
-  </>
+    </>
   );
 };
 
@@ -341,11 +344,9 @@ function genStrongPassword(len = 12) {
   const all = lowers + uppers + digits + symbols;
 
   const pick = (str) => str[Math.floor(Math.random() * str.length)];
-  // 至少各一
   let base = [pick(lowers), pick(uppers), pick(digits), pick(symbols)];
   while (base.length < len) base.push(pick(all));
 
-  // shuffle
   for (let i = base.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [base[i], base[j]] = [base[j], base[i]];
@@ -354,21 +355,22 @@ function genStrongPassword(len = 12) {
 }
 
 export default function AccountManagement() {
+  // in-memory，不寫 localStorage
   const [rows, setRows] = useState(() => loadAccounts(seed));
 
-  // 角色選項：從 localStorage 同步（RolePermissions.jsx 新增角色後，這裡會更新下拉選單）
+  // 角色選項：同頁面用 event 同步
   const [roleOptions, setRoleOptions] = useState(() => {
     const roles = loadRoles(DEFAULT_ROLE_OBJECTS);
     const next = Array.isArray(roles) ? roles.map((r) => r.name) : ROLE_OPTIONS;
     return next;
   });
 
-  // 帳號列表持久化：新增/修改/刪除後，F5 仍保留
+  // 帳號列表：變更時寫入 in-memory cache（避免爆 localStorage quota）
   useEffect(() => {
     saveAccounts(rows);
   }, [rows]);
 
-  // 角色清單同步：同分頁自訂事件 + 跨分頁 storage event
+  // 角色清單同步：同分頁自訂事件
   useEffect(() => {
     const refresh = () => {
       const roles = loadRoles(DEFAULT_ROLE_OBJECTS);
@@ -376,31 +378,24 @@ export default function AccountManagement() {
       setRoleOptions(next);
     };
 
-    const onStorage = (e) => {
-      if (e?.key === "rbac.roles.v1") refresh();
-    };
-
     window.addEventListener("rbac_roles_changed", refresh);
-    window.addEventListener("storage", onStorage);
-
     refresh();
+
     return () => {
       window.removeEventListener("rbac_roles_changed", refresh);
-      window.removeEventListener("storage", onStorage);
     };
   }, []);
 
-  // 表格列選取
   const [selectedRowId, setSelectedRowId] = useState(null);
 
-  // 搜尋 - 分為三個獨立欄位（必須與任何 modal 操作完全解耦）
+  // 搜尋
   const [searchName, setSearchName] = useState("");
   const [searchUsername, setSearchUsername] = useState("");
   const [searchRole, setSearchRole] = useState("");
 
   // 排序
-  const [sortField, setSortField] = useState(null); // 'name' | 'username' | 'role' | null
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' | 'desc'
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // 分頁
   const [page, setPage] = useState(1);
@@ -425,8 +420,6 @@ export default function AccountManagement() {
 
   const editRow = useMemo(() => rows.find((r) => r.id === editId) || null, [rows, editId]);
   const pwdRow = useMemo(() => rows.find((r) => r.id === pwdId) || null, [rows, pwdId]);
-
-  // 刪除目標 row（用來顯示資訊）
   const delRowObj = useMemo(() => rows.find((r) => r.id === delTargetId) || null, [rows, delTargetId]);
 
   const filtered = useMemo(() => {
@@ -439,14 +432,13 @@ export default function AccountManagement() {
       return nameMatch && usernameMatch && roleMatch;
     });
 
-    // 排序
     if (sortField) {
       result = [...result].sort((a, b) => {
-        const aVal = a[sortField]?.toLowerCase() || '';
-        const bVal = b[sortField]?.toLowerCase() || '';
-        
-        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+        const aVal = a[sortField]?.toLowerCase() || "";
+        const bVal = b[sortField]?.toLowerCase() || "";
+
+        if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
         return 0;
       });
     }
@@ -459,7 +451,6 @@ export default function AccountManagement() {
     return Math.max(1, n);
   }, [filtered.length, pageSize]);
 
-  // 確保 page 不會超出範圍
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
@@ -470,7 +461,6 @@ export default function AccountManagement() {
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize, totalPages]);
 
-  // pagination render (1..5 ... last)
   const pageButtons = useMemo(() => {
     const btns = [];
 
@@ -494,15 +484,12 @@ export default function AccountManagement() {
     return btns;
   }, [page, totalPages]);
 
-  // ====== handlers ======
   const handleSort = (field) => {
     if (sortField === field) {
-      // 同一欄位：切換排序方向
-      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
-      // 不同欄位：設為新欄位，預設升序
       setSortField(field);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
   };
 
@@ -510,7 +497,6 @@ export default function AccountManagement() {
     setSelectedRowId((prev) => (prev === rowId ? null : rowId));
   };
 
-  // 用 onClick（冒泡）攔截，避免破壞 button onClick
   const stopRowClick = (e) => {
     e.stopPropagation();
   };
@@ -524,10 +510,9 @@ export default function AccountManagement() {
   const saveAdd = () => {
     if (!form.name.trim() || !form.username.trim() || !form.role.trim() || !form.password.trim()) return;
 
-    // Email 驗證
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (form.email.trim() && !emailRegex.test(form.email.trim())) {
-      return; // 阻止新增，錯誤提示已在表單中即時顯示
+      return;
     }
 
     const newRow = {
@@ -576,7 +561,6 @@ export default function AccountManagement() {
   };
 
   const openPwd = (row) => {
-    // 重設密碼表單
     setPwdCopied(false);
     setPwdForm(mkEmptyPwdForm());
     setPwdId(row.id);
@@ -612,8 +596,6 @@ export default function AccountManagement() {
   const savePwd = () => {
     if (!canSavePwd) return;
 
-    // 之後串 API：PUT /users/{id}/password
-    // 目前先更新一個時間戳，表示已修改過密碼
     setRows((prev) =>
       prev.map((r) =>
         r.id === pwdId
@@ -628,23 +610,19 @@ export default function AccountManagement() {
     closePwd();
   };
 
-  // 開啟刪除確認 modal
   const openDel = (row) => {
     setDelTargetId(row.id);
     setDelOpen(true);
   };
 
-  // 關閉刪除確認 modal
   const closeDel = () => {
     setDelOpen(false);
     setDelTargetId(null);
   };
 
-  // 真正執行刪除（只有按「確定刪除」才會跑）
   const confirmDel = () => {
     if (delTargetId == null) return;
     setRows((prev) => prev.filter((r) => r.id !== delTargetId));
-    // 如果剛好刪的是被選取那列，也一併清掉選取
     setSelectedRowId((prev) => (prev === delTargetId ? null : prev));
     closeDel();
   };
@@ -666,14 +644,12 @@ export default function AccountManagement() {
       setPwdCopied(true);
       window.setTimeout(() => setPwdCopied(false), 1200);
     } catch {
-      // ignore
       setPwdCopied(false);
     }
   };
 
   return (
     <div className="rbac-card">
-      {/* Header row: 右上按鈕 */}
       <div className="acct-head">
         <div className="acct-right" style={{ marginLeft: "auto" }}>
           <button className="btn btn-yellow" onClick={openAdd} type="button">
@@ -682,7 +658,6 @@ export default function AccountManagement() {
         </div>
       </div>
 
-      {/* 搜尋欄位區域 - 對齊表格欄位 */}
       <div style={{ display: "flex", gap: "0", marginTop: "20px", marginBottom: "12px", alignItems: "center" }}>
         <input
           className="input"
@@ -727,7 +702,6 @@ export default function AccountManagement() {
           ))}
         </select>
 
-        {/* 全部清除按鈕 */}
         <div style={{ width: "25%", display: "flex", justifyContent: "flex-start" }}>
           {(searchName || searchUsername || searchRole) && (
             <button
@@ -747,26 +721,29 @@ export default function AccountManagement() {
         </div>
       </div>
 
-      {/* 表格 */}
       <table className="table">
         <thead>
           <tr>
-            <th className="th-sort" style={{ width: "30%", cursor: "pointer" }} onClick={() => handleSort('name')}>
+            <th className="th-sort" style={{ width: "30%", cursor: "pointer" }} onClick={() => handleSort("name")}>
               姓名
-              <span style={{ marginLeft: '8px', color: sortField === 'name' ? '#3b82f6' : '#9ca3af' }}>
-                {sortField === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              <span style={{ marginLeft: "8px", color: sortField === "name" ? "#3b82f6" : "#9ca3af" }}>
+                {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : "⇅"}
               </span>
             </th>
-            <th className="th-sort" style={{ width: "25%", cursor: "pointer" }} onClick={() => handleSort('username')}>
+            <th
+              className="th-sort"
+              style={{ width: "25%", cursor: "pointer" }}
+              onClick={() => handleSort("username")}
+            >
               帳號
-              <span style={{ marginLeft: '8px', color: sortField === 'username' ? '#3b82f6' : '#9ca3af' }}>
-                {sortField === 'username' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              <span style={{ marginLeft: "8px", color: sortField === "username" ? "#3b82f6" : "#9ca3af" }}>
+                {sortField === "username" ? (sortOrder === "asc" ? "▲" : "▼") : "⇅"}
               </span>
             </th>
-            <th style={{ width: "20%", cursor: "pointer" }} onClick={() => handleSort('role')}>
+            <th style={{ width: "20%", cursor: "pointer" }} onClick={() => handleSort("role")}>
               角色
-              <span style={{ marginLeft: '8px', color: sortField === 'role' ? '#3b82f6' : '#9ca3af' }}>
-                {sortField === 'role' ? (sortOrder === 'asc' ? '▲' : '▼') : '⇅'}
+              <span style={{ marginLeft: "8px", color: sortField === "role" ? "#3b82f6" : "#9ca3af" }}>
+                {sortField === "role" ? (sortOrder === "asc" ? "▲" : "▼") : "⇅"}
               </span>
             </th>
             <th style={{ width: "25%" }}>操作</th>
@@ -810,11 +787,7 @@ export default function AccountManagement() {
                     <button className="btn btn-green" onClick={() => openEdit(r)} type="button">
                       修改
                     </button>
-                    <button 
-                      className="btn btn-red" 
-                      onClick={() => openDel(r)} 
-                      type="button"
-                    >
+                    <button className="btn btn-red" onClick={() => openDel(r)} type="button">
                       刪除
                     </button>
                   </div>
@@ -825,7 +798,6 @@ export default function AccountManagement() {
         </tbody>
       </table>
 
-      {/* 分頁列 */}
       <div className="pg-bar">
         <div className="pg-left">
           <PageButton disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
@@ -867,7 +839,6 @@ export default function AccountManagement() {
         </div>
       </div>
 
-      {/* ====== Modal：新增帳號 ====== */}
       {addOpen ? (
         <Modal
           title="新增帳號"
@@ -900,7 +871,6 @@ export default function AccountManagement() {
         </Modal>
       ) : null}
 
-      {/* ====== Modal：編輯帳號 ====== */}
       {editRow ? (
         <Modal
           title="編輯帳號"
@@ -933,7 +903,6 @@ export default function AccountManagement() {
         </Modal>
       ) : null}
 
-      {/* ====== Modal：修改密碼（加強版） ====== */}
       {pwdRow ? (
         <Modal
           title="修改密碼"
@@ -977,7 +946,6 @@ export default function AccountManagement() {
             </button>
           </div>
 
-          {/* strength */}
           <div className="pwd-strength">
             <div className="pwd-strength-top">
               <span className="small-muted">強度</span>
@@ -988,7 +956,6 @@ export default function AccountManagement() {
             </div>
           </div>
 
-          {/* New password */}
           <div className="form-row">
             <div className="label">新密碼:</div>
             <div className="pwd-wrap">
@@ -1022,7 +989,6 @@ export default function AccountManagement() {
           </div>
           {pwdErrorNew ? <div className="field-error">{pwdErrorNew}</div> : null}
 
-          {/* Confirm password */}
           <div className="form-row" style={{ marginTop: 10 }}>
             <div className="label">確認新密碼:</div>
             <div className="pwd-wrap">
@@ -1056,7 +1022,6 @@ export default function AccountManagement() {
           </div>
           {pwdErrorConfirm ? <div className="field-error">{pwdErrorConfirm}</div> : null}
 
-          {/* rules */}
           <div className="pwd-rules">
             <div className="pwd-rules-title">密碼規則</div>
             <ul className="pwd-rules-list">
@@ -1070,7 +1035,6 @@ export default function AccountManagement() {
         </Modal>
       ) : null}
 
-      {/* ====== Modal：刪除確認（避免誤刪） ====== */}
       {delOpen ? (
         <Modal
           title="確認刪除"

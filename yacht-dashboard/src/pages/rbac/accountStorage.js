@@ -1,38 +1,29 @@
 // src/page/rbac/accountStorage.js
-//
-// Account list persistence for AccountManagement.jsx
-// Storage key is versioned to allow future migrations.
+// Pure UI mock store (in-memory). No localStorage, no persistence across refresh.
 
-const ACCOUNTS_KEY = "rbac.accounts.v1";
+let accountsCache = null;
 
 /**
- * Load accounts from localStorage.
- * @param {Array<any>} defaultAccounts fallback when storage is empty/invalid
+ * Load accounts from in-memory cache.
+ * @param {Array<any>} defaultAccounts fallback
  */
 export function loadAccounts(defaultAccounts = []) {
-  const raw = localStorage.getItem(ACCOUNTS_KEY);
-  if (!raw) return defaultAccounts;
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return defaultAccounts;
-    return parsed;
-  } catch {
-    return defaultAccounts;
-  }
+  return Array.isArray(accountsCache) ? accountsCache : defaultAccounts;
 }
 
 /**
- * Save accounts to localStorage.
+ * Save accounts to in-memory cache (never throws).
  * @param {Array<any>} accounts
+ * @returns {{ ok: boolean, reason?: string }}
  */
 export function saveAccounts(accounts) {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  accountsCache = Array.isArray(accounts) ? accounts : [];
+  return { ok: true, reason: "memory_only" };
 }
 
 /**
- * Clear accounts from localStorage.
+ * Clear accounts cache.
  */
 export function clearAccounts() {
-  localStorage.removeItem(ACCOUNTS_KEY);
+  accountsCache = null;
 }
