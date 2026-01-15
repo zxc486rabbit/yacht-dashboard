@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "../../auth/AuthContext";
 import {
   buildDefaultRolePermissions,
   buildPermissionRows,
@@ -184,7 +185,8 @@ function normalizeRolePermMap({ roles, permissionRows, rolePermMap }) {
 }
 
 export default function RolePermissions() {
-  const currentUser = { role: "管理者" };
+  const { user } = useAuth();
+  const currentUser = user || { role: "管理者" };
   const rbac = useRBAC(currentUser);
 
   const PERMISSION_LEVELS = [

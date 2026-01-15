@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../auth/AuthContext";
 import "./rbac.styles.css";
 import EyeIcon from "../../components/EyeIcon";
 import { rbacStoreGetRoles, rbacStoreOnRolesChanged, rbacStoreOffRolesChanged } from "./rbac.data";
@@ -351,6 +352,9 @@ function rolesToOptions(roles) {
 }
 
 export default function AccountManagement() {
+  const { user } = useAuth();
+  const currentUser = user || { role: "管理者" };
+
   // 帳號資料只存在 component state（F5 不保留）
   const [rows, setRows] = useState(seed);
 
@@ -614,7 +618,7 @@ export default function AccountManagement() {
         </div>
 
         <div className="small-muted">
-          目前登入角色：<strong style={{ marginLeft: 6 }}>管理者</strong>
+          目前登入角色：<strong style={{ marginLeft: 6 }}>{currentUser?.role || "管理者"}</strong>
         </div>
       </div>
 
