@@ -383,13 +383,12 @@ export default function AuditLogs() {
                   </tr>
                 ) : (
                   <tr>
-                    <th style={{ width: "18%" }}>時間</th>
-                    <th style={{ width: "13%" }}>帳號</th>
-                    <th style={{ width: "13%" }}>角色</th>
-                    <th style={{ width: "14%" }}>IP</th>
-                    <th style={{ width: "14%" }}>目標</th>
-                    <th style={{ width: "12%" }}>動作</th>
-                    <th style={{ width: "16%" }}>備註</th>
+                    <th style={{ width: "20%" }}>時間</th>
+                    <th style={{ width: "15%" }}>帳號</th>
+                    <th style={{ width: "15%" }}>角色</th>
+                    <th style={{ width: "18%" }}>IP</th>
+                    <th style={{ width: "16%" }}>目標</th>
+                    <th style={{ width: "16%" }}>動作</th>
                   </tr>
                 )}
               </thead>
@@ -443,13 +442,10 @@ export default function AuditLogs() {
                           <td className="rbac-td-ellipsis" title={r.action}>
                             <span className={`rbac-badge ${getActionBadgeTone(r.action)}`}>{r.action}</span>
                           </td>
-                          <td className="rbac-td-ellipsis" title={r.remark || ""}>
-                            {r.remark}
-                          </td>
                         </tr>,
                         expanded ? (
                           <tr key={`${r.id}-detail`} className="rbac-audit-expand-row is-open">
-                            <td colSpan={7}>
+                            <td colSpan={6}>
                               <div className="rbac-audit-expand">
                                 <div className="rbac-audit-expand-inner">
                                   <div className="rbac-audit-expand-head">
