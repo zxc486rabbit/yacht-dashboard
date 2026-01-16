@@ -895,24 +895,6 @@
   line-height: 1.5;
 }
 
-.rbac-card .pwd-tools{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.rbac-card .btn-ghost{
-  background: #ffffff;
-  border: 1px solid var(--line);
-  color: #111827;
-}
-
-.rbac-card .btn-ghost:hover:not(:disabled){
-  background: #f3f4f6;
-  border-color: var(--brand);
-}
-
 .rbac-card .pwd-strength{
   border: 1px solid var(--line);
   border-radius: 12px;

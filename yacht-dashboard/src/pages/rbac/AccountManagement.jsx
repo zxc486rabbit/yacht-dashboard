@@ -328,24 +328,6 @@ function scoreLabel(score) {
   return "強";
 }
 
-function genStrongPassword(len = 12) {
-  const lowers = "abcdefghijklmnopqrstuvwxyz";
-  const uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const digits = "0123456789";
-  const symbols = "!@#$%^&*()-_=+[]{};:,.?/";
-  const all = lowers + uppers + digits + symbols;
-
-  const pick = (str) => str[Math.floor(Math.random() * str.length)];
-  let base = [pick(lowers), pick(uppers), pick(digits), pick(symbols)];
-  while (base.length < len) base.push(pick(all));
-
-  for (let i = base.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [base[i], base[j]] = [base[j], base[i]];
-  }
-  return base.join("");
-}
-
 function rolesToOptions(roles) {
   if (!Array.isArray(roles) || roles.length === 0) return ROLE_OPTIONS;
   return roles.map((r) => r.name).filter(Boolean);
@@ -391,7 +373,6 @@ export default function AccountManagement() {
   const [showPwd, setShowPwd] = useState(false);
 
   const [pwdForm, setPwdForm] = useState(mkEmptyPwdForm());
-  const [pwdCopied, setPwdCopied] = useState(false);
 
   const editRow = useMemo(() => rows.find((r) => r.id === editId) || null, [rows, editId]);
   const pwdRow = useMemo(() => rows.find((r) => r.id === pwdId) || null, [rows, pwdId]);
@@ -519,14 +500,12 @@ export default function AccountManagement() {
   };
 
   const openPwd = (row) => {
-    setPwdCopied(false);
     setPwdForm(mkEmptyPwdForm());
     setPwdId(row.id);
   };
 
   const closePwd = () => {
     setPwdId(null);
-    setPwdCopied(false);
     setPwdForm(mkEmptyPwdForm());
   };
 
@@ -585,27 +564,6 @@ export default function AccountManagement() {
     setRows((prev) => prev.filter((r) => r.id !== delTargetId));
     setSelectedRowId((prev) => (prev === delTargetId ? null : prev));
     closeDel();
-  };
-
-  const handleGeneratePwd = () => {
-    const s = genStrongPassword(12);
-    setPwdCopied(false);
-    setPwdForm((p) => ({
-      ...p,
-      newPwd: s,
-      confirmPwd: s,
-      touched: { newPwd: true, confirmPwd: true },
-    }));
-  };
-
-  const handleCopyPwd = async () => {
-    try {
-      await navigator.clipboard.writeText(pwdForm.newPwd || "");
-      setPwdCopied(true);
-      window.setTimeout(() => setPwdCopied(false), 1200);
-    } catch {
-      setPwdCopied(false);
-    }
   };
 
   return (
@@ -899,15 +857,6 @@ export default function AccountManagement() {
               <span className="pwd-meta-v">{pwdRow.role}</span>
             </div>
             {pwdRow.locked ? <div className="pwd-warn">此帳號目前為「鎖定」狀態，禁止修改密碼。</div> : null}
-          </div>
-
-          <div className="pwd-tools">
-            <button className="btn btn-ghost" type="button" onClick={handleGeneratePwd} disabled={pwdRow.locked}>
-              產生安全密碼
-            </button>
-            <button className="btn btn-ghost" type="button" onClick={handleCopyPwd} disabled={!pwdForm.newPwd}>
-              {pwdCopied ? "已複製" : "複製密碼"}
-            </button>
           </div>
 
           <div className="pwd-strength">
