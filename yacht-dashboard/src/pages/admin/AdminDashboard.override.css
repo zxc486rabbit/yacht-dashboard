@@ -1,0 +1,24 @@
+/* src/pages/admin/AdminDashboard.override.css */
+/* 只覆蓋 /admin (AdminDashboard.jsx)，不改 Dashboard.css */
+
+/* 背景圖片，改為乾淨底色 */
+.appdash__bg{
+  /* 直接覆寫整個 background，避免保留 url() 那層 */
+  background: linear-gradient(
+    180deg,
+    rgba(238, 244, 250, 1) 0%,
+    rgba(231, 239, 247, 1) 45%,
+    rgba(220, 232, 243, 1) 100%
+  ) !important;
+
+  /* 保留原本的 cover/center 設定 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 確保背景能鋪滿整頁（原本 appdash 是 min-height:100%，會依父層高度） */
+.appdash{
+  min-height: 100vh !important;
+  background: transparent; /* 底色交給 appdash__bg */
+}

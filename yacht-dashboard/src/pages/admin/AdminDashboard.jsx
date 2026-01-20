@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 // 共用 Dashboard 視覺（不要改）
 import "../../styles/dashboard/Dashboard.css";
+// 覆蓋部分樣式
+import "./AdminDashboard.override.css";
+
 
 import {
   FaShip,

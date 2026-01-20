@@ -45,8 +45,6 @@ import ChargeItemManage from "./pages/billing-system/ChargeItemManage"; //計費
 import RateLogicManage from "./pages/billing-system/RateLogicManage"; //邏輯費率管理
 import PaymentSupport from "./pages/billing-system/PaymentSupport"; //支付方式支援
 import BillNotification from "./pages/billing-system/BillNotification"; //帳單通知功能
-import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
-
 
 import BerthBooking from "./pages/userCenter/BerthBooking"; //船位預約
 import MyBookings from "./pages/userCenter/MyBookings"; //我的預約 / 停泊費用
@@ -54,25 +52,28 @@ import AccountSettings from "./pages/userProfile/AccountSettings";
 import PermissionManagement from "./pages/rbac/PermissionManagement"; // RBAC 權限設定頁面
 import AuditLogs from "./pages/rbac/AuditLogs"; // 稽核紀錄（畫面頁）
 
-
+import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
+import AdminLayout from "./pages/admin/AdminLayout"; // 後臺管理 Layout
+import BerthBasic from "./pages/admin/BerthBasic"; // 船席基本設定頁面
 
 // 新增：Account 子分頁
-import AccountBasicProfile from "./pages/userProfile/AccountBasicProfile";
-import MyYachts from "./pages/userProfile/MyYachts";
-import PaymentMethods from "./pages/userProfile/PaymentMethods";
-import BillingHistory from "./pages/userProfile/BillingHistory";
-import BerthRecord from "./pages/userProfile/BerthRecord";
+import AccountBasicProfile from "./pages/userProfile/AccountBasicProfile"; // 基本資料
+import MyYachts from "./pages/userProfile/MyYachts"; // 我的遊艇
+import PaymentMethods from "./pages/userProfile/PaymentMethods"; // 付款方式
+import BillingHistory from "./pages/userProfile/BillingHistory"; // 帳單紀錄
+import BerthRecord from "./pages/userProfile/BerthRecord"; // 船席使用紀錄
 
 export default function App() {
   return (
     <AuthProvider>
       {/*  basename={import.meta.env.BASE_URL} */}
-      <HashRouter >
+      <HashRouter>
         <Routes>
           {/*  入口：直接導到系統首頁（會被 RequireAuth 擋住→去 login） */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {/*  登入頁：獨立，不套 AppLayout */}
           <Route path="/login" element={<Login />} />
+
           {/*  系統區：一律要登入 + 套 Layout */}
           <Route
             path="/*"
@@ -82,17 +83,20 @@ export default function App() {
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
 
-                    {/* 後臺管理 */}
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/berth-basic" element={<AdminDashboard />} />
-                    <Route path="/admin/access-control" element={<AdminDashboard />} />
-                    <Route path="/admin/ais" element={<AdminDashboard />} />
-                    <Route path="/admin/communication" element={<AdminDashboard />} />
-                    <Route path="/admin/cameras" element={<AdminDashboard />} />
-                    <Route path="/admin/energy-billing" element={<AdminDashboard />} />
-                    <Route path="/admin/payment" element={<AdminDashboard />} />
-                    <Route path="/admin/notifications-alarms" element={<AdminDashboard />} />
-                    <Route path="/admin/feature-pages" element={<AdminDashboard />} />
+                    {/* 後臺管理（巢狀路由，統一走 AdminLayout） */}
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="berth-basic" element={<BerthBasic />} />
+                      <Route path="access-control" element={<AdminDashboard />} />
+                      <Route path="ais" element={<AdminDashboard />} />
+                      <Route path="communication" element={<AdminDashboard />} />
+                      <Route path="cameras" element={<AdminDashboard />} />
+                      <Route path="energy-billing" element={<AdminDashboard />} />
+                      <Route path="payment" element={<AdminDashboard />} />
+                      <Route path="notifications-alarms" element={<AdminDashboard />} />
+                      <Route path="feature-pages" element={<AdminDashboard />} />
+                    </Route>
+
                     {/* ----------新版岸電--------- */}
                     <Route path="/shore-power" element={<ShorePowerDashboard />} />
                     <Route path="/realtime" element={<RealtimeMonitor />} />
@@ -101,15 +105,15 @@ export default function App() {
                     <Route path="/history" element={<History />} />
                     <Route path="/alarm-center" element={<AlarmCenter />} />
                     <Route path="/test" element={<Test />} />
+
                     {/* 使用者專區 */}
                     <Route path="/user/berth-booking" element={<BerthBooking />} />
                     <Route path="/user/my-bookings" element={<MyBookings />} />
                     <Route path="/account" element={<AccountSettings />} />
-                    
+
                     {/* RBAC 權限設定 */}
                     <Route path="/rbac/permissions" element={<PermissionManagement />} />
                     <Route path="/rbac/audit-logs" element={<AuditLogs />} />
-                  
 
                     {/* Account 主頁與子頁 */}
                     <Route path="/account" element={<AccountSettings />} />
@@ -117,12 +121,12 @@ export default function App() {
                     <Route path="/account/yachts" element={<MyYachts />} />
                     <Route path="/account/berth-record" element={<BerthRecord />} />
                     <Route path="/account/payments" element={<PaymentMethods />} />
-                    <Route path="/account/billing" element={<BillingHistory />} />                  
+                    <Route path="/account/billing" element={<BillingHistory />} />
 
                     {/* ----------舊版--------- */}
-                    <Route path="/" element={<Dashboard />} />                                                         
+                    <Route path="/" element={<Dashboard />} />
                     <Route path="/billing" element={<BillingModule />} />
-                    <Route path="/user-binding" element={<UserBinding />} />                   
+                    <Route path="/user-binding" element={<UserBinding />} />
                     <Route path="/ais" element={<AisIntegration />} />
                     <Route path="/image-recognition" element={<ShipImageRecognition />} />
                     <Route path="/owner-ship" element={<OwnerShipManage />} />
@@ -144,6 +148,7 @@ export default function App() {
                     <Route path="/payment-methods" element={<PaymentSupport />} />
                     <Route path="/billing-notice" element={<BillNotification />} />
                     <Route path="/backend" element={<AdminManage />} />
+
                     {/* 找不到路由就回 dashboard，避免空白頁 */}
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                   </Routes>
