@@ -2,7 +2,7 @@
    只做「側欄佔位 / 讓位」；不改 Dashboard 的視覺
 */
 
-/* Sidebar 預設收合寬度（Sidebar.css 目前是 60px） */
+/* Sidebar 預設收合寬度 */
 :root {
   --sidebar-collapsed: 60px;
   --sidebar-expanded: 200px;

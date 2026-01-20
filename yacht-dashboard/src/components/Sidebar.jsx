@@ -14,7 +14,7 @@ import {
   FaSignInAlt,
   FaUserCircle,
   FaClipboardList,
-  FaAnchor,
+  FaCogs,
 } from "react-icons/fa";
 
 import "./Sidebar.css";
@@ -157,7 +157,7 @@ export default function Sidebar() {
     },
     {
       type: "link",
-      icon: <FaAnchor />,
+      icon: <FaCogs />,
       label: "後臺管理", // 單點導頁不展開、不顯示子項目
       to: "/admin",
     },
