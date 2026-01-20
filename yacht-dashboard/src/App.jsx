@@ -55,6 +55,8 @@ import AuditLogs from "./pages/rbac/AuditLogs"; // 稽核紀錄（畫面頁）
 import AdminManage from "./pages/billing-system/AdminManage"; //後台管理功能
 import AdminLayout from "./pages/admin/AdminLayout"; // 後臺管理 Layout
 import BerthBasic from "./pages/admin/BerthBasic"; // 船席基本設定頁面
+import AccessControl from "./pages/admin/AccessControl"; // 門禁管理頁面
+import AisSettings from "./pages/admin/AisSettings"; // AIS 設定頁面
 
 // 新增：Account 子分頁
 import AccountBasicProfile from "./pages/userProfile/AccountBasicProfile"; // 基本資料
@@ -87,8 +89,8 @@ export default function App() {
                     <Route path="/admin" element={<AdminLayout />}>
                       <Route index element={<AdminDashboard />} />
                       <Route path="berth-basic" element={<BerthBasic />} />
-                      <Route path="access-control" element={<AdminDashboard />} />
-                      <Route path="ais" element={<AdminDashboard />} />
+                      <Route path="access-control" element={<AccessControl />} />
+                      <Route path="ais" element={<AisSettings />} />
                       <Route path="communication" element={<AdminDashboard />} />
                       <Route path="cameras" element={<AdminDashboard />} />
                       <Route path="energy-billing" element={<AdminDashboard />} />
