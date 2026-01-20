@@ -1,0 +1,36 @@
+/* AdminDashboard.css
+   只做「側欄佔位 / 讓位」；不改 Dashboard 的視覺
+*/
+
+/* Sidebar 預設收合寬度（Sidebar.css 目前是 60px） */
+:root {
+  --sidebar-collapsed: 60px;
+  --sidebar-expanded: 200px;
+}
+
+.admin-layout {
+  min-height: 100vh;
+}
+
+/* 右側主內容：預設讓位 60px（Sidebar 收合寬） */
+.admin-main {
+  min-height: 100vh;
+  margin-left: var(--sidebar-collapsed);
+}
+
+/* Sidebar pinned 會在 body 加上 sidebar-pinned（Sidebar.jsx 已做）
+   pinned 時讓位 200px（Sidebar 展開寬）
+*/
+body.sidebar-pinned .admin-main {
+  margin-left: var(--sidebar-expanded);
+}
+
+/* 小螢幕可視需求自行調整 */
+@media (max-width: 576px) {
+  .admin-main {
+    margin-left: var(--sidebar-collapsed);
+  }
+  body.sidebar-pinned .admin-main {
+    margin-left: var(--sidebar-expanded);
+  }
+}

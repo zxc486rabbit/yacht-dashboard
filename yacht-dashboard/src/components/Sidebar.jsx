@@ -12,8 +12,8 @@ import {
   FaFileInvoiceDollar,
   FaThumbtack,
   FaSignInAlt,
-  FaUserCircle, 
-  FaClipboardList, 
+  FaUserCircle,
+  FaClipboardList,
   FaAnchor,
 } from "react-icons/fa";
 
@@ -34,7 +34,6 @@ export default function Sidebar() {
 
   const isExpanded = pinned || hovered;
 
-  // 切 pinned：解除固定時順便把子選單收起來
   const togglePin = () => {
     setPinned((prev) => {
       if (prev) setActiveSubmenu(null);
@@ -42,7 +41,6 @@ export default function Sidebar() {
     });
   };
 
-  // pinned 時讓主內容讓位（靠 body 的 class 控制）
   useEffect(() => {
     if (pinned) document.body.classList.add("sidebar-pinned");
     else document.body.classList.remove("sidebar-pinned");
@@ -50,18 +48,30 @@ export default function Sidebar() {
     return () => document.body.classList.remove("sidebar-pinned");
   }, [pinned]);
 
-  // 點主選單：展開/收合該組子選單
-  //（Sidebar 收合狀態下先不讓點，避免誤觸）
-  const handleToggleSubmenu = (index) => {
-    if (!isExpanded) return;
-    setActiveSubmenu((prev) => (prev === index ? null : index));
-  };
-
   const handleMouseEnter = () => setHovered(true);
 
   const handleMouseLeave = () => {
     setHovered(false);
     if (!pinned) setActiveSubmenu(null);
+  };
+
+  /**
+   * 點主選單：
+   * - 如果是「link-only」：直接導頁，不展開子選單
+   * - 其他：展開/收合子選單（收合狀態不給點，避免誤觸）
+   */
+  const handleMenuClick = (menu, index) => {
+    // link-only：不展開，直接導頁
+    if (menu.type === "link") {
+      navigate(menu.to);
+      // 不要留下任何展開狀態（尤其是 hover 展開時）
+      setActiveSubmenu(null);
+      return;
+    }
+
+    // 其餘：維持原本展開邏輯（收合狀態不給點）
+    if (!isExpanded) return;
+    setActiveSubmenu((prev) => (prev === index ? null : index));
   };
 
   // 選單資料：之後要加/改路由只動這裡就好
@@ -74,7 +84,6 @@ export default function Sidebar() {
         { label: "即時監控", path: "/realtime" },
         { label: "船舶基本檔", path: "/BerthMaster" },
         { label: "遠端控管", path: "/remote-control" },
-        // { label: "用戶資訊綁定 ?", path: "/user-binding" },
         { label: "歷史報表", path: "/history" },
         { label: "告警中心", path: "/alarm-center" },
         { label: "測試", path: "/test" },
@@ -94,9 +103,9 @@ export default function Sidebar() {
       label: "門禁管制系統",
       children: [
         { label: "門匣設備管理", path: "/equipment" },
-        { label: "門禁排程設定 ?", path: "/schedule" },
+        { label: "門禁排程設定", path: "/schedule" },
         { label: "進出識別紀錄", path: "/access-log" },
-        { label: "人員授權管理 ?", path: "/personnel" },
+        { label: "人員授權管理", path: "/personnel" },
         { label: "異常警示事件", path: "/alerts" },
       ],
     },
@@ -107,7 +116,7 @@ export default function Sidebar() {
         { label: "監控畫面管理", path: "/monitoring" },
         { label: "攝影機管理", path: "/camera" },
         { label: "影像儲存管理", path: "/storage" },
-        { label: "警示通報系統 ?", path: "/notifications" },
+        { label: "警示通報系統", path: "/notifications" },
       ],
     },
     {
@@ -120,13 +129,13 @@ export default function Sidebar() {
       ],
     },
     {
-     icon: <FaUserCircle />,
-     label: "使用者專區",
-     children: [
-       { label: "船位預約", path: "/user/berth-booking" },
-       { label: "我的預約 / 停泊費用", path: "/user/my-bookings" },
-     ],
-   },
+      icon: <FaUserCircle />,
+      label: "使用者專區",
+      children: [
+        { label: "船位預約", path: "/user/berth-booking" },
+        { label: "我的預約 / 停泊費用", path: "/user/my-bookings" },
+      ],
+    },
     {
       icon: <FaFileInvoiceDollar />,
       label: "支付計費系統",
@@ -145,6 +154,12 @@ export default function Sidebar() {
         { label: "權限設定", path: "/rbac/permissions" },
         { label: "稽核紀錄", path: "/rbac/audit-logs" },
       ],
+    },
+    {
+      type: "link",
+      icon: <FaAnchor />,
+      label: "後臺管理", // 單點導頁不展開、不顯示子項目
+      to: "/admin",
     },
   ];
 
@@ -169,7 +184,7 @@ export default function Sidebar() {
         <FaThumbtack />
       </button>
 
-      {/* Logo / 系統名（建議導到 dashboard） */}
+      {/* Logo / 系統名 */}
       <Link
         to="/dashboard"
         className="text-center py-4 border-bottom d-block text-decoration-none text-white"
@@ -178,27 +193,37 @@ export default function Sidebar() {
       </Link>
 
       {/* 選單 */}
-      <div className="flex-grow-1">
-        {menus.map((menu, index) => (
-          <div key={index}>
-            <button
-              type="button"
-              className="menu-toggle btn btn-link text-start w-100 text-white"
-              onClick={() => handleToggleSubmenu(index)}
-            >
-              <span className="sidebar-icon">{menu.icon}</span>
-              <span className="sidebar-label">{menu.label}</span>
-            </button>
+      <div className="flex-grow-1 sidebar-scroll">
+        {menus.map((menu, index) => {
+          const isOpen = activeSubmenu === index;
+          const hasChildren = Array.isArray(menu.children) && menu.children.length > 0;
+          const isLinkOnly = menu.type === "link";
 
-            <div className={`submenu ${activeSubmenu === index ? "" : "d-none"}`}>
-              {menu.children.map((item, i) => (
-                <Link key={i} to={item.path} className="d-block py-1 text-white submenu-link">
-                  {item.label}
-                </Link>
-              ))}
+          return (
+            <div key={index}>
+              <button
+                type="button"
+                className="menu-toggle btn btn-link text-start w-100 text-white"
+                onClick={() => handleMenuClick(menu, index)}
+                title={menu.label}
+              >
+                <span className="sidebar-icon">{menu.icon}</span>
+                <span className="sidebar-label">{menu.label}</span>
+              </button>
+
+              {/* ink-only 不渲染 submenu */}
+              {!isLinkOnly && hasChildren && (
+                <div className={`submenu ${isOpen ? "" : "d-none"}`}>
+                  {menu.children.map((item, i) => (
+                    <Link key={i} to={item.path} className="d-block py-1 text-white submenu-link">
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 左下角：登入 / 會員卡 */}
@@ -221,7 +246,11 @@ export default function Sidebar() {
               </div>
             </button>
 
-            <button type="button" className="btn btn-sm btn-outline-light w-100 mt-2" onClick={handleLogout}>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-light w-100 mt-2"
+              onClick={handleLogout}
+            >
               登出
             </button>
           </div>

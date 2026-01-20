@@ -7,6 +7,7 @@ import AppLayout from "./layout/AppLayout";
 
 import Dashboard from "./pages/dashboard/Dashboard";
 import Login from "./pages/Login";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // 各頁面
 import ShorePowerDashboard from "./pages/shorePower/ShorePowerDashboard"; //岸電儀表板
@@ -80,6 +81,18 @@ export default function App() {
                 <AppLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
+
+                    {/* 後臺管理 */}
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/berth-basic" element={<AdminDashboard />} />
+                    <Route path="/admin/access-control" element={<AdminDashboard />} />
+                    <Route path="/admin/ais" element={<AdminDashboard />} />
+                    <Route path="/admin/communication" element={<AdminDashboard />} />
+                    <Route path="/admin/cameras" element={<AdminDashboard />} />
+                    <Route path="/admin/energy-billing" element={<AdminDashboard />} />
+                    <Route path="/admin/payment" element={<AdminDashboard />} />
+                    <Route path="/admin/notifications-alarms" element={<AdminDashboard />} />
+                    <Route path="/admin/feature-pages" element={<AdminDashboard />} />
                     {/* ----------新版岸電--------- */}
                     <Route path="/shore-power" element={<ShorePowerDashboard />} />
                     <Route path="/realtime" element={<RealtimeMonitor />} />
