@@ -1,3 +1,282 @@
+/* =========================================================
+   Admin Settings UI Kit (AIS-style)
+   Scope: .as-page (後臺內頁統一樣式)
+   Depends on: Dashboard.css variables
+   ========================================================= */
+
+.as-page{
+  max-width: 1800px;
+  margin: 10px auto 0 auto;
+  padding: 18px 18px 28px;
+}
+
+/* ===== Header ===== */
+.as-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom: 14px;
+}
+
+.as-titleWrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.as-title{
+  margin:0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.as-subtitle{
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.as-status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.75);
+}
+.as-status.ok{ border-color: rgba(16,185,129,.35); }
+.as-status.warn{ border-color: rgba(245,158,11,.45); }
+.as-status.bad{ border-color: rgba(239,68,68,.35); }
+
+.as-dirty{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px dashed rgba(245,158,11,.55);
+  background: rgba(245,158,11,.08);
+  color: var(--ink);
+}
+
+.as-topActions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* ===== Buttons ===== */
+.as-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.90);
+  color: var(--ink);
+  cursor:pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform .12s ease, filter .12s ease;
+}
+.as-btn:hover{ transform: translateY(-1px); }
+.as-btn:disabled{
+  opacity: .55;
+  cursor:not-allowed;
+  transform:none;
+}
+.as-btn.primary{
+  background: rgba(5,153,187,.10);
+  border-color: rgba(5,153,187,.35);
+}
+.as-btn.ghost{ background: rgba(255,255,255,.65); }
+.as-btn.danger{
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.28);
+}
+
+/* ===== Card ===== */
+.as-card{
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.as-cardHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.as-cardTitle{
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.as-cardSubtitle{
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.as-rowActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* ===== Table ===== */
+.as-tableWrap{
+  overflow:auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.85);
+}
+
+.as-table{
+  width:100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.as-table thead th{
+  text-align:left;
+  font-size: 13px;
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(246,247,249,.65);
+  white-space: nowrap;
+}
+
+.as-table tbody td{
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(229,231,235,.75);
+  font-size: 14px;
+}
+
+.as-table tbody tr:hover td{
+  background: rgba(5,153,187,.06);
+}
+.as-table tbody tr.is-selected td{
+  background: rgba(5,153,187,.10);
+}
+
+.as-colRadio{ width: 46px; }
+
+.as-thSort{
+  cursor:pointer;
+  user-select:none;
+}
+.as-sortIco{
+  margin-left: 6px;
+  opacity: .65;
+  transform: translateY(-2px);
+}
+
+/* ===== Modal ===== */
+.as-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.40);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 24px;
+  z-index: 999;
+}
+
+.as-modalCard{
+  width: min(560px, 100%);
+  background: rgba(255,255,255,.95);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 22px 60px rgba(15,23,42,.28);
+  padding: 14px;
+}
+
+.as-modalHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 6px 6px 10px 6px;
+  border-bottom: 1px solid rgba(229,231,235,.75);
+}
+
+.as-modalHead h3{
+  margin:0;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.as-modalHead .x{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.85);
+  cursor:pointer;
+  font-size: 18px;
+  line-height: 30px;
+}
+
+.as-form{
+  padding: 12px 6px 6px 6px;
+  display:grid;
+  gap: 12px;
+}
+
+.as-field label{
+  display:block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.as-field input,
+.as-field select{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.95);
+  outline:none;
+}
+
+.as-field input:focus,
+.as-field select:focus{
+  border-color: rgba(5,153,187,.45);
+  box-shadow: 0 0 0 3px rgba(5,153,187,.12);
+}
+
+.as-hint{
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.as-modalActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding: 10px 6px 6px 6px;
+}
+
+/* =========================================================
+   AIS Scoped Styles (migrated into admin.settings.css)
+   Keep scoped in .ais-page to avoid impacting Sidebar/Dashboard
+   Source: ais.settings.css
+   ========================================================= */
+
 /* src/pages/admin/ais/ais.settings.css */
 /* Scoped: ONLY affect inside .ais-page to avoid impacting Sidebar / Dashboard */
 
@@ -673,4 +952,69 @@
 /* Keep selects/inputs reasonable width in filters */
 .ais-logs__filters .ais-input{
   max-width: 320px;
+}
+
+/* =========================================================
+   Aliases (optional, but useful):
+   If future pages want AIS switch/input style without .ais-*,
+   you can use .as-switch / .as-input classes with same visuals.
+   ========================================================= */
+
+.as-switch{
+  position: relative;
+  width: 48px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+.as-switch input{
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.as-switch__track{
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(148,163,184,.35);
+  border: 1px solid rgba(229,231,235,.95);
+  transition: background .15s ease, border-color .15s ease;
+}
+.as-switch__thumb{
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, .18);
+  transition: transform .15s ease;
+}
+.as-switch input:checked ~ .as-switch__track{
+  background: rgba(5,153,187,.35);
+  border-color: rgba(5,153,187,.35);
+}
+.as-switch input:checked ~ .as-switch__thumb{
+  transform: translateX(20px);
+}
+.as-switch.is-disabled{ opacity: .55; }
+
+/* Optional: AIS-like input for non-AIS pages */
+.as-input{
+  width: 100%;
+  max-width: 420px;
+  height: 40px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(229,231,235,.95);
+  background: rgba(255,255,255,.92);
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
+  font-size: 14px;
+  color: var(--ink);
+}
+.as-input:focus{
+  border-color: rgba(5,153,187,.45);
+  box-shadow: 0 0 0 4px rgba(5,153,187,.12);
 }

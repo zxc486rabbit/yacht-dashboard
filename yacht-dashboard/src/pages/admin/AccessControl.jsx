@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "../../styles/dashboard/Dashboard.css";
+import "../../styles/admin/admin.settings.css";
 
 export default function AccessControl() {
   const [activeTab, setActiveTab] = useState("device");
@@ -39,9 +41,7 @@ export default function AccessControl() {
       if (res.isConfirmed) {
         setDevices((prev) =>
           prev.map((d) =>
-            d.id === id
-              ? { ...d, door: action === "open" ? "開啟" : "關閉" }
-              : d
+            d.id === id ? { ...d, door: action === "open" ? "開啟" : "關閉" } : d
           )
         );
       }
@@ -76,10 +76,7 @@ export default function AccessControl() {
       showCancelButton: true,
     }).then((res) => {
       if (res.isConfirmed) {
-        setSchedules((prev) => [
-          { id: Date.now(), ...res.value },
-          ...prev,
-        ]);
+        setSchedules((prev) => [{ id: Date.now(), ...res.value }, ...prev]);
       }
     });
   };
@@ -100,147 +97,151 @@ export default function AccessControl() {
   const togglePerson = (id) => {
     setPersons((prev) =>
       prev.map((p) =>
-        p.id === id
-          ? { ...p, status: p.status === "啟用" ? "停用" : "啟用" }
-          : p
+        p.id === id ? { ...p, status: p.status === "啟用" ? "停用" : "啟用" } : p
       )
     );
   };
 
   return (
-    <div className="container-fluid mt-3">
-      <h2 className="text-primary mb-3">門禁管理</h2>
+    <div className="as-page">
+      <div className="as-header">
+        <div className="as-titleWrap">
+          <h2 className="as-title">門禁管理</h2>
+        </div>
+      </div>
 
-      {/* Tabs */}
-      <ul className="nav nav-tabs">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "device" ? "active" : ""}`}
-            onClick={() => setActiveTab("device")}
-          >
-            門禁設備
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "schedule" ? "active" : ""}`}
-            onClick={() => setActiveTab("schedule")}
-          >
-            門禁排程
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "person" ? "active" : ""}`}
-            onClick={() => setActiveTab("person")}
-          >
-            人員授權
-          </button>
-        </li>
-      </ul>
+      <div className="as-card">
+        <div className="as-cardHead">
+          <div>
+            <div className="as-cardTitle">功能分頁</div>
+            <div className="as-cardSubtitle">門禁設備（閘門開關）／門禁排程／人員授權</div>
+          </div>
 
-      {/* ================= Tab Content ================= */}
-      <div className="bg-white border border-top-0 p-3">
-
-        {/* 門禁設備 */}
-        {activeTab === "device" && (
-          <table className="table table-bordered text-center">
-            <thead className="table-info">
-              <tr>
-                <th>設備</th>
-                <th>區域</th>
-                <th>狀態</th>
-                <th>匣門</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {devices.map((d) => (
-                <tr key={d.id}>
-                  <td>{d.name}</td>
-                  <td>{d.location}</td>
-                  <td>{d.status}</td>
-                  <td>{d.door}</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-success me-2"
-                      disabled={d.door === "開啟"}
-                      onClick={() => toggleDoor(d.id, "open")}
-                    >
-                      開啟
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      disabled={d.door === "關閉"}
-                      onClick={() => toggleDoor(d.id, "close")}
-                    >
-                      關閉
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {/* 門禁排程 */}
-        {activeTab === "schedule" && (
-          <>
-            <button className="btn btn-success mb-2" onClick={addSchedule}>
-              新增排程
+          <div className="as-rowActions">
+            <button
+              className={`as-btn ${activeTab === "device" ? "primary" : "ghost"}`}
+              onClick={() => setActiveTab("device")}
+            >
+              門禁設備
             </button>
-            <table className="table table-bordered text-center">
-              <thead className="table-info">
+            <button
+              className={`as-btn ${activeTab === "schedule" ? "primary" : "ghost"}`}
+              onClick={() => setActiveTab("schedule")}
+            >
+              門禁排程
+            </button>
+            <button
+              className={`as-btn ${activeTab === "person" ? "primary" : "ghost"}`}
+              onClick={() => setActiveTab("person")}
+            >
+              人員授權
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "device" && (
+          <div className="as-tableWrap">
+            <table className="as-table">
+              <thead>
                 <tr>
-                  <th>名稱</th>
-                  <th>時間</th>
                   <th>設備</th>
+                  <th>區域</th>
+                  <th>狀態</th>
+                  <th>匣門</th>
+                  <th style={{ width: 260 }}>操作</th>
                 </tr>
               </thead>
               <tbody>
-                {schedules.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.name}</td>
-                    <td>{s.time}</td>
-                    <td>{s.device}</td>
+                {devices.map((d) => (
+                  <tr key={d.id}>
+                    <td>{d.name}</td>
+                    <td>{d.location}</td>
+                    <td>{d.status}</td>
+                    <td>{d.door}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>
+                      <button
+                        className="as-btn primary"
+                        disabled={d.door === "開啟"}
+                        onClick={() => toggleDoor(d.id, "open")}
+                      >
+                        開啟
+                      </button>{" "}
+                      <button
+                        className="as-btn danger"
+                        disabled={d.door === "關閉"}
+                        onClick={() => toggleDoor(d.id, "close")}
+                      >
+                        關閉
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {activeTab === "schedule" && (
+          <>
+            <div style={{ marginBottom: 10 }}>
+              <button className="as-btn primary" onClick={addSchedule}>
+                新增排程
+              </button>
+            </div>
+
+            <div className="as-tableWrap">
+              <table className="as-table">
+                <thead>
+                  <tr>
+                    <th>名稱</th>
+                    <th>時間</th>
+                    <th>設備</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedules.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.name}</td>
+                      <td>{s.time}</td>
+                      <td>{s.device}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
 
-        {/* 人員授權 */}
         {activeTab === "person" && (
-          <table className="table table-bordered text-center">
-            <thead className="table-info">
-              <tr>
-                <th>姓名</th>
-                <th>卡號</th>
-                <th>角色</th>
-                <th>狀態</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {persons.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.name}</td>
-                  <td>{p.card}</td>
-                  <td>{p.role}</td>
-                  <td>{p.status}</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => togglePerson(p.id)}
-                    >
-                      切換
-                    </button>
-                  </td>
+          <div className="as-tableWrap">
+            <table className="as-table">
+              <thead>
+                <tr>
+                  <th>姓名</th>
+                  <th>卡號</th>
+                  <th>角色</th>
+                  <th>狀態</th>
+                  <th style={{ width: 160 }}>操作</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {persons.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.name}</td>
+                    <td>{p.card}</td>
+                    <td>{p.role}</td>
+                    <td>{p.status}</td>
+                    <td>
+                      <button className="as-btn" onClick={() => togglePerson(p.id)}>
+                        切換
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
       </div>

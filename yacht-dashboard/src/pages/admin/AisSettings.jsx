@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "../../styles/dashboard/Dashboard.css"; // 共用 Dashboard 視覺
-import "./ais.settings.css";
+import "../../styles/admin/admin.settings.css";
 
 import {
   FaSave,

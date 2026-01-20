@@ -57,6 +57,7 @@ import AdminLayout from "./pages/admin/AdminLayout"; // 後臺管理 Layout
 import BerthBasic from "./pages/admin/BerthBasic"; // 船席基本設定頁面
 import AccessControl from "./pages/admin/AccessControl"; // 門禁管理頁面
 import AisSettings from "./pages/admin/AisSettings"; // AIS 設定頁面
+import RemoteControlSettings from "./pages/admin/CommSystemSettings"; // 通訊系統設定頁面
 
 // 新增：Account 子分頁
 import AccountBasicProfile from "./pages/userProfile/AccountBasicProfile"; // 基本資料
@@ -91,7 +92,7 @@ export default function App() {
                       <Route path="berth-basic" element={<BerthBasic />} />
                       <Route path="access-control" element={<AccessControl />} />
                       <Route path="ais" element={<AisSettings />} />
-                      <Route path="communication" element={<AdminDashboard />} />
+                      <Route path="communication" element={<RemoteControlSettings />} />
                       <Route path="cameras" element={<AdminDashboard />} />
                       <Route path="energy-billing" element={<AdminDashboard />} />
                       <Route path="payment" element={<AdminDashboard />} />
