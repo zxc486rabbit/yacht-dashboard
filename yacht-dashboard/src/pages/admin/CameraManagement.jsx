@@ -507,14 +507,21 @@ export default function CameraManage() {
               ) : (
                 pageRows.map((r) => {
                   const meta = statusMeta(r.status);
+
                   return (
-                    <tr key={r.id}>
+                    <tr
+                      key={r.id}
+                      onClick={() => openView(r)}
+                      style={{ cursor: "pointer" }}
+                      title="點擊檢視"
+                    >
                       <td className="col-icon">
+                        {/* 保留 icon 區塊結構，但避免重複觸發 row click */}
                         <button
                           type="button"
-                          onClick={() => openView(r)}
-                          title="檢視"
-                          aria-label={`檢視 ${r.name}`}
+                          onClick={(e) => e.stopPropagation()}
+                          title="攝影機"
+                          aria-label={`攝影機 ${r.name}`}
                           style={{
                             width: "100%",
                             display: "flex",
@@ -523,7 +530,7 @@ export default function CameraManage() {
                             background: "transparent",
                             border: "none",
                             padding: 0,
-                            cursor: "pointer",
+                            cursor: "inherit",
                           }}
                         >
                           <div
@@ -572,10 +579,23 @@ export default function CameraManage() {
 
                       <td className="col-actions">
                         <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
-                          <button className="as-btn" onClick={() => openEdit(r)}>
+                          <button
+                            className="as-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEdit(r);
+                            }}
+                          >
                             <FaEdit /> 編輯
                           </button>
-                          <button className="as-btn danger" onClick={() => openDelete(r)}>
+
+                          <button
+                            className="as-btn danger"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDelete(r);
+                            }}
+                          >
                             <FaTrash /> 刪除
                           </button>
                         </div>
