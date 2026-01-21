@@ -61,6 +61,7 @@ import RemoteControlSettings from "./pages/admin/CommSystemSettings"; // 通訊�
 import CameraManagement from "./pages/admin/CameraManagement"; // 攝影機管理頁面
 import EnergyBillingSettings from "./pages/admin/EnergyBillingSettings"; // 能耗與計費設定頁面
 import PaymentModule from "./pages/admin/PaymentModule"; // 支付模組頁面
+import NotificationsAlarms from "./pages/admin/NotificationsAlarms"; // 通知與告警設定頁面
 import FeaturePageManager from "./pages/admin/FeaturePageManager"; // 功能頁面管理
 
 // 新增：Account 子分頁
@@ -100,7 +101,7 @@ export default function App() {
                       <Route path="cameras" element={<CameraManagement />} />
                       <Route path="energy-billing" element={<EnergyBillingSettings />} />
                       <Route path="payment" element={<PaymentModule />} />
-                      <Route path="notifications-alarms" element={<AdminDashboard />} />
+                      <Route path="notifications-alarms" element={<NotificationsAlarms />} />
                       <Route path="feature-pages" element={<FeaturePageManager />} />
                     </Route>
 

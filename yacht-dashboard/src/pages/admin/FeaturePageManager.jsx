@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "../../styles/dashboard/Dashboard.css"; // 共用 Dashboard 視覺（不要改）
-import "../../styles/admin/admin.settings.css"; // 統一內頁樣式
+import "../../styles/dashboard/Dashboard.css"; 
+import "../../styles/admin/admin.settings.css";
 
 const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
 
@@ -111,7 +111,7 @@ export default function FeaturePageManager() {
       <div className="as-page">
         <div className="as-header">
           <div>
-            <h2 className="as-title">後臺管理｜功能頁管理</h2>
+            <h2 className="as-title">功能頁管理</h2>
             <div className="as-subtitle">
               管理新增功能頁與各角色預設權限（檢視 / 編輯 / 刪除）
             </div>

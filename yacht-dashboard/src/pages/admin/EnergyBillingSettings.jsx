@@ -379,10 +379,9 @@ export default function EnergyBillingSettings() {
                           checked={settings.tou.enabled}
                           onChange={() => togglePath(["tou", "enabled"])}
                         />
-                        <span className="as-switch__track" />
-                        <span className="as-switch__thumb" />
+                        <span className="as-switch-ui" />
+                        <span className="as-switch-label">{settings.tou.enabled ? "已啟用" : "未啟用"}</span>
                       </label>
-                      <span className="as-inline__sep">{settings.tou.enabled ? "已啟用" : "未啟用"}</span>
                     </div>
                   </div>
                 </div>
@@ -529,10 +528,9 @@ export default function EnergyBillingSettings() {
                           checked={settings.anomaly.enabled}
                           onChange={() => togglePath(["anomaly", "enabled"])}
                         />
-                        <span className="as-switch__track" />
-                        <span className="as-switch__thumb" />
+                        <span className="as-switch-ui" />
+                        <span className="as-switch-label">{settings.anomaly.enabled ? "已啟用" : "未啟用"}</span>
                       </label>
-                      <span className="as-inline__sep">{settings.anomaly.enabled ? "已啟用" : "未啟用"}</span>
                     </div>
                   </div>
                 </div>
@@ -719,10 +717,9 @@ export default function EnergyBillingSettings() {
                         checked={settings.taxInvoice.taxEnabled}
                         onChange={() => togglePath(["taxInvoice", "taxEnabled"])}
                       />
-                      <span className="as-switch__track" />
-                      <span className="as-switch__thumb" />
+                      <span className="as-switch-ui" />
+                      <span className="as-switch-label">{settings.taxInvoice.taxEnabled ? "已啟用" : "未啟用"}</span>
                     </label>
-                    <span className="as-inline__sep">{settings.taxInvoice.taxEnabled ? "已啟用" : "未啟用"}</span>
                   </div>
                 </div>
 
@@ -851,8 +848,7 @@ export default function EnergyBillingSettings() {
                           checked={settings.berthBinding.allowOverridePerBerth}
                           onChange={() => togglePath(["berthBinding", "allowOverridePerBerth"])}
                         />
-                        <span className="as-switch__track" />
-                        <span className="as-switch__thumb" />
+                        <span className="as-switch-ui" />
                       </label>
                     </div>
                   </div>
@@ -968,8 +964,7 @@ export default function EnergyBillingSettings() {
                                     setPath(["berthBinding", "berthMap"], next);
                                   }}
                                 />
-                                <span className="as-switch__track" />
-                                <span className="as-switch__thumb" />
+                                <span className="as-switch-ui" />
                               </label>
                             </td>
                           </tr>

@@ -188,7 +188,7 @@ export default function PaymentModuleAs() {
         <div className="as-titleWrap">
           <div>
             <h2 className="as-title">支付模組</h2>
-            <div className="as-subtitle">費用結算與付款流程（後臺）</div>
+            <div className="as-subtitle">費用結算與付款流程</div>
           </div>
         </div>
 
