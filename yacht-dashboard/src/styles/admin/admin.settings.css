@@ -2190,3 +2190,61 @@
   color: var(--muted);
   line-height: 1;
 }
+
+/* Modal 寬度加寬 */
+.as-modalCard{
+  width: 1100px;        
+  max-width: 90vw;     /* 防止小螢幕爆版 */
+}
+
+/* =========================================================
+   AS Table Column Spec (Shared / Unified)
+   用途：設備列表（攝影機 / 通訊 / 門禁）
+   使用方式：
+   <table class="as-table as-table--spec-device">
+   ========================================================= */
+
+/* ✅ 固定版面：讓欄寬分配生效且穩定 */
+.as-table{
+  table-layout: fixed;
+}
+
+/* 共用 padding（讓欄位更緊湊） */
+.as-table th,
+.as-table td{
+  padding-left: 12px;
+  padding-right: 12px;
+  vertical-align: middle;
+}
+
+/* =========================================================
+   SPEC: Device List（6 欄）
+   icon | name | ip | status | updated | actions
+   需求：六欄位平均
+   ========================================================= */
+
+.as-table--spec-device{
+  table-layout: fixed;
+}
+
+.as-table--spec-device .col-icon,
+.as-table--spec-device .col-name,
+.as-table--spec-device .col-ip,
+.as-table--spec-device .col-status,
+.as-table--spec-device .col-updated,
+.as-table--spec-device .col-actions{
+  width: calc(100% / 6);
+}
+
+
+.as-table--spec-device .col-actions{
+  text-align: left;
+}
+.as-table--spec-device .col-ip{
+  white-space: nowrap;
+}
+
+/* 按鈕群靠左 */
+.as-table--spec-device .col-actions > div{
+  justify-content: flex-start;
+}
