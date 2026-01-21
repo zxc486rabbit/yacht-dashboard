@@ -6,8 +6,6 @@ import {
   FaSortDown,
   FaSave,
   FaUndoAlt,
-  FaCheckCircle,
-  FaExclamationTriangle,
 } from "react-icons/fa";
 
 import "../../styles/dashboard/Dashboard.css";
@@ -25,11 +23,12 @@ const SWITCH_SUBTYPE_OPTIONS = ["一般", "POE"];
 
 function normalizeByType(next) {
   if (next.type !== "交換器") return { ...next, subType: "N/A" };
-  if (!SWITCH_SUBTYPE_OPTIONS.includes(next.subType)) return { ...next, subType: "一般" };
+  if (!SWITCH_SUBTYPE_OPTIONS.includes(next.subType))
+    return { ...next, subType: "一般" };
   return next;
 }
 
-// ✅ 交換器一般型顯示 N/A（只有 POE 顯示 POE）
+// 交換器一般型顯示 N/A（只有 POE 顯示 POE）
 function renderSubType(row) {
   return row.type === "交換器" && row.subType === "POE" ? "POE" : "N/A";
 }
@@ -41,13 +40,17 @@ export default function CommSystemSettings() {
   const [dirty, setDirty] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ ip: "", type: "路由器", subType: "N/A" });
-
-  const statusOk = true;
+  const [form, setForm] = useState({
+    ip: "",
+    type: "路由器",
+    subType: "N/A",
+  });
 
   const sortedData = useMemo(() => {
     if (!sortKey) return data;
-    return [...data].sort((a, b) => String(a[sortKey]).localeCompare(String(b[sortKey])));
+    return [...data].sort((a, b) =>
+      String(a[sortKey]).localeCompare(String(b[sortKey]))
+    );
   }, [data, sortKey]);
 
   const openAdd = () => {
@@ -96,20 +99,22 @@ export default function CommSystemSettings() {
       <div className="as-header">
         <div className="as-titleWrap">
           <h2 className="as-title">通訊系統設定</h2>
-
-          <div className={`as-status ${statusOk ? "ok" : "warn"}`}>
-            {statusOk ? <FaCheckCircle /> : <FaExclamationTriangle />}
-            <span>{statusOk ? "設定狀態正常" : "需要檢查設定"}</span>
-          </div>
-
           {dirty && <span className="as-dirty">尚未儲存</span>}
         </div>
 
         <div className="as-topActions">
-          <button className="as-btn primary" onClick={saveAll} disabled={!dirty}>
+          <button
+            className="as-btn primary"
+            onClick={saveAll}
+            disabled={!dirty}
+          >
             <FaSave /> 儲存
           </button>
-          <button className="as-btn ghost" onClick={resetAll} disabled={!dirty}>
+          <button
+            className="as-btn ghost"
+            onClick={resetAll}
+            disabled={!dirty}
+          >
             <FaUndoAlt /> 還原
           </button>
         </div>
@@ -119,17 +124,27 @@ export default function CommSystemSettings() {
         <div className="as-cardHead">
           <div>
             <div className="as-cardTitle">網路設備清單</div>
-            <div className="as-cardSubtitle">設定通訊設備 IP 與型態（交換器 POE 供電將標示為 POE）</div>
+            <div className="as-cardSubtitle">
+              設定通訊設備 IP 與型態（交換器 POE 供電將標示為 POE）
+            </div>
           </div>
 
           <div className="as-rowActions">
             <button className="as-btn" onClick={openAdd}>
               <FaPlus /> 新增
             </button>
-            <button className="as-btn" disabled={!selectedId} onClick={openEdit}>
+            <button
+              className="as-btn"
+              disabled={!selectedId}
+              onClick={openEdit}
+            >
               <FaEdit /> 修改
             </button>
-            <button className="as-btn danger" disabled={!selectedId} onClick={removeRow}>
+            <button
+              className="as-btn danger"
+              disabled={!selectedId}
+              onClick={removeRow}
+            >
               <FaTrash /> 刪除
             </button>
           </div>
@@ -140,13 +155,25 @@ export default function CommSystemSettings() {
             <thead>
               <tr>
                 <th className="as-colRadio"></th>
-                <th className="as-thSort" onClick={() => setSortKey("ip")} role="button">
+                <th
+                  className="as-thSort"
+                  onClick={() => setSortKey("ip")}
+                  role="button"
+                >
                   網路設備IP <FaSortDown className="as-sortIco" />
                 </th>
-                <th className="as-thSort" onClick={() => setSortKey("type")} role="button">
+                <th
+                  className="as-thSort"
+                  onClick={() => setSortKey("type")}
+                  role="button"
+                >
                   型態 <FaSortDown className="as-sortIco" />
                 </th>
-                <th className="as-thSort" onClick={() => setSortKey("subType")} role="button">
+                <th
+                  className="as-thSort"
+                  onClick={() => setSortKey("subType")}
+                  role="button"
+                >
                   子型態 <FaSortDown className="as-sortIco" />
                 </th>
               </tr>
@@ -154,7 +181,10 @@ export default function CommSystemSettings() {
 
             <tbody>
               {sortedData.map((row) => (
-                <tr key={row.id} className={selectedId === row.id ? "is-selected" : ""}>
+                <tr
+                  key={row.id}
+                  className={selectedId === row.id ? "is-selected" : ""}
+                >
                   <td className="as-colRadio">
                     <input
                       type="radio"
@@ -177,7 +207,11 @@ export default function CommSystemSettings() {
           <div className="as-modalCard">
             <div className="as-modalHead">
               <h3>通訊設備設定</h3>
-              <button className="x" onClick={() => setShowModal(false)} aria-label="close">
+              <button
+                className="x"
+                onClick={() => setShowModal(false)}
+                aria-label="close"
+              >
                 ×
               </button>
             </div>
@@ -187,7 +221,9 @@ export default function CommSystemSettings() {
                 <label>網路設備 IP</label>
                 <input
                   value={form.ip}
-                  onChange={(e) => setForm({ ...form, ip: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, ip: e.target.value })
+                  }
                   placeholder="例如：192.168.112.123"
                 />
               </div>
@@ -198,7 +234,13 @@ export default function CommSystemSettings() {
                   value={form.type}
                   onChange={(e) => {
                     const type = e.target.value;
-                    setForm((prev) => normalizeByType({ ...prev, type, subType: prev.subType }));
+                    setForm((prev) =>
+                      normalizeByType({
+                        ...prev,
+                        type,
+                        subType: prev.subType,
+                      })
+                    );
                   }}
                 >
                   {TYPE_OPTIONS.map((t) => (
@@ -214,7 +256,14 @@ export default function CommSystemSettings() {
                   <label>子型態</label>
                   <select
                     value={form.subType}
-                    onChange={(e) => setForm((prev) => normalizeByType({ ...prev, subType: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) =>
+                        normalizeByType({
+                          ...prev,
+                          subType: e.target.value,
+                        })
+                      )
+                    }
                   >
                     {SWITCH_SUBTYPE_OPTIONS.map((st) => (
                       <option key={st} value={st}>
@@ -223,7 +272,10 @@ export default function CommSystemSettings() {
                     ))}
                   </select>
 
-                  <div className="as-hint">顯示規則：僅 POE 會顯示「POE」，一般型在列表顯示為 N/A。</div>
+                  <div className="as-hint">
+                    顯示規則：僅 POE 會顯示「POE」，一般型在列表顯示為
+                    N/A。
+                  </div>
                 </div>
               )}
             </div>
@@ -232,7 +284,10 @@ export default function CommSystemSettings() {
               <button className="as-btn primary" onClick={saveRow}>
                 <FaSave /> 儲存
               </button>
-              <button className="as-btn ghost" onClick={() => setShowModal(false)}>
+              <button
+                className="as-btn ghost"
+                onClick={() => setShowModal(false)}
+              >
                 取消
               </button>
             </div>

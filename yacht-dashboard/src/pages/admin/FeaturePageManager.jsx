@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import "../../styles/dashboard/Dashboard.css"; // 共用 Dashboard 視覺（
+import React, { useEffect, useMemo, useState } from "react";
+import "../../styles/dashboard/Dashboard.css"; // 共用 Dashboard 視覺（不要改）
 import "../../styles/admin/admin.settings.css"; // 統一內頁樣式
 
 const ROLE_OPTIONS = ["管理者", "工程師", "船長", "船員"];
@@ -47,7 +47,7 @@ export default function FeaturePageManager() {
   const [draftName, setDraftName] = useState(active?.name || "");
   const [draftPerms, setDraftPerms] = useState(active?.perms || DEFAULT_PERMS());
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!active) return;
     setDraftName(active.name);
     setDraftPerms(active.perms || DEFAULT_PERMS());
@@ -151,10 +151,6 @@ export default function FeaturePageManager() {
                     onClick={() => setActiveId(it.id)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ")
-                        setActiveId(it.id);
-                    }}
                   >
                     <div className="as-list-item-name">{it.name}</div>
                     <button
@@ -195,13 +191,7 @@ export default function FeaturePageManager() {
                     className="as-input"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
-                    placeholder="例如：泊位排程、設備維護、告警中心..."
                   />
-                  {!canSave && (
-                    <div className="as-help danger">
-                      名稱不可空白，且不可與其他項目重複。
-                    </div>
-                  )}
                 </div>
 
                 <div className="as-divider" />
@@ -216,22 +206,37 @@ export default function FeaturePageManager() {
                     {ROLE_OPTIONS.map((role) => (
                       <div className="as-perm-row" key={role}>
                         <div className="as-perm-role">{role}</div>
+
                         <div className="as-perm-actions">
-                          <PermSwitch
-                            label="檢視"
-                            checked={!!draftPerms?.[role]?.view}
-                            onChange={() => handleToggle(role, "view")}
-                          />
-                          <PermSwitch
-                            label="編輯"
-                            checked={!!draftPerms?.[role]?.edit}
-                            onChange={() => handleToggle(role, "edit")}
-                          />
-                          <PermSwitch
-                            label="刪除"
-                            checked={!!draftPerms?.[role]?.del}
-                            onChange={() => handleToggle(role, "del")}
-                          />
+                          <div className="as-perm-item">
+                            <span>檢視</span>
+                            <PermSwitch
+                              checked={!!draftPerms?.[role]?.view}
+                              onChange={() =>
+                                handleToggle(role, "view")
+                              }
+                            />
+                          </div>
+
+                          <div className="as-perm-item">
+                            <span>編輯</span>
+                            <PermSwitch
+                              checked={!!draftPerms?.[role]?.edit}
+                              onChange={() =>
+                                handleToggle(role, "edit")
+                              }
+                            />
+                          </div>
+
+                          <div className="as-perm-item">
+                            <span>刪除</span>
+                            <PermSwitch
+                              checked={!!draftPerms?.[role]?.del}
+                              onChange={() =>
+                                handleToggle(role, "del")
+                              }
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -246,12 +251,12 @@ export default function FeaturePageManager() {
   );
 }
 
-function PermSwitch({ label, checked, onChange }) {
+/* === 純 switch，與其他頁面完全一致 === */
+function PermSwitch({ checked, onChange }) {
   return (
     <label className="as-switch">
       <input type="checkbox" checked={checked} onChange={onChange} />
       <span className="as-switch-ui" />
-      <span className="as-switch-label">{label}</span>
     </label>
   );
 }

@@ -50,7 +50,7 @@ const seedSettings = {
     polygonPoints: [
       { lat: 25.0482, lon: 121.5308 },
       { lat: 25.0486, lon: 121.5333 },
-      { lat: 25.0469, lon: 121.5340 },
+      { lat: 25.0469, lon: 121.534 },
       { lat: 25.0464, lon: 121.5312 },
     ],
     triggers: { onEnter: true, onExit: false, dwellMin: 10, dwellEnabled: false },
@@ -66,8 +66,22 @@ const seedSettings = {
 };
 
 const seedLogs = [
-  { id: 1, ts: "2026/01/20 13:58:12", level: "INFO", source: "UDP", mmsi: "416123456", msg: "AIS listener started on 0.0.0.0:10110" },
-  { id: 2, ts: "2026/01/20 13:58:21", level: "INFO", source: "PARSE", mmsi: "416123456", msg: "AIVDM parsed: lat=25.0479 lon=121.5322 sog=6.2 cog=181" },
+  {
+    id: 1,
+    ts: "2026/01/20 13:58:12",
+    level: "INFO",
+    source: "UDP",
+    mmsi: "416123456",
+    msg: "AIS listener started on 0.0.0.0:10110",
+  },
+  {
+    id: 2,
+    ts: "2026/01/20 13:58:21",
+    level: "INFO",
+    source: "PARSE",
+    mmsi: "416123456",
+    msg: "AIVDM parsed: lat=25.0479 lon=121.5322 sog=6.2 cog=181",
+  },
   { id: 3, ts: "2026/01/20 13:59:05", level: "WARN", source: "PARSE", mmsi: "", msg: "Unknown sentence type received (ignored)" },
   { id: 4, ts: "2026/01/20 14:00:11", level: "ERROR", source: "PARSE", mmsi: "", msg: "Parse failed: invalid checksum. raw='!AIVDM,1,1,,A,15MuqP0P00PD;88MD5...' " },
   { id: 5, ts: "2026/01/20 14:02:44", level: "INFO", source: "GEOFENCE", mmsi: "416987654", msg: "Geofence disabled; event suppressed" },
@@ -78,40 +92,38 @@ function deepClone(obj) {
 }
 
 function Badge({ tone = "neutral", children }) {
-  return <span className={`ais-badge ais-badge--${tone}`}>{children}</span>;
+  return <span className={`as-badge as-badge--${tone}`}>{children}</span>;
 }
 
 function FieldRow({ label, hint, children }) {
   return (
-    <div className="ais-field">
-      <div className="ais-field__meta">
-        <div className="ais-field__label">{label}</div>
-        {hint ? <div className="ais-field__hint">{hint}</div> : null}
+    <div className="as-kvfield">
+      <div className="as-kvfield__meta">
+        <div className="as-kvfield__label">{label}</div>
+        {hint ? <div className="as-kvfield__hint">{hint}</div> : null}
       </div>
-      <div className="ais-field__control">{children}</div>
+      <div className="as-kvfield__control">{children}</div>
     </div>
   );
 }
 
 function Switch({ checked, onChange, disabled }) {
   return (
-    <label className={`ais-switch ${disabled ? "is-disabled" : ""}`}>
+    <label className={`as-switch ${disabled ? "is-disabled" : ""}`}>
       <input
         type="checkbox"
         checked={!!checked}
         onChange={(e) => onChange?.(e.target.checked)}
         disabled={disabled}
       />
-      <span className="ais-switch__track" />
-      <span className="ais-switch__thumb" />
+      <span className="as-switch-ui" />
     </label>
   );
 }
-
 function Select({ value, onChange, disabled, children }) {
   return (
     <select
-      className="ais-input"
+      className="as-input"
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
       disabled={disabled}
@@ -124,7 +136,7 @@ function Select({ value, onChange, disabled, children }) {
 function Input({ value, onChange, disabled, placeholder, type = "text" }) {
   return (
     <input
-      className="ais-input"
+      className="as-input"
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
       disabled={disabled}
@@ -137,7 +149,7 @@ function Input({ value, onChange, disabled, placeholder, type = "text" }) {
 function NumberInput({ value, onChange, disabled, min, max, step = 1 }) {
   return (
     <input
-      className="ais-input"
+      className="as-input"
       value={value}
       onChange={(e) => onChange?.(e.target.value === "" ? "" : Number(e.target.value))}
       disabled={disabled}
@@ -151,9 +163,9 @@ function NumberInput({ value, onChange, disabled, min, max, step = 1 }) {
 
 function RadioGroup({ value, onChange, disabled, options }) {
   return (
-    <div className={`ais-radio ${disabled ? "is-disabled" : ""}`}>
+    <div className={`as-radio ${disabled ? "is-disabled" : ""}`}>
       {options.map((opt) => (
-        <label key={opt.value} className="ais-radio__item">
+        <label key={opt.value} className="as-radio__item">
           <input
             type="radio"
             name={opt.name || "radio"}
@@ -170,9 +182,8 @@ function RadioGroup({ value, onChange, disabled, options }) {
 }
 
 function LevelDot({ level }) {
-  const tone =
-    level === "ERROR" ? "danger" : level === "WARN" ? "warn" : "ok";
-  return <span className={`ais-level-dot ais-level-dot--${tone}`} />;
+  const tone = level === "ERROR" ? "danger" : level === "WARN" ? "warn" : "ok";
+  return <span className={`as-level-dot as-level-dot--${tone}`} />;
 }
 
 export default function AisSettings() {
@@ -366,60 +377,57 @@ export default function AisSettings() {
 
   return (
     <div className="appdash admin-shell">
-      <div className="ais-page">
+      <div className="as-page">
         {/* Header */}
-        <div className="ais-header">
-          <div className="ais-header__left">
-            <h1 className="ais-title">AIS 設定</h1>
-            <div className="ais-subtitle">資料接收來源、解析規則、圍欄與告警、監控與測試</div>
+        <div className="as-header">
+          <div className="as-titleBlock">
+            <h1 className="as-title as-title--xl">AIS 設定</h1>
+            <div className="as-subtitle">資料接收來源、解析規則、圍欄與告警、監控與測試</div>
           </div>
 
-          <div className="ais-header__actions">
-            <button className="ais-btn ais-btn--primary" onClick={onSave}>
+          <div className="as-actions">
+            <button className="as-btn primary" onClick={onSave}>
               <FaSave /> 儲存設定
             </button>
-            <button className="ais-btn" onClick={onResetToSaved} title="還原到上次儲存的版本">
+            <button className="as-btn" onClick={onResetToSaved} title="還原到上次儲存的版本">
               <FaUndoAlt /> 還原
             </button>
-            <button className="ais-btn ais-btn--ghost" onClick={onRestoreDefaults} title="回到預設值（UI-only）">
+            <button className="as-btn ghost" onClick={onRestoreDefaults} title="回到預設值（UI-only）">
               <FaTrash /> 還原預設
             </button>
           </div>
         </div>
 
         {/* Status */}
-        <div className="ais-status">
-          <div className="ais-status__item">
-            <span className="ais-status__label">AIS</span>
+        <div className="as-statusRow">
+          <div className="as-statusItem">
+            <span className="as-statusLabel">AIS</span>
             <Badge tone={statusChips.ais.tone}>{statusChips.ais.label}</Badge>
           </div>
-          <div className="ais-status__item">
-            <span className="ais-status__label">連線</span>
+          <div className="as-statusItem">
+            <span className="as-statusLabel">連線</span>
             <Badge tone={statusChips.conn.tone}>{statusChips.conn.label}</Badge>
           </div>
-          <div className="ais-status__item">
-            <span className="ais-status__label">最後接收</span>
-            <span className="ais-status__value">{statusChips.last}</span>
+          <div className="as-statusItem">
+            <span className="as-statusLabel">最後接收</span>
+            <span className="as-statusValue">{statusChips.last}</span>
           </div>
-          <div className="ais-status__item">
-            <span className="ais-status__label">訊息量</span>
-            <span className="ais-status__value">{statusChips.rx}</span>
+          <div className="as-statusItem">
+            <span className="as-statusLabel">訊息量</span>
+            <span className="as-statusValue">{statusChips.rx}</span>
           </div>
         </div>
 
         {/* Section: Basic + Source */}
-        <section className="ais-card">
-          <div className="ais-card__head">
-            <div className="ais-card__title">基本啟用與資料來源</div>
-            <div className="ais-card__hint">停用 AIS 時，底下設定會變成唯讀（仍可查看）。</div>
+        <section className="as-card">
+          <div className="as-card-head">
+            <div className="as-card-title">基本啟用與資料來源</div>
+            <div className="as-card-hint">停用 AIS 時，底下設定會變成唯讀（仍可查看）。</div>
           </div>
 
-          <div className="ais-grid">
+          <div className="as-formGrid">
             <FieldRow label="AIS 功能啟用" hint="關閉後不會接收任何 AIS/NMEA 資料。">
-              <Switch
-                checked={settings.enabled}
-                onChange={(v) => patch("enabled", v)}
-              />
+              <Switch checked={settings.enabled} onChange={(v) => patch("enabled", v)} />
             </FieldRow>
 
             <FieldRow label="資料來源" hint="依你現場設備選擇 UDP/TCP/Serial。">
@@ -438,9 +446,9 @@ export default function AisSettings() {
           </div>
 
           {/* Source detail */}
-          <div className={`ais-subcard ${isDisabledAll ? "is-disabled" : ""}`}>
+          <div className={`as-subcard ${isDisabledAll ? "is-disabled" : ""}`}>
             {settings.sourceType === "udp" && (
-              <div className="ais-grid">
+              <div className="as-formGrid">
                 <FieldRow label="Listen IP" hint="通常用 0.0.0.0 代表綁定所有網卡。">
                   <Input
                     value={settings.udp.host}
@@ -462,7 +470,7 @@ export default function AisSettings() {
             )}
 
             {settings.sourceType === "tcp" && (
-              <div className="ais-grid">
+              <div className="as-formGrid">
                 <FieldRow label="Host" hint="AIS 來源主機位址。">
                   <Input
                     value={settings.tcp.host}
@@ -501,7 +509,7 @@ export default function AisSettings() {
             )}
 
             {settings.sourceType === "serial" && (
-              <div className="ais-grid">
+              <div className="as-formGrid">
                 <FieldRow label="COM" hint="例如 COM3 / COM5。">
                   <Input
                     value={settings.serial.com}
@@ -560,7 +568,7 @@ export default function AisSettings() {
             )}
 
             {settings.sourceType === "api" && (
-              <div className="ais-grid">
+              <div className="as-formGrid">
                 <FieldRow label="Provider">
                   <Select
                     value={settings.api.provider}
@@ -585,13 +593,13 @@ export default function AisSettings() {
         </section>
 
         {/* Section: Receive / Parse */}
-        <section className="ais-card">
-          <div className="ais-card__head">
-            <div className="ais-card__title">接收與解析設定</div>
-            <div className="ais-card__hint">影響訊息吞吐量、解析成功率，以及後續儲存/告警的資料品質。</div>
+        <section className="as-card">
+          <div className="as-card-head">
+            <div className="as-card-title">接收與解析設定</div>
+            <div className="as-card-hint">影響訊息吞吐量、解析成功率，以及後續儲存/告警的資料品質。</div>
           </div>
 
-          <div className={`ais-grid ${isDisabledAll ? "is-disabled" : ""}`}>
+          <div className={`as-formGrid ${isDisabledAll ? "is-disabled" : ""}`}>
             <FieldRow label="接收模式" hint="一般只收 AIVDM/AIVDO；除錯才收全部 NMEA。">
               <RadioGroup
                 value={settings.receive.acceptMode}
@@ -671,13 +679,13 @@ export default function AisSettings() {
         </section>
 
         {/* Section: Geofence + Alerts */}
-        <section className="ais-card">
-          <div className="ais-card__head">
-            <div className="ais-card__title">地理圍欄與告警規則</div>
-            <div className="ais-card__hint">此區建議與「事件中心 / 告警通知」串成一致的規則與通道。</div>
+        <section className="as-card">
+          <div className="as-card-head">
+            <div className="as-card-title">地理圍欄與告警規則</div>
+            <div className="as-card-hint">此區建議與「事件中心 / 告警通知」串成一致的規則與通道。</div>
           </div>
 
-          <div className={`ais-grid ${isDisabledAll ? "is-disabled" : ""}`}>
+          <div className={`as-formGrid ${isDisabledAll ? "is-disabled" : ""}`}>
             <FieldRow label="圍欄啟用">
               <Switch
                 checked={settings.geofence.enabled}
@@ -700,9 +708,9 @@ export default function AisSettings() {
           </div>
 
           {/* Geofence detail */}
-          <div className={`ais-subcard ${isDisabledAll || !settings.geofence.enabled ? "is-disabled" : ""}`}>
+          <div className={`as-subcard ${isDisabledAll || !settings.geofence.enabled ? "is-disabled" : ""}`}>
             {settings.geofence.shape === "circle" && (
-              <div className="ais-grid">
+              <div className="as-formGrid">
                 <FieldRow label="中心緯度（lat）">
                   <NumberInput
                     value={settings.geofence.circle.lat}
@@ -737,12 +745,12 @@ export default function AisSettings() {
             )}
 
             {settings.geofence.shape === "polygon" && (
-              <div className="ais-polypoints">
-                <div className="ais-polypoints__head">
-                  <div className="ais-polypoints__title">多邊形點位（UI-only）</div>
-                  <div className="ais-polypoints__hint">後續可換成地圖畫點/拖曳調整。</div>
+              <div className="as-polypoints">
+                <div className="as-polypoints__head">
+                  <div className="as-polypoints__title">多邊形點位（UI-only）</div>
+                  <div className="as-polypoints__hint">後續可換成地圖畫點/拖曳調整。</div>
                 </div>
-                <table className="ais-table">
+                <table className="as-table">
                   <thead>
                     <tr>
                       <th style={{ width: "80px" }}>#</th>
@@ -756,7 +764,7 @@ export default function AisSettings() {
                         <td>{idx + 1}</td>
                         <td>
                           <input
-                            className="ais-input ais-input--sm"
+                            className="as-input as-input--sm"
                             type="number"
                             step="0.0001"
                             value={p.lat}
@@ -770,7 +778,7 @@ export default function AisSettings() {
                         </td>
                         <td>
                           <input
-                            className="ais-input ais-input--sm"
+                            className="as-input as-input--sm"
                             type="number"
                             step="0.0001"
                             value={p.lon}
@@ -789,9 +797,9 @@ export default function AisSettings() {
               </div>
             )}
 
-            <div className="ais-divider" />
+            <div className="as-sectionDivider" />
 
-            <div className="ais-grid">
+            <div className="as-formGrid">
               <FieldRow label="觸發：進入圍欄">
                 <Switch
                   checked={settings.geofence.triggers.onEnter}
@@ -809,7 +817,7 @@ export default function AisSettings() {
               </FieldRow>
 
               <FieldRow label="觸發：停留超過（分鐘）" hint="例如停留超過 10 分鐘才告警。">
-                <div className="ais-inline">
+                <div className="as-inline">
                   <Switch
                     checked={settings.geofence.triggers.dwellEnabled}
                     onChange={(v) => patch("geofence.triggers.dwellEnabled", v)}
@@ -827,9 +835,9 @@ export default function AisSettings() {
             </div>
           </div>
 
-          <div className="ais-divider" />
+          <div className="as-sectionDivider" />
 
-          <div className={`ais-grid ${isDisabledAll ? "is-disabled" : ""}`}>
+          <div className={`as-formGrid ${isDisabledAll ? "is-disabled" : ""}`}>
             <FieldRow label="危險速度門檻（knots）" hint="超過門檻可觸發告警（UI-only）。">
               <NumberInput
                 value={settings.alerts.speedKnots}
@@ -849,7 +857,7 @@ export default function AisSettings() {
             </FieldRow>
 
             <FieldRow label="夜間開始 / 結束">
-              <div className="ais-inline">
+              <div className="as-inline">
                 <Input
                   value={settings.alerts.nightStart}
                   onChange={(v) => patch("alerts.nightStart", v)}
@@ -857,7 +865,7 @@ export default function AisSettings() {
                   placeholder="22:00"
                   type="time"
                 />
-                <span className="ais-inline__sep">—</span>
+                <span className="as-inline__sep">—</span>
                 <Input
                   value={settings.alerts.nightEnd}
                   onChange={(v) => patch("alerts.nightEnd", v)}
@@ -869,8 +877,8 @@ export default function AisSettings() {
             </FieldRow>
 
             <FieldRow label="通知通道">
-              <div className="ais-checks">
-                <label className="ais-check">
+              <div className="as-checks">
+                <label className="as-check">
                   <input
                     type="checkbox"
                     checked={settings.alerts.notify.ui}
@@ -879,7 +887,7 @@ export default function AisSettings() {
                   />
                   <span>後台通知</span>
                 </label>
-                <label className="ais-check">
+                <label className="as-check">
                   <input
                     type="checkbox"
                     checked={settings.alerts.notify.email}
@@ -888,7 +896,7 @@ export default function AisSettings() {
                   />
                   <span>Email</span>
                 </label>
-                <label className="ais-check">
+                <label className="as-check">
                   <input
                     type="checkbox"
                     checked={settings.alerts.notify.webhook}
@@ -903,22 +911,22 @@ export default function AisSettings() {
         </section>
 
         {/* Section: Monitor + Test + Logs */}
-        <section className="ais-card">
-          <div className="ais-card__head">
-            <div className="ais-card__title">測試與狀態監控</div>
-            <div className="ais-card__hint">UI-only：提供連線狀態、測試解析預覽與日誌篩選。後續接 API 即可變成真實監控。</div>
+        <section className="as-card">
+          <div className="as-card-head">
+            <div className="as-card-title">測試與狀態監控</div>
+            <div className="as-card-hint">UI-only：提供連線狀態、測試解析預覽與日誌篩選。後續接 API 即可變成真實監控。</div>
           </div>
 
-          <div className="ais-monitor">
-            <div className="ais-monitor__panel">
-              <div className="ais-monitor__title">
+          <div className="as-monitor">
+            <div className="as-panel">
+              <div className="as-panelTitle">
                 <FaWifi /> 連線狀態
               </div>
 
-              <div className="ais-monitor__grid">
-                <div className="ais-kv">
-                  <div className="ais-kv__k">目前來源</div>
-                  <div className="ais-kv__v">
+              <div className="as-panelGrid">
+                <div className="as-kv">
+                  <div className="as-kv__k">目前來源</div>
+                  <div className="as-kv__v">
                     {settings.sourceType === "udp" && `UDP:${settings.udp.host}:${settings.udp.port}`}
                     {settings.sourceType === "tcp" && `TCP:${settings.tcp.host}:${settings.tcp.port}`}
                     {settings.sourceType === "serial" && `SERIAL:${settings.serial.com}@${settings.serial.baudRate}`}
@@ -926,72 +934,72 @@ export default function AisSettings() {
                   </div>
                 </div>
 
-                <div className="ais-kv">
-                  <div className="ais-kv__k">狀態</div>
-                  <div className="ais-kv__v">
+                <div className="as-kv">
+                  <div className="as-kv__k">狀態</div>
+                  <div className="as-kv__v">
                     {conn.connected ? (
-                      <span className="ais-kv__ok"><FaCheckCircle /> Connected</span>
+                      <span className="as-kv__ok"><FaCheckCircle /> Connected</span>
                     ) : (
-                      <span className="ais-kv__bad"><FaExclamationTriangle /> Disconnected</span>
+                      <span className="as-kv__bad"><FaExclamationTriangle /> Disconnected</span>
                     )}
                   </div>
                 </div>
 
-                <div className="ais-kv">
-                  <div className="ais-kv__k">Last packet</div>
-                  <div className="ais-kv__v">{conn.lastPacket}</div>
+                <div className="as-kv">
+                  <div className="as-kv__k">Last packet</div>
+                  <div className="as-kv__v">{conn.lastPacket}</div>
                 </div>
 
-                <div className="ais-kv">
-                  <div className="ais-kv__k">RX</div>
-                  <div className="ais-kv__v">{conn.rxPerMin} msgs/min</div>
+                <div className="as-kv">
+                  <div className="as-kv__k">RX</div>
+                  <div className="as-kv__v">{conn.rxPerMin} msgs/min</div>
                 </div>
 
-                <div className="ais-kv">
-                  <div className="ais-kv__k">Parse OK</div>
-                  <div className="ais-kv__v">{conn.parseOkRate}%</div>
+                <div className="as-kv">
+                  <div className="as-kv__k">Parse OK</div>
+                  <div className="as-kv__v">{conn.parseOkRate}%</div>
                 </div>
 
-                <div className="ais-kv">
-                  <div className="ais-kv__k">Top MMSI</div>
-                  <div className="ais-kv__v">
-                    <div className="ais-pills">
+                <div className="as-kv">
+                  <div className="as-kv__k">Top MMSI</div>
+                  <div className="as-kv__v">
+                    <div className="as-pills">
                       {conn.topMmsi.map((m) => (
-                        <span key={m} className="ais-pill">{m}</span>
+                        <span key={m} className="as-pill">{m}</span>
                       ))}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="ais-monitor__actions">
-                <button className="ais-btn" onClick={simulateReconnect} title="UI-only 模擬斷線/重連">
+              <div className="as-panelActions">
+                <button className="as-btn" onClick={simulateReconnect} title="UI-only 模擬斷線/重連">
                   <FaPlug /> 模擬重連
                 </button>
               </div>
             </div>
 
-            <div className="ais-monitor__panel">
-              <div className="ais-monitor__title">
+            <div className="as-panel">
+              <div className="as-panelTitle">
                 <FaBug /> 測試解析（UI-only）
               </div>
 
-              <div className="ais-test">
-                <div className="ais-test__raw">
-                  <div className="ais-test__label">Raw input</div>
+              <div className="as-test">
+                <div className="as-test__raw">
+                  <div className="as-test__label">Raw input</div>
                   <textarea
-                    className="ais-textarea"
+                    className="as-textarea"
                     value={testRaw}
                     onChange={(e) => setTestRaw(e.target.value)}
                     placeholder="Paste AIVDM line here..."
                     rows={5}
                   />
-                  <div className="ais-test__actions">
-                    <button className="ais-btn ais-btn--primary" onClick={runTestParse}>
+                  <div className="as-test__actions">
+                    <button className="as-btn primary" onClick={runTestParse}>
                       <FaPlay /> 送出測試
                     </button>
                     <button
-                      className="ais-btn ais-btn--ghost"
+                      className="as-btn ghost"
                       onClick={() => {
                         setTestRaw("");
                         setTestResult(null);
@@ -1002,9 +1010,9 @@ export default function AisSettings() {
                   </div>
                 </div>
 
-                <div className="ais-test__result">
-                  <div className="ais-test__label">解析結果</div>
-                  <pre className="ais-pre">
+                <div className="as-test__result">
+                  <div className="as-test__label">解析結果</div>
+                  <pre className="as-pre">
 {JSON.stringify(testResult, null, 2)}
                   </pre>
                 </div>
@@ -1012,16 +1020,13 @@ export default function AisSettings() {
             </div>
           </div>
 
-          <div className="ais-divider" />
+          <div className="as-sectionDivider" />
 
-          <div className="ais-logs">
-            <div className="ais-logs__head">
-              <div className="ais-logs__title">日誌（Log）</div>
-              <div className="ais-logs__filters">
-                <Select
-                  value={logFilter.level}
-                  onChange={(v) => setLogFilter((p) => ({ ...p, level: v }))}
-                >
+          <div className="as-logs">
+            <div className="as-logsHead">
+              <div className="as-logsTitle">日誌（Log）</div>
+              <div className="as-logsFilters">
+                <Select value={logFilter.level} onChange={(v) => setLogFilter((p) => ({ ...p, level: v }))}>
                   <option value="ALL">ALL</option>
                   <option value="INFO">INFO</option>
                   <option value="WARN">WARN</option>
@@ -1034,14 +1039,14 @@ export default function AisSettings() {
                   placeholder="關鍵字（MMSI / 內容 / 來源）"
                 />
 
-                <button className="ais-btn ais-btn--ghost" onClick={() => setLogFilter({ level: "ALL", keyword: "" })}>
+                <button className="as-btn ghost" onClick={() => setLogFilter({ level: "ALL", keyword: "" })}>
                   <FaUndoAlt /> 清除篩選
                 </button>
               </div>
             </div>
 
-            <div className="ais-tablewrap">
-              <table className="ais-table">
+            <div className="as-tableWrap">
+              <table className="as-table">
                 <thead>
                   <tr>
                     <th style={{ width: "160px" }}>時間</th>
@@ -1054,19 +1059,19 @@ export default function AisSettings() {
                 <tbody>
                   {filteredLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="ais-empty">沒有符合條件的日誌</td>
+                      <td colSpan={5} className="as-empty">沒有符合條件的日誌</td>
                     </tr>
                   ) : (
                     filteredLogs.map((x) => (
                       <tr key={x.id}>
-                        <td className="ais-mono">{x.ts}</td>
-                        <td className="ais-level">
+                        <td className="as-mono">{x.ts}</td>
+                        <td className="as-level">
                           <LevelDot level={x.level} />
-                          <span className="ais-mono">{x.level}</span>
+                          <span className="as-mono">{x.level}</span>
                         </td>
-                        <td className="ais-mono">{x.source}</td>
-                        <td className="ais-mono">{x.mmsi || "-"}</td>
-                        <td className="ais-msg">{x.msg}</td>
+                        <td className="as-mono">{x.source}</td>
+                        <td className="as-mono">{x.mmsi || "-"}</td>
+                        <td className="as-msg">{x.msg}</td>
                       </tr>
                     ))
                   )}
