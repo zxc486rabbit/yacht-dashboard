@@ -60,6 +60,7 @@ import AisSettings from "./pages/admin/AisSettings"; // AIS 設定頁面
 import RemoteControlSettings from "./pages/admin/CommSystemSettings"; // 通訊系統設定頁面
 import CameraManagement from "./pages/admin/CameraManagement"; // 攝影機管理頁面
 import EnergyBillingSettings from "./pages/admin/EnergyBillingSettings"; // 能耗與計費設定頁面
+import PaymentModule from "./pages/admin/PaymentModule"; // 支付模組頁面
 import FeaturePageManager from "./pages/admin/FeaturePageManager"; // 功能頁面管理
 
 // 新增：Account 子分頁
@@ -98,7 +99,7 @@ export default function App() {
                       <Route path="communication" element={<RemoteControlSettings />} />
                       <Route path="cameras" element={<CameraManagement />} />
                       <Route path="energy-billing" element={<EnergyBillingSettings />} />
-                      <Route path="payment" element={<AdminDashboard />} />
+                      <Route path="payment" element={<PaymentModule />} />
                       <Route path="notifications-alarms" element={<AdminDashboard />} />
                       <Route path="feature-pages" element={<FeaturePageManager />} />
                     </Route>
